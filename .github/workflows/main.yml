@@ -1,0 +1,21 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build-desktop-frontend:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v1
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    - name: Build the executable
+      run: |
+        cd DesktopFrontend/DesktopFrontend
+        dotnet build
