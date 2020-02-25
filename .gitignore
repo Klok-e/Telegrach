@@ -1,3 +1,4 @@
 **/.idea
 /DesktopFrontend/DesktopFrontend/bin/
 /DesktopFrontend/DesktopFrontend/obj/
+*.DotSettings.user

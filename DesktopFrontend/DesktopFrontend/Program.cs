@@ -1,10 +1,10 @@
 ﻿using System;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Logging.Serilog;
+using Avalonia.ReactiveUI;
 
-namespace DesktopTest
+namespace DesktopFrontend
 {
     class Program
     {
@@ -18,6 +18,7 @@ namespace DesktopTest
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .LogToDebug();
+                .LogToDebug()
+                .UseReactiveUI();
     }
 }

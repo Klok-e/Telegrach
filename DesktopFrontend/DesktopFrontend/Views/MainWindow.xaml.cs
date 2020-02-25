@@ -1,8 +1,9 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace DesktopTest
+namespace DesktopFrontend.Views
 {
     public class MainWindow : Window
     {
