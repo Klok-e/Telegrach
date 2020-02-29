@@ -14,20 +14,19 @@ namespace DesktopFrontend.Models
 
     public class ChatMessages
     {
-        public float Interval { get; set; } = 0.5f;
-
-        private IDisposable timer;
+        //public float Interval { get; set; } = 0.5f;
+        //private IDisposable timer;
 
         public ChatMessages()
         {
-            var counter = 0;
             Messages = new ObservableCollection<ChatMessage>();
-            timer = DispatcherTimer.Run(() =>
-                {
-                    Messages.Add(new ChatMessage {Time = DateTime.Now, Body = $"interval {counter++}"});
-                    return true;
-                },
-                TimeSpan.FromSeconds(Interval));
+            //var counter = 0;
+            //timer = DispatcherTimer.Run(() =>
+            //    {
+            //        Messages.Add(new ChatMessage {Time = DateTime.Now, Body = $"interval {counter++}"});
+            //        return true;
+            //    },
+            //    TimeSpan.FromSeconds(Interval));
         }
 
         public ObservableCollection<ChatMessage> Messages { get; }
