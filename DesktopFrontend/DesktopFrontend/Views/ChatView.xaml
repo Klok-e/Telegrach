@@ -11,11 +11,11 @@
         <DataTemplate DataType="m:ChatMessage">
             <StackPanel>
                 <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto">
-                    <TextBlock Margin="5" Grid.Row="0" Grid.Column="0" Text="{Binding Time}"/>
-                    <TextBlock Margin="5" Grid.Row="0" Grid.Column="1" Text="{Binding Body}"/>
+                    <TextBlock Margin="5" Grid.Row="0" Grid.Column="0" Text="{Binding Time}" />
+                    <TextBlock Margin="5" Grid.Row="0" Grid.Column="1" Text="{Binding Body}" />
                 </Grid>
             </StackPanel>
         </DataTemplate>
     </UserControl.DataTemplates>
-    <ListBox Items="{Binding Messages}"/>
+    <ListBox Items="{Binding Messages}" />
 </UserControl>
