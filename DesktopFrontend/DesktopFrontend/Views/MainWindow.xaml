@@ -7,6 +7,12 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="DesktopFrontend.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="DesktopFrontend"
-        Content="{Binding Chat}">
+        Title="DesktopFrontend">
+    <DockPanel>
+        <v:ChatView DockPanel.Dock="Top" DataContext="{Binding Chat}" />
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" MinHeight="40">
+            <Button Content="Send" />
+            <TextBox AcceptsReturn="True"/>
+        </StackPanel>
+    </DockPanel>
 </Window>
