@@ -17,5 +17,11 @@
             </StackPanel>
         </DataTemplate>
     </UserControl.DataTemplates>
-    <ListBox Items="{Binding Messages}" />
+    <DockPanel LastChildFill="True">
+        <DockPanel DockPanel.Dock="Bottom" LastChildFill="True">
+            <Button Content="Send" DockPanel.Dock="Left" Margin="2" />
+            <TextBox AcceptsReturn="True" Margin="2" />
+        </DockPanel>
+        <ListBox Items="{Binding Messages}" />
+    </DockPanel>
 </UserControl>

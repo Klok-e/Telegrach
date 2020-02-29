@@ -8,11 +8,5 @@
         x:Class="DesktopFrontend.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="DesktopFrontend">
-    <DockPanel LastChildFill="True">
-        <DockPanel DockPanel.Dock="Bottom" LastChildFill="True">
-            <Button Content="Send" DockPanel.Dock="Left" Margin="2"/>
-            <TextBox AcceptsReturn="True" Margin="2"/>
-        </DockPanel>
-        <v:ChatView DataContext="{Binding Chat}" />
-    </DockPanel>
+    <v:ChatView DataContext="{Binding Chat}" />
 </Window>
