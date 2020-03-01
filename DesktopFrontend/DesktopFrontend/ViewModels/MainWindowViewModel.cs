@@ -6,6 +6,11 @@ namespace DesktopFrontend.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "Hello World!";
+        public MainWindowViewModel()
+        {
+            Chat = new ChatViewModel();
+        }
+
+        public ChatViewModel Chat { get; }
     }
 }
