@@ -9,12 +9,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/cache@v1
+    - uses: actions/setup-dotnet@v1
       with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
+        dotnet-version: '3.1.102'
+    - name: Install dotnet-format
+      run: |
+        dotnet tool install -g dotnet-format
+        # fix global config
+        echo "::set-env name=PATH::${PATH}:${HOME}/.dotnet/tools"
+    
+    - name: Check formatting
+      run: |
+        cd DesktopFrontend
+        dotnet format --check
+    
     - name: Build the executable
       run: |
         cd DesktopFrontend/DesktopFrontend
