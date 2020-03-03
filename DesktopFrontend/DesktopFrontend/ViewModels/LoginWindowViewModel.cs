@@ -7,7 +7,7 @@ namespace DesktopFrontend.ViewModels
 {
     public class LoginWindowViewModel : ViewModelBase
     {
-        public string Greeting => "Hello World!";
+        
 
         public void GetConnection()
         {

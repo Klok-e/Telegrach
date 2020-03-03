@@ -1,22 +1,17 @@
-<Window xmlns="https://github.com/avaloniaui"
+﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DesktopFrontend.ViewModels"
-        xmlns:ctrls="clr-namespace:DesktopFrontend.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="DesktopFrontend.Views.LoginWindow"
+        x:Class="DesktopFrontend.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="DesktopFrontend">
 
     <Design.DataContext>
-        <vm:LoginWindowViewModel/>
+        <vm:MainWindowViewModel/>
     </Design.DataContext>
-    
-    <DockPanel LastChildFill="False">
-        
-        <ctrls:LoginCarousel DockPanel.Dock="Top" />
-        <Button Width="500" DockPanel.Dock="Bottom" Command="{Binding GetConnection}">Become mentally disabled</Button>
-    </DockPanel>
+
+    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center" />
 
 </Window>
