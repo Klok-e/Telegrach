@@ -14,13 +14,14 @@ jobs:
         dotnet-version: '3.1.102'
     - name: Install dotnet-format
       run: |
-        cd DesktopFrontend
         dotnet tool install -g dotnet-format
         # fix global config
         echo "::set-env name=PATH::${PATH}:${HOME}/.dotnet/tools"
     
     - name: Check formatting
-      run: dotnet format --check
+      run: |
+        cd DesktopFrontend
+        dotnet format --check
     
     - name: Build the executable
       run: |
