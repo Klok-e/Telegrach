@@ -15,7 +15,9 @@ jobs:
     - name: Install dotnet-format
       run: |
         cd DesktopFrontend
-        dotnet tool install dotnet-format
+        dotnet tool install -g dotnet-format
+        # fix global config
+        echo "::set-env name=PATH::${PATH}:${HOME}/.dotnet/tools"
     
     - name: Check formatting
       run: dotnet format --check
