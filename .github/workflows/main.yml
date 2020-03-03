@@ -13,15 +13,14 @@ jobs:
       with:
         dotnet-version: '3.1.102'
     - name: Install dotnet-format
-      run: dotnet tool install -g dotnet-format
+      run: |
+        cd DesktopFrontend
+        dotnet tool install dotnet-format
     
     - name: Check formatting
-      run: |
-        cd ../
-        dotnet format --check
+      run: dotnet format --check
     
     - name: Build the executable
       run: |
         cd DesktopFrontend/DesktopFrontend
         dotnet build
-        dotnet format --check
