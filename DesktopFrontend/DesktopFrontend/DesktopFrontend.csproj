@@ -6,7 +6,6 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <Folder Include="Models\" />
         <Compile Update="**\*.xaml.cs">
             <DependentUpon>%(Filename)</DependentUpon>
         </Compile>
@@ -15,9 +14,17 @@
         </AvaloniaResource>
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
+    <!--<ItemGroup>
+      <AvaloniaResource Remove="Assets\science.jpg" />
+    </ItemGroup>-->
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="0.9.999-cibuild0006096-beta" />
         <PackageReference Include="Avalonia.Desktop" Version="0.9.999-cibuild0006096-beta" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.999-cibuild0006096-beta" />
     </ItemGroup>
+    <!--<ItemGroup>
+      <None Update="Controls\LoginCarousel.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </None>
+    </ItemGroup>-->
 </Project>
