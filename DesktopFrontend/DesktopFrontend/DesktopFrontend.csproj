@@ -14,9 +14,6 @@
             <SubType>Designer</SubType>
         </AvaloniaResource>
         <AvaloniaResource Include="Assets\**" />
-        <Compile Update="Views\LoginView.xaml.cs">
-          <DependentUpon>LoginView.xaml</DependentUpon>
-        </Compile>
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="0.9.999-cibuild0006096-beta" />
