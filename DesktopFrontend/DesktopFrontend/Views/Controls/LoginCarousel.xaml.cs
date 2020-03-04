@@ -5,26 +5,17 @@ namespace DesktopFrontend.Views.Controls
 {
     public class LoginCarousel : UserControl
     {
-        private Carousel _carousel;
-        private Button _left;
-        private Button _right;
-
-
         public LoginCarousel()
         {
-            this.InitializeComponent();
-            _left.Click += (s, e) => _carousel.Previous();
-            _right.Click += (s, e) => _carousel.Next();
-
+            InitializeComponent();
+            var carousel = this.FindControl<Carousel>("carousel");
+            this.FindControl<Button>("left").Click += (s, e) => carousel.Previous();
+            this.FindControl<Button>("right").Click += (s, e) => carousel.Next();
         }
 
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
-            _carousel = this.FindControl<Carousel>("carousel");
-            _left = this.FindControl<Button>("left");
-            _right = this.FindControl<Button>("right");
-
         }
     }
 }
