@@ -1,4 +1,6 @@
 **/.idea
 /DesktopFrontend/DesktopFrontend/bin/
 /DesktopFrontend/DesktopFrontend/obj/
+/Server/__pycache__/
+/Server/*.log
 *.DotSettings.user
