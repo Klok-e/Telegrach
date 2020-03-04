@@ -6,13 +6,14 @@ namespace DesktopFrontend.ViewModels
 {
     class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "Hello World!";
+        public ChatViewModel Chat { get; }
         
         public LoginWindowViewModel LoginViewModel { get; }
 
         public MainWindowViewModel()
         {
-            LoginViewModel=new LoginWindowViewModel();
+            LoginViewModel = new LoginWindowViewModel();
+            Chat = new ChatViewModel();
         }
     }
 }
