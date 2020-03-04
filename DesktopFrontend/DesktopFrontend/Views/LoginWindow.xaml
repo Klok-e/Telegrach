@@ -16,7 +16,7 @@
     <DockPanel LastChildFill="False">
         
         <ctrls:LoginCarousel DockPanel.Dock="Top" />
-        <Button Width="500" DockPanel.Dock="Bottom" Command="{Binding GetConnection}">Become mentally disabled</Button>
+        <Button Width="500" DockPanel.Dock="Bottom" Command="{Binding Login}" Content="Become mentally disabled"></Button>
     </DockPanel>
 
 </Window>
