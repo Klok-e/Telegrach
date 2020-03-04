@@ -8,7 +8,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DesktopFrontend.Views.Controls.LoginCarousel">
-    <Grid RowDefinitions="Auto" ColumnDefinitions="Auto,5*,Auto">
+    <Grid RowDefinitions="Auto" ColumnDefinitions="Auto,*,Auto">
         <!-- Right button -->
         <Button Width="50" VerticalAlignment="Center" Padding="20" Grid.Column="0" Grid.Row="0" Margin="40,40">
             <Button.Command>
@@ -32,11 +32,11 @@
 
         <Carousel Name="carousel" Grid.Column="1" Grid.Row="0">
             <Carousel.PageTransition>
-                <PageSlide Duration="0.5" Orientation="Horizontal" />
+                <PageSlide Duration="0.4" Orientation="Horizontal" />
             </Carousel.PageTransition>
-            <Image Source="/Assets/test.jpg" Stretch="Fill" MaxWidth="300" MaxHeight="200" />
-            <Image Source="/Assets/avalonia-logo.ico" Stretch="Fill" MaxWidth="300" MaxHeight="200" />
-            <Image Source="/Assets/science.jpg" Stretch="Fill" MaxWidth="300" MaxHeight="200" />
+            <Image Source="/Assets/test.jpg" Stretch="UniformToFill" MaxWidth="400" MaxHeight="300" />
+            <Image Source="/Assets/avalonia-logo.ico" Stretch="UniformToFill" MaxWidth="400" MaxHeight="300" />
+            <Image Source="/Assets/science.jpg" Stretch="UniformToFill" MaxWidth="400" MaxHeight="300" />
         </Carousel>
     </Grid>
 </UserControl>
