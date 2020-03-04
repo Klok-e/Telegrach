@@ -5,7 +5,7 @@ using Avalonia.Markup.Xaml;
 
 namespace DesktopFrontend.Views
 {
-    public class LoginView: UserControl
+    public class LoginView : UserControl
     {
         public LoginView()
         {
@@ -14,8 +14,7 @@ namespace DesktopFrontend.Views
 
         private void InitializeComponent()
         {
-            AvaloniaXamlLoader.Load(this);            
+            AvaloniaXamlLoader.Load(this);
         }
-        
     }
 }

@@ -8,14 +8,14 @@ namespace DesktopFrontend.Views.Controls
         private Carousel _carousel;
         private Button _left;
         private Button _right;
-        
+
 
         public LoginCarousel()
         {
             this.InitializeComponent();
             _left.Click += (s, e) => _carousel.Previous();
             _right.Click += (s, e) => _carousel.Next();
-           
+
         }
 
         private void InitializeComponent()
@@ -24,7 +24,7 @@ namespace DesktopFrontend.Views.Controls
             _carousel = this.FindControl<Carousel>("carousel");
             _left = this.FindControl<Button>("left");
             _right = this.FindControl<Button>("right");
-           
-        }        
+
+        }
     }
 }

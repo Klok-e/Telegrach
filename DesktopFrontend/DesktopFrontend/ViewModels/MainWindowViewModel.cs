@@ -9,7 +9,7 @@ namespace DesktopFrontend.ViewModels
         public ChatViewModel Chat { get; }
 
         public LoginViewModel LoginViewModel { get; }
-        
+
         public ViewModelBase CurrentContent { get; private set; }
 
         public MainWindowViewModel()

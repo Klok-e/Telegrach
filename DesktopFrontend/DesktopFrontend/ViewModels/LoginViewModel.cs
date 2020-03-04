@@ -9,8 +9,8 @@ namespace DesktopFrontend.ViewModels
 {
     public class LoginViewModel : ViewModelBase
     {
-        public ReactiveCommand<Unit,Unit> Login { get; }
-        
+        public ReactiveCommand<Unit, Unit> Login { get; }
+
         public LoginViewModel()
         {
             Login = ReactiveCommand.Create(() => { Connection.Connect(null, 0); });
