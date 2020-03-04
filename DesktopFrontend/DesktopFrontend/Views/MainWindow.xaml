@@ -2,11 +2,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DesktopFrontend.ViewModels"
         xmlns:v="clr-namespace:DesktopFrontend.Views"
+        xmlns:vc="clr-namespace:DesktopFrontend.Views.Controls"
+        xmlns:m="clr-namespace:DesktopFrontend.Models"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="DesktopFrontend.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="DesktopFrontend">
-    <v:ChatView DataContext="{Binding Chat}" />
+        Title="DesktopFrontend"
+        Content="{Binding CurrentContent}">
 </Window>

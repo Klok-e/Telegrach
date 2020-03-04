@@ -1,9 +1,7 @@
-﻿using System;
-using Avalonia.Animation;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace DesktopFrontend.Controls
+namespace DesktopFrontend.Views.Controls
 {
     public class LoginCarousel : UserControl
     {

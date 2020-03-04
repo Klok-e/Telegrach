@@ -5,9 +5,9 @@ using Avalonia.Markup.Xaml;
 
 namespace DesktopFrontend.Views
 {
-    public class LoginWindow : Window
+    public class LoginView: UserControl
     {
-        public LoginWindow()
+        public LoginView()
         {
             InitializeComponent();
         }
