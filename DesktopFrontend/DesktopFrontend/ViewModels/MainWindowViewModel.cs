@@ -4,13 +4,16 @@ using System.Text;
 
 namespace DesktopFrontend.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase
+    class MainWindowViewModel : ViewModelBase
     {
+        public ChatViewModel Chat { get; }
+        
+        public LoginWindowViewModel LoginViewModel { get; }
+
         public MainWindowViewModel()
         {
+            LoginViewModel = new LoginWindowViewModel();
             Chat = new ChatViewModel();
         }
-
-        public ChatViewModel Chat { get; }
     }
 }

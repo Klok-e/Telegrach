@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -22,5 +22,6 @@ namespace DesktopFrontend.Views
         {
             AvaloniaXamlLoader.Load(this);
         }
+
     }
 }
