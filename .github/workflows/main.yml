@@ -21,7 +21,7 @@ jobs:
     - name: Check formatting
       run: |
         cd DesktopFrontend
-        dotnet format --check
+        dotnet format --check --dry-run
     
     - name: Build the executable
       run: |

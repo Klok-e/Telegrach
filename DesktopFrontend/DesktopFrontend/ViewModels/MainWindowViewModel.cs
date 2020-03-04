@@ -7,13 +7,16 @@ namespace DesktopFrontend.ViewModels
     class MainWindowViewModel : ViewModelBase
     {
         public ChatViewModel Chat { get; }
-        
-        public LoginWindowViewModel LoginViewModel { get; }
+
+        public LoginViewModel LoginViewModel { get; }
+
+        public ViewModelBase CurrentContent { get; private set; }
 
         public MainWindowViewModel()
         {
-            LoginViewModel = new LoginWindowViewModel();
+            LoginViewModel = new LoginViewModel();
             Chat = new ChatViewModel();
+            CurrentContent = LoginViewModel;
         }
     }
 }

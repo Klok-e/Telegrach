@@ -7,11 +7,11 @@ using ReactiveUI;
 
 namespace DesktopFrontend.ViewModels
 {
-    public class LoginWindowViewModel : ViewModelBase
+    public class LoginViewModel : ViewModelBase
     {
-        public ReactiveCommand<Unit,Unit> Login { get; }
-        
-        public LoginWindowViewModel()
+        public ReactiveCommand<Unit, Unit> Login { get; }
+
+        public LoginViewModel()
         {
             Login = ReactiveCommand.Create(() => { Connection.Connect(null, 0); });
         }
