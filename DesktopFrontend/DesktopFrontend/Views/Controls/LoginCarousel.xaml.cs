@@ -8,9 +8,6 @@ namespace DesktopFrontend.Views.Controls
         public LoginCarousel()
         {
             InitializeComponent();
-            var carousel = this.FindControl<Carousel>("carousel");
-            this.FindControl<Button>("left").Click += (s, e) => carousel.Previous();
-            this.FindControl<Button>("right").Click += (s, e) => carousel.Next();
         }
 
         private void InitializeComponent()
