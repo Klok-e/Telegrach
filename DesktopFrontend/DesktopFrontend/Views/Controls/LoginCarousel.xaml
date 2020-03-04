@@ -9,17 +9,24 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DesktopFrontend.Views.Controls.LoginCarousel">
     <Grid RowDefinitions="Auto" ColumnDefinitions="Auto,5*,Auto">
-        <!-- Left and right buttons -->
+        <!-- Right button -->
         <Button Width="50" VerticalAlignment="Center" Padding="20" Grid.Column="0" Grid.Row="0">
             <Button.Command>
                 <Binding Path="#carousel.Previous" />
             </Button.Command>
+            <Button.IsVisible>
+                <Binding Path="!$parent[1].IsSelectedFirst" />
+            </Button.IsVisible>
             <Path Data="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" Fill="Black" />
         </Button>
-        <Button Width="50" VerticalAlignment="Center" Padding="20" Grid.Column="2" Grid.Row="0">
+        <!-- Left button -->
+        <Button Width="50" VerticalAlignment="Center" Padding="20" Grid.Column="2" Grid.Row="0" >
             <Button.Command>
                 <Binding Path="#carousel.Next" />
             </Button.Command>
+            <Button.IsVisible>
+                <Binding Path="!$parent[1].IsSelectedLast" />
+            </Button.IsVisible>
             <Path Data="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" Fill="Black" />
         </Button>
 
