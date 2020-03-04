@@ -9,21 +9,20 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DesktopFrontend.Views.Controls.LoginCarousel">
     <StackPanel Orientation="Vertical" Spacing="4">
-        
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 16 0 0" Spacing="8">
             <Button Name="left" VerticalAlignment="Center" Padding="20">
-                <Path Data="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" Fill="Black"/>
+                <Path Data="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" Fill="Black" />
             </Button>
             <Carousel Name="carousel">
                 <Carousel.PageTransition>
                     <PageSlide Duration="0.5" Orientation="Horizontal" />
                 </Carousel.PageTransition>
-                <Image Source="/Assets/test.jpg"/>
-                <Image Source="/Assets/avalonia-logo.ico"/>
-                <Image Source="/Assets/science.jpg"/>
+                <Image Source="/Assets/test.jpg" />
+                <Image Source="/Assets/avalonia-logo.ico" />
+                <Image Source="/Assets/science.jpg" />
             </Carousel>
             <Button Name="right" VerticalAlignment="Center" Padding="20">
-                <Path Data="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" Fill="Black"/>
+                <Path Data="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" Fill="Black" />
             </Button>
         </StackPanel>
     </StackPanel>
