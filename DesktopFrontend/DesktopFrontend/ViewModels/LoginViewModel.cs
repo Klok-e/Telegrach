@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -21,14 +22,25 @@ namespace DesktopFrontend.ViewModels
             get => _isConnected;
             set => this.RaiseAndSetIfChanged(ref _isConnected, value);
         }
-        
+
         public LoginViewModel(ServerConnection connection)
         {
             TryConneсt = ReactiveCommand.CreateFromTask(async () =>
             {
                 var task = connection.Connect();
                 task.ToObservable().Subscribe(_ => IsConnected = true);
-                await task;
+                try
+                {
+                    await task;
+                }
+                catch (SocketException e)
+                {
+                    Console.WriteLine(e);
+                }
+                finally
+                {
+                    IsConnected = false;
+                }
             });
         }
     }
