@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using DesktopFrontend.Models;
+using DynamicData.Binding;
 
 namespace DesktopFrontend.ViewModels
 {
@@ -18,6 +19,13 @@ namespace DesktopFrontend.ViewModels
             LoginViewModel = new LoginViewModel(connection);
             Chat = new ChatViewModel();
             CurrentContent = LoginViewModel;
+
+            LoginViewModel.WhenPropertyChanged(lo => lo.IsConnected)
+                .Subscribe(v =>
+                {
+                    if (v.Value)
+                        CurrentContent = Chat;
+                });
         }
     }
 }
