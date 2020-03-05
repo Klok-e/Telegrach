@@ -34,17 +34,15 @@ namespace DesktopFrontend.Views.Controls
             private set => SetAndRaise(IsSelectedLastProperty, ref _isSelectedLast, value);
         }
 
-        private Carousel _carousel;
-
         public LoginCarousel()
         {
             InitializeComponent();
-            _carousel = this.FindControl<Carousel>("carousel");
-            _carousel.WhenPropertyChanged(c => c.SelectedIndex)
+            var carousel = this.FindControl<Carousel>("carousel");
+            carousel.WhenPropertyChanged(c => c.SelectedIndex)
                 .Subscribe(_ =>
                 {
-                    IsSelectedLast = _carousel.SelectedIndex == _carousel.ItemCount - 1;
-                    IsSelectedFirst = _carousel.SelectedIndex == 0;
+                    IsSelectedLast = carousel.SelectedIndex == carousel.ItemCount - 1;
+                    IsSelectedFirst = carousel.SelectedIndex == 0;
                 });
         }
 
