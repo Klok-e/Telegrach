@@ -2,5 +2,6 @@
 /DesktopFrontend/DesktopFrontend/bin/
 /DesktopFrontend/DesktopFrontend/obj/
 /Server/__pycache__/
+/Server/logs
 /Server/*.log
 *.DotSettings.user

@@ -1,59 +1,55 @@
 import asyncio
+import logging
 import socket
+import sys
 from typing import Tuple
 from config import *
 
+# TODO LOG ALL EXCEPTIONS WITH sys.exc_info
+
+
+logging.basicConfig(filename=LOG_FILE_SERVER,
+                    level=LOG_LEVEL_SERVER,
+                    format=LOG_FORMAT_SERVER)
+
+
 
 async def handle_read(reader: asyncio.StreamReader, sockname: Tuple[str, int]):
-    try:
-        data = await reader.readuntil(SEPARATOR)
-        print('read')
-        data = data.decode()
-        print(data)
-        commands, message = data.strip().split("\n\n")
-        print(f"Got request from {sockname}")
-        print(f"Command is {commands}")
-        print(f"Message if {message}")
-    except asyncio.LimitOverrunError:
-        print("LimitOverrunError")
-
-    except asyncio.IncompleteReadError:
-        print("IncompleteReadError")
-
-    except Exception as e:
-        print(str(e))
-        raise e
+    logging.info(f"Reading from {sockname}...")
+    data = await reader.readuntil(SEPARATOR)
+    data = data.decode()
+    commands, message = data.strip().split("\n\n")
+    logging.info(f"Got request from {sockname}")
+    logging.info(f"Command is {commands}")
+    logging.info(f"Message if {message}")
 
 
 async def handle_write(writer: asyncio.StreamWriter, sockname: Tuple[str, int]):
-    print(f"Writing to {sockname}")
-    try:
-        writer.write("Message from server".encode())
-        await writer.drain()
-        print("Message sended...")
-    except:
-        print("handle_write Error")
+    logging.info(f"Writing to {sockname}")
+    writer.write("Message from server".encode())
+    await writer.drain()
+    logging.info(f"Message sended to {sockname}...")
 
 
 async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     sockname = writer.get_extra_info('peername')
-    print(f"New connection from {sockname}")
+    logging.info(f"New connection from {sockname}")
 
     try:
         await handle_read(reader, sockname)
-    except asyncio.LimitOverrunError:
-        print("LimitOverrunError")
+    except asyncio.LimitOverrunError as e:
+        logging.error(str(e))
         
-    except asyncio.IncompleteReadError:
-        print("IncompleteReadError")
+    except asyncio.IncompleteReadError as e:
+        logging.error(str(e))
 
     except Exception as e:
-        print(str(e))
+        logging.error(str(e))
 
     try:
         await handle_write(writer, sockname)
     except:
-        print("TroubleShouting with writing")
+        logging.error(f"Got {str(e)}")
 
     writer.close()
 
