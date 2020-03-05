@@ -13,6 +13,7 @@ SCHEMA_NAME = 'messenger'
 HOST = 'localhost'
 PORT = 9999
 ADDRESS = HOST, PORT
+SEPARATOR = b'\n\n\n\n'
 
 # Size of buffer for recieving and sending data
 BUFFSIZE = 2048

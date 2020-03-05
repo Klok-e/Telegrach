@@ -8,7 +8,7 @@ Current implementation requires postgresql and databases[postgresql] for async w
 import asyncio
 from config import *
 from databases import Database
-
+import asyncpg
 
 class DataBase:
 
@@ -39,7 +39,7 @@ class DataBase:
 			table = self._t(table)
 			query = f"SELECT * FROM {self._schema}.{table}"
 			rows = await self._database.fetch_all(query=query)
-			print(rows)
+			return rows
 		except:
 			pass
 
@@ -50,7 +50,7 @@ class DataBase:
 async def main():
 	a = DataBase(DB_USER, DB_PW, (DB_HOST, DB_PORT), SCHEMA_NAME, VOCAB)
 	await a.connect(DB)
-	await a.SelectAll('s_acc')
+	res = await a.SelectAll('u_acc')
 	await a.disconnect()
 
 if __name__ == '__main__':
