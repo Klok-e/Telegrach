@@ -21,16 +21,13 @@ namespace DesktopFrontend.ViewModels
             get => _isConnected;
             set => this.RaiseAndSetIfChanged(ref _isConnected, value);
         }
-
-        private IDisposable? _unsubscribe;
-
+        
         public LoginViewModel(ServerConnection connection)
         {
             TryConneсt = ReactiveCommand.CreateFromTask(async () =>
             {
                 var task = connection.Connect();
-                _unsubscribe?.Dispose();
-                _unsubscribe = task.ToObservable().Subscribe(_ => IsConnected = true);
+                task.ToObservable().Subscribe(_ => IsConnected = true);
                 await task;
             });
         }
