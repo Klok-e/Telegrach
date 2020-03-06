@@ -13,35 +13,11 @@ namespace DesktopFrontend.ViewModels
 {
     public class LoginViewModel : ViewModelBase
     {
-        public ReactiveCommand<Unit, Unit> TryConneсt { get; }
-
-        private bool _isConnected;
-
-        public bool IsConnected
-        {
-            get => _isConnected;
-            set => this.RaiseAndSetIfChanged(ref _isConnected, value);
-        }
+        public ReactiveCommand<Unit, bool> TryConneсt { get; }
 
         public LoginViewModel(ServerConnection connection)
         {
-            TryConneсt = ReactiveCommand.CreateFromTask(async () =>
-            {
-                var task = connection.Connect();
-                task.ToObservable().Subscribe(_ => IsConnected = true);
-                try
-                {
-                    await task;
-                }
-                catch (SocketException e)
-                {
-                    Console.WriteLine(e);
-                }
-                finally
-                {
-                    IsConnected = false;
-                }
-            });
+            TryConneсt = ReactiveCommand.CreateFromTask(async () => await connection.Connect());
         }
     }
 }

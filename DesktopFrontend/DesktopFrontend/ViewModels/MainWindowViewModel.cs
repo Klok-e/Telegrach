@@ -20,10 +20,11 @@ namespace DesktopFrontend.ViewModels
             Chat = new ChatViewModel();
             CurrentContent = LoginViewModel;
 
-            LoginViewModel.WhenPropertyChanged(lo => lo.IsConnected)
+
+            LoginViewModel.TryConneсt
                 .Subscribe(v =>
                 {
-                    if (v.Value)
+                    if (v)
                         CurrentContent = Chat;
                 });
         }

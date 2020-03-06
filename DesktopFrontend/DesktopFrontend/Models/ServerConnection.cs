@@ -12,6 +12,8 @@ namespace DesktopFrontend.Models
         private readonly string _connectString;
         private readonly int _port;
         private TcpClient _client;
+        
+        public bool IsConnected => _client.Connected;
 
         public ServerConnection(string connectString, int port)
         {
@@ -20,10 +22,18 @@ namespace DesktopFrontend.Models
             _client = new TcpClient();
         }
 
-        public async Task Connect()
+        public async Task<bool> Connect()
         {
-            // maybe idk
-            await _client.ConnectAsync(_connectString, _port);
+            try
+            {
+                await _client.ConnectAsync(_connectString, _port);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(e);
+            }
+
+            return IsConnected;
         }
     }
 }
