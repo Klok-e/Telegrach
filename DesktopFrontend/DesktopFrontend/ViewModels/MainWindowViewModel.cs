@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using DesktopFrontend.Models;
+using DynamicData.Binding;
 
 namespace DesktopFrontend.ViewModels
 {
@@ -12,11 +14,18 @@ namespace DesktopFrontend.ViewModels
 
         public ViewModelBase CurrentContent { get; private set; }
 
-        public MainWindowViewModel()
+        public MainWindowViewModel(ServerConnection connection)
         {
-            LoginViewModel = new LoginViewModel();
+            LoginViewModel = new LoginViewModel(connection);
             Chat = new ChatViewModel();
             CurrentContent = LoginViewModel;
+
+            LoginViewModel.TryConneсt
+                .Subscribe(v =>
+                {
+                    if (v)
+                        CurrentContent = Chat;
+                });
         }
     }
 }

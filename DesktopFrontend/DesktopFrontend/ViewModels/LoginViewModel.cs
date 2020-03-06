@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Text;
+using Avalonia.Interactivity;
 using DesktopFrontend.Models;
 using ReactiveUI;
 
@@ -9,16 +13,11 @@ namespace DesktopFrontend.ViewModels
 {
     public class LoginViewModel : ViewModelBase
     {
-        public ReactiveCommand<Unit, Unit> Login { get; }
+        public ReactiveCommand<Unit, bool> TryConneсt { get; }
 
-        public LoginViewModel()
+        public LoginViewModel(ServerConnection connection)
         {
-            Login = ReactiveCommand.Create(() => { Connection.Connect(null, 0); });
-        }
-
-        private void GetConnection()
-        {
-            Connection.Connect(null, 0);
+            TryConneсt = ReactiveCommand.CreateFromTask(async () => await connection.Connect());
         }
     }
 }

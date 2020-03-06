@@ -31,7 +31,7 @@ namespace DesktopFrontend.ViewModels
 
         public ReactiveCommand<Unit, Unit> SendMessage { get; }
 
-        private string _description;
+        private string _description = "";
 
         public string CurrentMessage
         {

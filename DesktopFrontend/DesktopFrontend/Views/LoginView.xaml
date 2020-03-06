@@ -8,10 +8,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DesktopFrontend.Views.LoginView">
-    <DockPanel LastChildFill="False">
-        <vc:LoginCarousel DockPanel.Dock="Top" />
-        <Button Width="500" DockPanel.Dock="Bottom" Command="{Binding Login}" Content="Become mentally disabled"></Button>
+    <DockPanel LastChildFill="True">
+        <Button DockPanel.Dock="Bottom" Command="{Binding TryConneсt}" Content="Start snorting cocaine!"
+                Margin="100,50,100,150" Padding="0,20" />
+        <vc:LoginCarousel />
     </DockPanel>
 </UserControl>
-
-
