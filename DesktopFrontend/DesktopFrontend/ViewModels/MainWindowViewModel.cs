@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using System.Text;
 using DesktopFrontend.Models;
 using DynamicData.Binding;
@@ -27,7 +28,10 @@ namespace DesktopFrontend.ViewModels
             Chat = new ChatViewModel();
             CurrentContent = LoginViewModel;
 
-            LoginViewModel.Conneсt
+            // TODO: LoginViewModel.ConneсtWithCredentials and LoginViewModel.CreateNewAccount
+            // TODO: must lead to different screens (views)
+            LoginViewModel.CreateNewAccount
+                .Merge(LoginViewModel.ConneсtWithCredentials)
                 .Subscribe(v =>
                 {
                     if (v)

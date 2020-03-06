@@ -12,5 +12,15 @@ namespace DesktopFrontend.Models
             await Task.Delay(TimeSpan.FromSeconds(1));
             return IsConnected = true;
         }
+
+        public Task<bool> LogInWithCredentials(string user, string pass)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> RequestANewAccount()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

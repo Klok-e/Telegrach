@@ -19,7 +19,10 @@ namespace DesktopFrontend.ViewModels
 
         public LoginViewModel(IServerConnection connection)
         {
-            ConneсtWithCredentials = ReactiveCommand.CreateFromTask(async () => await connection.Connect());
+            // TODO: load credentials from disk
+            ConneсtWithCredentials =
+                ReactiveCommand.CreateFromTask(async () => await connection.LogInWithCredentials("blah", "blah"));
+            CreateNewAccount = ReactiveCommand.CreateFromTask(async () => await connection.RequestANewAccount());
         }
     }
 }
