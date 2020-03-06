@@ -9,7 +9,7 @@ namespace DesktopFrontend.Models
         Task<bool> Connect();
 
         Task<bool> LogInWithCredentials(string user, string pass);
-        
+
         Task<bool> RequestANewAccount();
     }
 }
