@@ -13,11 +13,13 @@ namespace DesktopFrontend.ViewModels
 {
     public class LoginViewModel : ViewModelBase
     {
-        public ReactiveCommand<Unit, bool> TryConneсt { get; }
+        public ReactiveCommand<Unit, bool> ConneсtWithCredentials { get; }
+
+        public ReactiveCommand<Unit, bool> CreateNewAccount { get; }
 
         public LoginViewModel(IServerConnection connection)
         {
-            TryConneсt = ReactiveCommand.CreateFromTask(async () => await connection.Connect());
+            ConneсtWithCredentials = ReactiveCommand.CreateFromTask(async () => await connection.Connect());
         }
     }
 }
