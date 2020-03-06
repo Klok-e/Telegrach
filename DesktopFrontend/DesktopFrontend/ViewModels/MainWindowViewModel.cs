@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using DesktopFrontend.Models;
 using DynamicData.Binding;
+using ReactiveUI;
 
 namespace DesktopFrontend.ViewModels
 {
@@ -12,7 +13,13 @@ namespace DesktopFrontend.ViewModels
 
         public LoginViewModel LoginViewModel { get; }
 
-        public ViewModelBase CurrentContent { get; private set; }
+        private ViewModelBase _currentContent;
+
+        public ViewModelBase CurrentContent
+        {
+            get => _currentContent;
+            private set => this.RaiseAndSetIfChanged(ref _currentContent, value);
+        }
 
         public MainWindowViewModel(IServerConnection connection)
         {
