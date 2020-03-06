@@ -20,7 +20,6 @@ namespace DesktopFrontend.ViewModels
             Chat = new ChatViewModel();
             CurrentContent = LoginViewModel;
 
-
             LoginViewModel.TryConneсt
                 .Subscribe(v =>
                 {
