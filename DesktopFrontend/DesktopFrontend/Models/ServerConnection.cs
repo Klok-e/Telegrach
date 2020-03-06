@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DesktopFrontend.Models
 {
-    public class ServerConnection
+    public class ServerConnection : IServerConnection
     {
         private readonly string _connectString;
         private readonly int _port;
