@@ -15,7 +15,7 @@ namespace DesktopFrontend.ViewModels
     {
         public ReactiveCommand<Unit, bool> TryConneсt { get; }
 
-        public LoginViewModel(ServerConnection connection)
+        public LoginViewModel(IServerConnection connection)
         {
             TryConneсt = ReactiveCommand.CreateFromTask(async () => await connection.Connect());
         }

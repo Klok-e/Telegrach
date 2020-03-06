@@ -14,7 +14,7 @@ namespace DesktopFrontend.ViewModels
 
         public ViewModelBase CurrentContent { get; private set; }
 
-        public MainWindowViewModel(ServerConnection connection)
+        public MainWindowViewModel(IServerConnection connection)
         {
             LoginViewModel = new LoginViewModel(connection);
             Chat = new ChatViewModel();

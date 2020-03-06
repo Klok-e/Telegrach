@@ -27,7 +27,7 @@ namespace DesktopFrontend
             base.OnFrameworkInitializationCompleted();
         }
 
-        private ServerConnection GetConnection()
+        private IServerConnection GetConnection()
         {
             return new ServerConnection("blah blah", 30303);
         }
