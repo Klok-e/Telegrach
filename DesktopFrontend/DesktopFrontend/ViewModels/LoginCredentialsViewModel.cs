@@ -13,7 +13,7 @@ namespace DesktopFrontend.ViewModels
 {
     public class LoginCredentialsViewModel : ViewModelBase
     {
-        public LoginCredentialsViewModel(IServerConnection connection)
+        public LoginCredentialsViewModel(INavigationStack stack, IServerConnection connection)
         {
         }
     }

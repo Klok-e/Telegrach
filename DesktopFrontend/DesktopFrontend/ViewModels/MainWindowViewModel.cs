@@ -5,15 +5,13 @@ using System.Text;
 using DesktopFrontend.Models;
 using DynamicData.Binding;
 using ReactiveUI;
+using Serilog;
+using Serilog.Core;
 
 namespace DesktopFrontend.ViewModels
 {
-    class MainWindowViewModel : ViewModelBase
+    class MainWindowViewModel : ViewModelBase, INavigationStack
     {
-        public ChatViewModel Chat { get; }
-
-        public LoginViewModel LoginViewModel { get; }
-
         private ViewModelBase _currentContent;
 
         public ViewModelBase CurrentContent
@@ -24,19 +22,34 @@ namespace DesktopFrontend.ViewModels
 
         public MainWindowViewModel(IServerConnection connection)
         {
-            LoginViewModel = new LoginViewModel(connection);
-            Chat = new ChatViewModel();
-            CurrentContent = LoginViewModel;
-
-            // TODO: LoginViewModel.ConneсtWithCredentials and LoginViewModel.CreateNewAccount
-            // TODO: must lead to different screens (views)
-            LoginViewModel.CreateNewAccount
-                .Merge(LoginViewModel.ConneсtWithCredentials)
-                .Subscribe(v =>
-                {
-                    if (v)
-                        CurrentContent = Chat;
-                });
+            Push(new LoginViewModel(this, connection));
         }
+
+        #region INavigationStack
+
+        private Stack<ViewModelBase> _navigation = new Stack<ViewModelBase>();
+
+        public ViewModelBase Pop()
+        {
+            var t = _navigation.Pop();
+            CurrentContent = _navigation.Peek();
+            return t;
+        }
+
+        public void Push(ViewModelBase vm)
+        {
+            _navigation.Push(vm);
+            CurrentContent = vm;
+        }
+
+        public ViewModelBase ReplaceTop(ViewModelBase vm)
+        {
+            var t = _navigation.Pop();
+            _navigation.Push(vm);
+            CurrentContent = vm;
+            return t;
+        }
+
+        #endregion
     }
 }
