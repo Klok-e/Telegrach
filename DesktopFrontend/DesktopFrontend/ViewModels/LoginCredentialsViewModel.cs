@@ -16,7 +16,7 @@ namespace DesktopFrontend.ViewModels
         public ReactiveCommand<Unit, Unit> Back { get; }
 
         public ReactiveCommand<Unit, bool> SignIn { get; }
-        
+
         private string _login = "";
 
         public string Login
@@ -24,7 +24,7 @@ namespace DesktopFrontend.ViewModels
             get => _login;
             set => this.RaiseAndSetIfChanged(ref _login, value);
         }
-        
+
         private string _password = "";
 
         public string Password
