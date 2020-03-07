@@ -20,7 +20,7 @@ namespace DesktopFrontend.ViewModels
         public LoginViewModel(INavigationStack stack, IServerConnection connection)
         {
             Credentials = ReactiveCommand.Create(() => stack.Push(new LoginCredentialsViewModel(stack, connection)));
-            NewAccount = ReactiveCommand.Create(() => stack.Push(new LoginNewAccountView(stack, connection)));
+            NewAccount = ReactiveCommand.Create(() => stack.Push(new LoginNewAccountViewModel(stack, connection)));
         }
     }
 }
