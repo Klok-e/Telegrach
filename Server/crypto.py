@@ -1,11 +1,22 @@
+'''
+    Part used for handling hashes, encodes and passwords.
+'''
 import binascii
+import secrets
 import hashlib
+import string
 import os
- 
+
+
+def GeneratePassword():
+    ''' Just generating password'''
+    alphabet = string.ascii_letters + string.digits
+    password = ''.join(secrets.choice(alphabet) for i in range(10))
+    return password
+
 def HashPassword(password: str):
     '''Hash a given password.'''
     salt = binascii.hexlify(os.urandom(16))
-    print(salt, type(salt))
     hashed_password = hashlib.pbkdf2_hmac("sha256", password.encode(),
                                           salt, 10000, 64)
     salt = salt.decode()
