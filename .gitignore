@@ -4,5 +4,6 @@
 /Server/__pycache__/
 /Server/logs
 /Server/*.log
+/Server/congfig.py
 *.DotSettings.user
 .vs
