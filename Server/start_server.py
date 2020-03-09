@@ -4,6 +4,8 @@ import socket
 import sys
 from typing import Tuple
 from config import *
+import controllers as ctrl
+from database import DataBase
 
 # TODO LOG ALL EXCEPTIONS WITH sys.exc_info
 
@@ -12,6 +14,17 @@ logging.basicConfig(filename=LOG_FILE_SERVER,
                     level=LOG_LEVEL_SERVER,
                     format=LOG_FORMAT_SERVER)
 
+async def create_user(db, super_id=None):
+    ''' 
+        Returns new_users data and commits its data to database
+    '''
+    if super_id is None: # That part of code required if user is using the service for the first time, so super_account does not exist
+        select = await db.get_max_super_id()
+        super_id = dict(select.items())["max"] + 1
+        await db.create_new_super_account(super_id) # creating super_account before user_account
+    data: Tuple[Tuple[str, str], Dict] = ctrl.create_user(super_id)
+    await db.create_new_user(data[1])
+    return data[0]
 
 
 async def handle_read(reader: asyncio.StreamReader, sockname: Tuple[str, int]):
@@ -55,10 +68,16 @@ async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
 
 
 async def main():
-    server = await asyncio.start_server(handler, *ADDRESS)
 
-    async with server:
-        await server.serve_forever()
+    db = DataBase(DB_USER, DB_PW, (DB_HOST, DB_PORT), SCHEMA_NAME, VOCAB)
+    await db.connect(DB)
+
+    await create_user(db, 3)
+    # server = await asyncio.start_server(handler, *ADDRESS)
+
+    # async with server:
+    #     await server.serve_forever()
+    await db.disconnect()
 
 if __name__ == '__main__':
     asyncio.run(main())

@@ -25,6 +25,7 @@ def create_user(super_id: int) -> Tuple[Tuple[str, str], Dict]:
     }
     return ((login, password), values)
 
+
 def create_union_request(_from, to):
     time = func.now()
     is_accepted = False
@@ -35,6 +36,7 @@ def create_union_request(_from, to):
         "is_accepted": is_accepted,
     }
     return values
+
 
 def create_tred(max_id, creator_id, header, body):
     _id = max_id + 1
@@ -48,6 +50,7 @@ def create_tred(max_id, creator_id, header, body):
     }
     return values
 
+
 def create_tred_participation(max_id, tred_id, super_id):
     _id = max_id + 1
     values = {
@@ -56,6 +59,7 @@ def create_tred_participation(max_id, tred_id, super_id):
         "superacc_id": super_id,
     }
     return values
+
 
 def create_message(max_id, author, tred_id, body):
     _id = max_id + 1
@@ -74,6 +78,7 @@ def create_message(max_id, author, tred_id, body):
     }
     return values
 
+
 def create_personal_list(max_id, list_name, owner_id):
     _id = max_id + 1
     values = {
@@ -83,6 +88,7 @@ def create_personal_list(max_id, list_name, owner_id):
     }
     return values
 
+
 def create_people_inlist(list_id, friend_id):
     values = {
         "list_id": list_id,
@@ -90,10 +96,12 @@ def create_people_inlist(list_id, friend_id):
     }
     return values
 
+
 def validate_user(values: Dict, password: str):
     stored_salt = values["salt"]
     stored_pword = values["pword"]
     result = validate_password(stored_salt, stored_pword, password)
+
 
 if __name__ == '__main__':
     print(create_user(1))

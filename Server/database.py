@@ -12,7 +12,7 @@ from databases import Database
 from sqlalchemy.sql import select, text
 # from asyncpg.pgproto.pgproto import UUID
 # from sqlalchemy.dialects.postgresql import UUID
-from typing import List, Generator
+from typing import List, Generator, Dict
 from config import *
 from models import *
 from crypto import *
@@ -92,9 +92,6 @@ class DataBase:
         result = await self.fetch_one(query=query, login=login)
         return result
 
-    async def get_current_tred(self, tred_id: int):
-        query = Tred.select()
-
     async def all_messages_in_tred(self, tred_id: int):
         query = ("select * from messenger.message m "
                  "inner join messenger.tred t "
@@ -123,7 +120,7 @@ class DataBase:
         return result
 
     async def create_new_user(self, values):
-        query = "insert into messenger"
+        query = UserAccount.insert()
         result = await self.execute(query, **values)
         return result
 
@@ -133,6 +130,11 @@ class DataBase:
                  "on tp.tred_id = t.tred_id "
                  "where t.tred_id = :tred_id;") 
         result = await self.fetch_all(query, tred_id=tred_id)
+        return result
+
+    async def create_new_super_account(self, super_id):
+        query = SuperAccount.insert()
+        result = await self.execute(query=query, super_id=super_id)
         return result
 
     async def get_max_super_id(self):
