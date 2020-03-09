@@ -9,8 +9,18 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DesktopFrontend.Views.LoginView">
     <DockPanel LastChildFill="True">
-        <Button DockPanel.Dock="Bottom" Command="{Binding TryConneсt}" Content="Start snorting cocaine!"
-                Margin="100,50,100,150" Padding="0,20" />
+        <!-- TODO: make this into a style -->
+        <Button DockPanel.Dock="Bottom" Command="{Binding Credentials}" Content="I already have an account"
+                FontSize="16" Foreground="#04668c" Margin="100,0,100,150" Padding="0,5" BorderThickness="0"
+                Background="#FFFFFF" />
+        <Button DockPanel.Dock="Bottom" Command="{Binding NewAccount}" Content="Create an account" FontSize="22"
+                Margin="100,50,100,0" Padding="0,20" />
+        <TextBlock DockPanel.Dock="Bottom"
+                   Text="Would you like to create an account?"
+                   TextAlignment="Center" FontSize="18" Margin="5" />
+        <TextBlock DockPanel.Dock="Bottom"
+                   Text="Looks like you're launching this for the first time!"
+                   TextAlignment="Center" FontSize="18" Margin="5" />
         <vc:LoginCarousel />
     </DockPanel>
 </UserControl>

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DesktopFrontend.Models
 {
-    public class ServerConnection
+    public class ServerConnection : IServerConnection
     {
         private readonly string _connectString;
         private readonly int _port;
@@ -34,11 +34,21 @@ namespace DesktopFrontend.Models
                 return false;
             }
 
+            return IsConnected;
+        }
+
+        public Task<bool> LogInWithCredentials(string user, string pass)
+        {
             var stream = _client.GetStream();
             // TODO: send login request witch credentials
-            // TODO: or request a new account
+            throw new NotImplementedException();
+        }
 
-            return IsConnected;
+        public Task<bool> RequestANewAccount()
+        {
+            var stream = _client.GetStream();
+            // TODO: request a new account
+            throw new NotImplementedException();
         }
     }
 }
