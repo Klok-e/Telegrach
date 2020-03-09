@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, MetaData, Table, ForeignKey, Dat
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.types import BigInteger
 from sqlalchemy.sql import func
-from helpers import generate_uuid
+from helpers import generate_uuid4
 from config import SCHEMA_NAME
 
 
@@ -12,7 +12,7 @@ SuperAccount = Table("super_account", metadata,
                      Column('super_id', BigInteger, primary_key=True))
 
 UserAccount = Table("user_account", metadata,
-                    Column("login", UUID, primary_key=True, default=generate_uuid),
+                    Column("login", UUID, primary_key=True, default=generate_uuid4),
                     Column("salt", String(32), nullable=False),
                     Column("pword", String(128), nullable=False),
                     Column("super_id", BigInteger, ForeignKey(SCHEMA_NAME + ".super_account.super_id")))
