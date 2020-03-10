@@ -119,10 +119,6 @@ class DataBase:
         result = await self.fetch_all(query, login=login)
         return result
 
-    async def create_new_user(self, values):
-        query = UserAccount.insert()
-        result = await self.execute(query, **values)
-        return result
 
     async def all_people_in_current_tred(self, tred_id: int):
         query = ("select * from messenger.tred_participation tp "
@@ -136,22 +132,49 @@ class DataBase:
         query = SuperAccount.insert()
         result = await self.execute(query=query, super_id=super_id)
         return result
+        
+    async def create_new_user(self, values):
+        query = UserAccount.insert()
+        result = await self.execute(query, **values)
+        return result
+
+    async def create_new_message(self, values):
+        query = ("insert into messenger.message(author_login, tred_id, body, is_deleted) "
+                 "values(:author_login, :tred_id, :body, :is_deleted);")
+        result = await self.execute(query=query, **values)
+        return result
+
+    async def create_new_tred(self, values):
+        query = ("insert into messenger.tred(creator_id, header, body) "
+                 "values (:creator_id, :header, :body);")
+        result = await self.execute(query=query, **values)
+        return result
+
+    async def create_new_tred_participation(self, values):
+        query = ("insert into messenger.tred_participation(tred_id, superacc_id) "
+                 "values (:tred_id, :superacc_id);")
+        result = await self.execute(query=query, **values)
+        return result
+
+    async def create_new_union_request(self, values):
+        query = ("insert into messenger.union_requests(from_super_id, to_super_id, is_accepted) "
+                 "values (:from_super_id, :to_super_id, :is_accepted);")
+        result = await self.execute(query=query, **values)
+        return result
+
+    async def create_new_personal_list(self, values):
+        query = ("insert into messenger.personal_lists(list_name, owner_id) "
+                 "values (:list_name, :owner_id);")
+        result = await self.execute(query=query, **values)
+        return result
+
+    async def create_new_people_inlist(self, values):
+        query = ("insert into messenger.people_inlist(list_id, friend_id) "
+                 "values (:list_id, :friend_id);")
+        result = await self.execute(query=query, **values)
+        return result
 
     async def get_max_super_id(self):
         query = "select max(sa.super_id) from messenger.super_account sa;"
         result = await self.fetch_one(query)
         return result
-
-async def main():
-    a = DataBase(DB_USER, DB_PW, (DB_HOST, DB_PORT), SCHEMA_NAME, VOCAB)
-    await a.connect(DB)
-    res = await a.all_people_in_current_tred(1)
-    print(res)
-    # res = await a.all_messages_in_tred(1)
-    # for i in res:
-    #     print(dict(i.items()))
-
-    await a.disconnect()
-
-if __name__ == '__main__':
-    asyncio.run(main())

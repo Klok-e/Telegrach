@@ -4,8 +4,6 @@ SELECT * FROM pg_available_extensions;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 SELECT * FROM pg_extension;
 
-select uuid_generate_v1();
-
 create table messenger.super_account(
 	super_id bigserial primary keybigint references messenger.super_account(super_id),
 );

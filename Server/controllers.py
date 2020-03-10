@@ -27,62 +27,47 @@ def create_user(super_id: int) -> Tuple[Tuple[str, str], Dict]:
 
 
 def create_union_request(_from, to):
-    time = func.now()
     is_accepted = False
     values = {
         "from_super_id": _from,
         "to_super_id": to,
-        "timestamp": time,
         "is_accepted": is_accepted,
     }
     return values
 
 
-def create_tred(max_id, creator_id, header, body):
-    _id = max_id + 1
-    time = func.now()
+def create_tred(creator_id, header, body):
     values = {
-        "tred_id": _id,
         "creator_id": creator_id,
         "header": header,
         "body": body,
-        "timestamp": time,
     }
     return values
 
 
-def create_tred_participation(max_id, tred_id, super_id):
-    _id = max_id + 1
+def create_tred_participation(tred_id, super_id):
     values = {
-        "participation_id": _id,
         "tred_id": tred_id,
         "superacc_id": super_id,
     }
     return values
 
 
-def create_message(max_id, author, tred_id, body):
-    _id = max_id + 1
-    time = func.now()
+def create_message(author, tred_id, body):
     is_deleted = False
     # if answered:
     #   body += ">>>" + answered
-
     values = {
-        "message_id": _id,
         "author_login": author,
         "tred_id": tred_id,
-        "timestamp": time,
         "body": body,
         "is_deleted": is_deleted
     }
     return values
 
 
-def create_personal_list(max_id, list_name, owner_id):
-    _id = max_id + 1
+def create_personal_list(list_name, owner_id):
     values = {
-        "list_id": _id,
         "list_name": list_name,
         "owner_id": owner_id
     }
