@@ -5,5 +5,7 @@
 /Server/logs
 /Server/*.log
 /Server/congfig.py
+*_pb2.py
+Server/google/
 *.DotSettings.user
 .vs
