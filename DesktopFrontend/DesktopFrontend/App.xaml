@@ -12,13 +12,13 @@
         <Style Selector="Button.Regular">
             <Setter Property="FontSize" Value="22"/>
         </Style>
-        <Style Selector="Button.LessRegular">
+        <Style Selector="Button.Link">
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="Foreground" Value="#04668c"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="#FFFFFF"/>
         </Style>
-        <Style Selector="Button.LessRegular:pressed">
+        <Style Selector="Button.Link:pressed">
             <Setter Property="Foreground" Value="#abcdff"/>
         </Style>
     </Application.Styles>
