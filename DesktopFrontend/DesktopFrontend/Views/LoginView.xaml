@@ -11,14 +11,14 @@
     <DockPanel LastChildFill="True">
         <!-- TODO: make this into a style -->
         <Button DockPanel.Dock="Bottom" Command="{Binding Credentials}" Content="I already have an account"
-                Margin="100,0,100,150" Padding="0,5" BorderThickness="0" Classes="Link" />
-        <Button DockPanel.Dock="Bottom" Command="{Binding NewAccount}" Content="Create an account" Margin="100,50,100,0" Padding="0,20" Classes="Regular"/>
+                Margin="100,0,100,150" Padding="0,5" BorderThickness="0" Classes="link" />
+        <Button DockPanel.Dock="Bottom" Command="{Binding NewAccount}" Content="Create an account" Margin="100,50,100,0" Padding="0,20" Classes="reg1"/>
         <TextBlock DockPanel.Dock="Bottom"
                    Text="Would you like to create an account?"
-                   TextAlignment="Center" FontSize="18" Margin="5" />
+                   TextAlignment="Center" Margin="5" Classes="reg1"/>
         <TextBlock DockPanel.Dock="Bottom"
                    Text="Looks like you're launching this for the first time!"
-                   TextAlignment="Center" FontSize="18" Margin="5" />
+                   TextAlignment="Center" Margin="5" Classes="reg1"/>
         <vc:LoginCarousel />
     </DockPanel>
 </UserControl>

@@ -8,15 +8,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DesktopFrontend.Views.LoginNewAccountView">
-    <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" HorizontalAlignment="Center"
-          VerticalAlignment="Center">
-        <TextBlock Text="Your login:" Grid.Column="0" Grid.Row="0" />
-        <TextBlock Text="{Binding ReceivedPassword}" Grid.Column="1" Grid.Row="0" />
+    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" HorizontalAlignment="Center"
+          VerticalAlignment="Center" Width="400" Height="300">
+        <TextBlock Text="Your login:" Grid.Column="0" Grid.Row="0" Classes="reg2" HorizontalAlignment="Left" />
+        <TextBlock Text="{Binding ReceivedPassword}" Grid.Column="1" Grid.Row="0" Classes="reg2" />
 
-        <TextBlock Text="Your password:" Grid.Column="0" Grid.Row="1" />
-        <TextBlock Text="{Binding ReceivedLogin}" Grid.Column="1" Grid.Row="1" />
+        <TextBlock Text="Your password:" Grid.Column="0" Grid.Row="1" Classes="reg2" HorizontalAlignment="Left" />
+        <TextBlock Text="{Binding ReceivedLogin}" Grid.Column="1" Grid.Row="1" Classes="reg2" />
 
-        <Button Command="{Binding SignIn}" Content="Sign In" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" />
-        <Button Command="{Binding Back}" Content="Go Back" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" />
+        <Button Command="{Binding SignIn}" Content="Sign In" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2"
+                Classes="reg2" />
+        <Button Command="{Binding Back}" Content="Go Back" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2"
+                Classes="reg2" />
     </Grid>
 </UserControl>
