@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
@@ -41,6 +42,16 @@ namespace DesktopFrontend.Models
         {
             var stream = _client.GetStream();
             // TODO: send login request witch credentials
+            throw new NotImplementedException();
+        }
+
+        public Task<Image> RequestCaptcha()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> TryPassCaptcha(string tryText)
+        {
             throw new NotImplementedException();
         }
 

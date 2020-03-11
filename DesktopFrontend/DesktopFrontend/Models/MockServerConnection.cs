@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.Threading.Tasks;
 
 namespace DesktopFrontend.Models
@@ -14,6 +15,16 @@ namespace DesktopFrontend.Models
         }
 
         public Task<bool> LogInWithCredentials(string user, string pass)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Image> RequestCaptcha()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> TryPassCaptcha(string tryText)
         {
             throw new NotImplementedException();
         }
