@@ -1,0 +1,16 @@
+The main idea is that every single command has its unique code, that server and client can understand.
+
+For example:
+	If client sends command 0 to server then server can interpret it as client creation command. 
+	Then server creates the client`s data and send it to the actual client.
+	Codename for this, for example, is 1. And server sends login and password. Encoded of cource.
+	And so on.
+	So, protobuffers must declare the structure of message for each code.
+
+	What if we are sending a list of messages, for example?
+	Than we can separate each message by separator. For example \n\n. Or more complex. Food for thought.
+
+	The expected structure of enterchanging message:
+		CODE=0\nPARAM=2\n\nencoded_byte_interpretation_of_message1\nencodedbyte_interpretation_of_message2\nencodedbyte_interpretation_of_message3\n\n\n\n
+
+

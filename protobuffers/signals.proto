@@ -1,0 +1,13 @@
+
+syntax = "proto3";
+
+package messenger;
+
+message user_creation_request{
+	int64 super_id = 1;
+}
+
+message send_user_to_client{
+	string login = 1;
+	string password = 2;
+}

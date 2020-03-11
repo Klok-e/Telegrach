@@ -1,31 +1,42 @@
 import asyncio
-import logging
+# import logging
 import socket
 import sys
+import crypto
+import controllers as ctrl
+import signals_pb2 as signals
 from typing import Tuple
 from config import *
-import controllers as ctrl
 from database import DataBase
 
 # TODO LOG ALL EXCEPTIONS WITH sys.exc_info
 
-
-logging.basicConfig(filename=LOG_FILE_SERVER,
-                    level=LOG_LEVEL_SERVER,
-                    format=LOG_FORMAT_SERVER)
+TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
 
 
-async def create_user(db, super_id: int=None):
+
+# logging.basicConfig(filename=LOG_FILE_SERVER,
+#                     level=LOG_LEVEL_SERVER,
+#                     format=LOG_FORMAT_SERVER)
+
+
+async def create_user(db, message):
     ''' 
-        Returns new_users data and commits its data to database
+        Returns new_users with code data and commits its data to database
     '''
-    if super_id is None: # That part of code required if user is using the service for the first time, so super_account does not exist
+    # message = crypto.decrypt_message(TEST_KEY, message)
+    request = signals.user_creation_request()
+    request.ParseFromString(message)
+
+    if request.super_id == -1: # That part of code required if user is using the service for the first time, so super_account does not exists
         select = await db.get_max_super_id()
         super_id = dict(select.items())["max"] + 1
         await db.create_new_super_account(super_id) # creating super_account before user_account
+
     data: Tuple[Tuple[str, str], Dict] = ctrl.create_user(super_id) # a tuple(User`s data to send, Database data to store)
     await db.create_new_user(data[1])
-    return data[0]
+
+    return 1, data[0]
 
 
 async def create_message(db, login: str, tred_id: int, message: str):
@@ -57,44 +68,53 @@ async def create_people_inlist(db, list_id: int, friend_id: int):
     values = ctrl.create_people_inlist(list_id, friend_id)
     await db.create_new_people_inlist(values)
 
+async def send_users_data(data):
+    users_data = signals.send_user_to_client()
+    users_data.login = data[0]
+    users_data.password = data[1]
+    response = users_data.SerializeToString()
+    response = b"CODE=1\n\n" + response + b"\n\n\n\n"
+    return response
 
-async def handle_read(reader: asyncio.StreamReader, sockname: Tuple[str, int]):
-    logging.info(f"Reading from {sockname}...")
+CODES = {
+    0: create_user,
+    1: send_users_data,
+}
+
+
+async def parse_input(db, data):
+    commands, message = data.strip().split(b"\n\n")
+    commands = commands.split(b"\n")
+    commands = dict(i.split(b"=") for i in commands)
+    code = int(commands[b"CODE"])
+    return await CODES[code](db, message)
+
+
+async def make_output(db, data: Tuple[int, bytes]):
+    code = data[0]
+    response = data[1]
+    return await CODES[code](response)
+
+
+async def handle_read(db, reader: asyncio.StreamReader, sockname: Tuple[str, int]):
+    # logging.info(f"Reading from {sockname}...")
     data = await reader.readuntil(SEPARATOR)
-    data = data.decode()
-    commands, message = data.strip().split("\n\n")
-    logging.info(f"Got request from {sockname}")
-    logging.info(f"Command is {commands}")
-    logging.info(f"Message if {message}")
+    return await parse_input(db, data)
 
 
-async def handle_write(writer: asyncio.StreamWriter, sockname: Tuple[str, int]):
-    logging.info(f"Writing to {sockname}")
-    writer.write("Message from server".encode())
+async def handle_write(db, writer: asyncio.StreamWriter, sockname: Tuple[str, int], message: Tuple[int, bytes]):
+    # logging.info(f"Writing to {sockname}")
+    response = await make_output(db, message)
+    writer.write(response)
     await writer.drain()
-    logging.info(f"Message sended to {sockname}...")
+    # logging.info(f"Message sended to {sockname}...")
 
 
-async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     sockname = writer.get_extra_info('peername')
-    logging.info(f"New connection from {sockname}")
-
-    try:
-        await handle_read(reader, sockname)
-    except asyncio.LimitOverrunError as e:
-        logging.error(str(e))
-        
-    except asyncio.IncompleteReadError as e:
-        logging.error(str(e))
-
-    except Exception as e:
-        logging.error(str(e))
-
-    try:
-        await handle_write(writer, sockname)
-    except:
-        logging.error(f"Got {str(e)}")
-
+    # logging.info(f"New connection from {sockname}")
+    result = await handle_read(db, reader, sockname)
+    await handle_write(db, writer, sockname, result)
     writer.close()
 
 
@@ -109,11 +129,13 @@ async def main():
     # await create_union_request(db, 1, 1)
     # await create_personal_list(db, "test_list_from_code", 1)
     # await create_people_inlist(db, 1, 1)
-    # server = await asyncio.start_server(handler, *ADDRESS)
+    server = await asyncio.start_server(lambda r, w: handler(db, r, w), *ADDRESS)
 
-    # async with server:
-    #     await server.serve_forever()
+    async with server:
+        await server.serve_forever()
+
     await db.disconnect()
+
 
 if __name__ == '__main__':
     asyncio.run(main())
