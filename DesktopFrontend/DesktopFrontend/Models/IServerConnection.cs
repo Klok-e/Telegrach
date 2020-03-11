@@ -1,5 +1,5 @@
-using System.Drawing;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 
 namespace DesktopFrontend.Models
 {
@@ -11,10 +11,8 @@ namespace DesktopFrontend.Models
 
         Task<bool> LogInWithCredentials(string user, string pass);
 
-        Task<Image> RequestCaptcha();
+        Task<Bitmap> RequestCaptcha();
 
-        Task<bool> TryPassCaptcha(string tryText);
-
-        Task<bool> RequestANewAccount();
+        Task<(string login, string pass)?> TryRequestAccount(string tryText);
     }
 }

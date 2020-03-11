@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DesktopFrontend.ViewModels"
+             xmlns:v="clr-namespace:DesktopFrontend.Views"
+             xmlns:vc="clr-namespace:DesktopFrontend.Views.Controls"
+             xmlns:m="clr-namespace:DesktopFrontend.Models"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="DesktopFrontend.Views.LoginShowPasswdView">
+    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" HorizontalAlignment="Stretch"
+          VerticalAlignment="Stretch">
+        <TextBlock Text="Your login:" Grid.Column="0" Grid.Row="0" Classes="reg2"
+                   HorizontalAlignment="Left" />
+        <TextBlock Text="{Binding Pass}" Grid.Column="1" Grid.Row="0"
+                   Classes="reg2" />
+
+        <TextBlock Text="Your password:" Grid.Column="0" Grid.Row="1"
+                   Classes="reg2" HorizontalAlignment="Left" />
+        <TextBlock Text="{Binding Login}" Grid.Column="1" Grid.Row="1"
+                   Classes="reg2" />
+    </Grid>
+</UserControl>

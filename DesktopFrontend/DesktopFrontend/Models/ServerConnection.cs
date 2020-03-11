@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 
 namespace DesktopFrontend.Models
 {
@@ -45,12 +45,12 @@ namespace DesktopFrontend.Models
             throw new NotImplementedException();
         }
 
-        public Task<Image> RequestCaptcha()
+        public Task<Bitmap> RequestCaptcha()
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> TryPassCaptcha(string tryText)
+        public Task<(string login, string pass)?> TryRequestAccount(string tryText)
         {
             throw new NotImplementedException();
         }

@@ -1,6 +1,8 @@
 using System;
-using System.Drawing;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 
 namespace DesktopFrontend.Models
 {
@@ -14,24 +16,26 @@ namespace DesktopFrontend.Models
             return IsConnected = true;
         }
 
-        public Task<bool> LogInWithCredentials(string user, string pass)
+        public async Task<bool> LogInWithCredentials(string user, string pass)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Image> RequestCaptcha()
+        public async Task<Bitmap> RequestCaptcha()
         {
-            throw new NotImplementedException();
+            var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+            Bitmap b;
+            await using (var s = assets.Open(new Uri("/Assets/mock-captcha.jpg")))
+                b = new Bitmap(s);
+
+            return b;
         }
 
-        public Task<bool> TryPassCaptcha(string tryText)
+        public async Task<(string login, string pass)?> TryRequestAccount(string tryText)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> RequestANewAccount()
-        {
-            throw new NotImplementedException();
+            if (tryText == "hey /b/")
+                return ("rwerwer", "564756868");
+            return null;
         }
     }
 }

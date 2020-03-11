@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Reactive;
 using System.Threading.Tasks;
+using System;
 using DesktopFrontend.Models;
 using ReactiveUI;
 
@@ -8,48 +9,21 @@ namespace DesktopFrontend.ViewModels
 {
     public class LoginNewAccountViewModel : ViewModelBase
     {
-        private string _receivedPassword = "";
+        private bool _captchaPassed;
 
-        public string ReceivedPassword
+        public bool CaptchaPassed
         {
-            get => _receivedPassword;
-            private set => this.RaiseAndSetIfChanged(ref _receivedPassword, value);
+            get => _captchaPassed;
+            set => this.RaiseAndSetIfChanged(ref _captchaPassed, value);
         }
 
-        private string _receivedLogin = "";
+        private ViewModelBase _captcha;
 
-
-        public string ReceivedLogin
+        public ViewModelBase Captcha
         {
-            get => _receivedLogin;
-            private set => this.RaiseAndSetIfChanged(ref _receivedLogin, value);
+            get => _captcha;
+            set => this.RaiseAndSetIfChanged(ref _captcha, value);
         }
-
-        private bool _showCaptha;
-
-        public bool ShowCaptha
-        {
-            get => _showCaptha;
-            set => this.RaiseAndSetIfChanged(ref _showCaptha, value);
-        }
-
-        private Image _captchaImage;
-
-        public Image CaptchaImage
-        {
-            get => _captchaImage;
-            set => this.RaiseAndSetIfChanged(ref _captchaImage, value);
-        }
-
-        private string _capthaAttemptText = "";
-
-        public string CapthaAttemptText
-        {
-            get => _capthaAttemptText;
-            private set => this.RaiseAndSetIfChanged(ref _capthaAttemptText, value);
-        }
-
-        public ReactiveCommand<Unit, Unit> TryPassCaptha { get; }
 
         public ReactiveCommand<Unit, Unit> Back { get; }
 
@@ -57,35 +31,17 @@ namespace DesktopFrontend.ViewModels
 
         public LoginNewAccountViewModel(INavigationStack stack, IServerConnection connection)
         {
-            var capthaPassed = new TaskCompletionSource<bool>();
-
-            TryPassCaptha = ReactiveCommand.CreateFromTask(async () =>
+            var c = new CaptchaViewModel(connection);
+            Captcha = c;
+            c.CaptchaPassed.Subscribe(pl =>
             {
-                if (await connection.TryPassCaptcha(CapthaAttemptText))
-                {
-                    capthaPassed.SetResult(true);
-                }
-                else
-                {
-                    capthaPassed.SetResult(false);
-                }
+                CaptchaPassed = true;
+                Captcha = new LoginShowPasswdViewModel(pl.login, pl.pass);
             });
-
             Back = ReactiveCommand.Create(() => { stack.Pop(); });
-            SignIn = ReactiveCommand.CreateFromTask(async () =>
-            {
-                ShowCaptha = true;
-                bool notPassed;
-                do
-                {
-                    CaptchaImage = await connection.RequestCaptcha();
-                    notPassed = !await capthaPassed.Task;
-                    if (notPassed)
-                        capthaPassed = new TaskCompletionSource<bool>();
-                } while (notPassed);
-
-                stack.Push(new ChatViewModel());
-            });
+            var canExec = this.WhenAny(x => x.CaptchaPassed,
+                s => s.Value);
+            SignIn = ReactiveCommand.CreateFromTask(async () => { stack.Push(new ChatViewModel()); }, canExec);
         }
     }
 }
