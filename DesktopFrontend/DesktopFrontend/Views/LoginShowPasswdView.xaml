@@ -12,12 +12,12 @@
           VerticalAlignment="Stretch">
         <TextBlock Text="Your login:" Grid.Column="0" Grid.Row="0" Classes="reg2"
                    HorizontalAlignment="Left" />
-        <TextBlock Text="{Binding Pass}" Grid.Column="1" Grid.Row="0"
+        <TextBlock Text="{Binding Login}" Grid.Column="1" Grid.Row="0"
                    Classes="reg2" />
 
         <TextBlock Text="Your password:" Grid.Column="0" Grid.Row="1"
                    Classes="reg2" HorizontalAlignment="Left" />
-        <TextBlock Text="{Binding Login}" Grid.Column="1" Grid.Row="1"
+        <TextBlock Text="{Binding Password}" Grid.Column="1" Grid.Row="1"
                    Classes="reg2" />
     </Grid>
 </UserControl>

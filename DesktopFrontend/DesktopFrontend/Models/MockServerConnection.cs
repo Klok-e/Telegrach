@@ -25,9 +25,8 @@ namespace DesktopFrontend.Models
         {
             var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
             Bitmap b;
-            await using (var s = assets.Open(new Uri("/Assets/mock-captcha.jpg")))
+            await using (var s = assets.Open(new Uri("avares://DesktopFrontend/Assets/mock-captcha.jpg")))
                 b = new Bitmap(s);
-
             return b;
         }
 
