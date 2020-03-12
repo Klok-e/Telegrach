@@ -43,9 +43,9 @@ jobs:
           cd DesktopFrontend/
           dotnet format --check || CHANGED=1
           if [ $CHANGED -ne 1 ]; then
-            echo "::set-output changed-files=0"
+            echo "::set-output name=changed-files::0"
           else
-            echo "::set-output changed-files=1"
+            echo "::set-output name=changed-files::1"
           fi
 
       - name: Format python code
