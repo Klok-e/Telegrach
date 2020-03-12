@@ -39,10 +39,15 @@ jobs:
 
       - name: Run dotnet format
         id: csharp
-        uses: xt0rted/dotnet-format@v1
-        with:
-          action: "fix"
-          args: -w DesktopFrontend/
+        run: |
+          cd DesktopFrontend/
+          dotnet format --check
+          if [ $? -eq 0]; then
+            echo "::set-output changed-files=0"
+          else
+            echo "::set-output changed-files=1"
+          fi
+          exit 0
 
       - name: Format python code
         id: autopep8
@@ -51,7 +56,7 @@ jobs:
           args: --exit-code --recursive --in-place --aggressive --aggressive ./Server
 
       - name: Commit changes
-        if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.has-changes == 'true'
+        if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files == 1
         run: |
           echo "python exit ${{ steps.autopep8.outputs.exit-code }}"
           echo "csharp has-changes ${{ steps.csharp.outputs.has-changes }}"
