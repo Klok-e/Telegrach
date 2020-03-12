@@ -47,7 +47,6 @@ jobs:
           else
             echo "::set-output changed-files=1"
           fi
-          exit 0
 
       - name: Format python code
         id: autopep8
@@ -55,11 +54,14 @@ jobs:
         with:
           args: --exit-code --recursive --in-place --aggressive --aggressive ./Server
 
-      - name: Commit changes
-        if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files == 1
+      - name: Print changed files debug
         run: |
           echo "python exit ${{ steps.autopep8.outputs.exit-code }}"
           echo "csharp has-changes ${{ steps.csharp.outputs.has-changes }}"
+
+      - name: Commit changes
+        if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files == 1
+        run: |
           git config --global user.name "Code Formatter"
           git commit -am "Format code"
           git push
