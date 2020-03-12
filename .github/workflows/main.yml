@@ -33,9 +33,9 @@ jobs:
           dotnet-version: "3.1.102"
 
       - name: Restore local tools
-        working-directory: gatsby  # Error Line Referred to by error response
-        uses: xt0rted/dotnet-tool-restore@v1
-        run: echo 0 > /dev/null
+        run: |
+          cd DesktopFrontend/
+          dotnet tool restore
 
       - name: Run dotnet format
         id: csharp
