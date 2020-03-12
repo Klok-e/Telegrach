@@ -8,9 +8,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "3.1.102"
+      - name: Setup protoc
+        uses: arduino/setup-protoc@v1.1.0
 
       - name: Compile protobuffers
         run: bash ./protobuffers/compile.sh
