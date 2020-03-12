@@ -13,7 +13,7 @@ jobs:
           dotnet-version: "3.1.102"
 
       - name: Compile protobuffers
-        run: sh protobuffers/compile.sh
+        run: sh ./protobuffers/compile.sh
 
       - name: Build the executable
         run: |
