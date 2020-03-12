@@ -4,6 +4,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 
 namespace DesktopFrontend.Models
 {
@@ -41,6 +42,16 @@ namespace DesktopFrontend.Models
         {
             var stream = _client.GetStream();
             // TODO: send login request witch credentials
+            throw new NotImplementedException();
+        }
+
+        public Task<Bitmap> RequestCaptcha()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<(string login, string pass)?> TryRequestAccount(string tryText)
+        {
             throw new NotImplementedException();
         }
 
