@@ -32,6 +32,10 @@ jobs:
         with:
           dotnet-version: "3.1.102"
 
+      - name: Restore local tools
+        working-directory: gatsby  # Error Line Referred to by error response
+        uses: xt0rted/dotnet-tool-restore@v1
+
       - name: Run dotnet format
         id: csharp
         uses: xt0rted/dotnet-format@v1
