@@ -42,7 +42,7 @@ jobs:
         run: |
           cd DesktopFrontend/
           dotnet format --check || CHANGED=1
-          if [ $CHANGED -ne 1 ]; then
+          if [ "$CHANGED" != "1" ]; then
             echo "::set-output name=changed-files::0"
           else
             echo "::set-output name=changed-files::1"
