@@ -3,7 +3,7 @@ name: CI
 on: [push]
 
 jobs:
-  build-desktop-frontend:
+  build:
 
     runs-on: ubuntu-latest
 
@@ -22,6 +22,9 @@ jobs:
       run: |
         cd DesktopFrontend
         dotnet format --check --dry-run
+
+    - name: Compile protobuffers
+      run: sh protobuffers/compile.sh
     
     - name: Build the executable
       run: |
