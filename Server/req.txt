@@ -4,6 +4,7 @@ cffi==1.14.0
 chardet==3.0.4
 databases==0.2.6
 idna==2.9
+protobuf==3.11.3
 psycopg2-binary==2.8.4
 pycparser==2.20
 pycryptodome==3.9.7
