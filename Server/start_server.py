@@ -14,26 +14,28 @@ from database import DataBase
 TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
 
 
-
 # logging.basicConfig(filename=LOG_FILE_SERVER,
 #                     level=LOG_LEVEL_SERVER,
 #                     format=LOG_FORMAT_SERVER)
 
 
 async def create_user(db, message):
-    ''' 
+    '''
         Returns new_users with code data and commits its data to database
     '''
     # message = crypto.decrypt_message(TEST_KEY, message)
     request = signals.user_creation_request()
     request.ParseFromString(message)
 
-    if request.super_id == -1: # That part of code required if user is using the service for the first time, so super_account does not exists
+    if request.super_id == - \
+            1:  # That part of code required if user is using the service for the first time, so super_account does not exists
         select = await db.get_max_super_id()
         super_id = dict(select.items())["max"] + 1
-        await db.create_new_super_account(super_id) # creating super_account before user_account
+        # creating super_account before user_account
+        await db.create_new_super_account(super_id)
 
-    data: Tuple[Tuple[str, str], Dict] = ctrl.create_user(super_id) # a tuple(User`s data to send, Database data to store)
+    # a tuple(User`s data to send, Database data to store)
+    data: Tuple[Tuple[str, str], Dict] = ctrl.create_user(super_id)
     await db.create_new_user(data[1])
 
     return 1, data[0]
@@ -67,6 +69,7 @@ async def create_personal_list(db, list_name: str, owner_id: int):
 async def create_people_inlist(db, list_id: int, friend_id: int):
     values = ctrl.create_people_inlist(list_id, friend_id)
     await db.create_new_people_inlist(values)
+
 
 async def send_users_data(data):
     users_data = signals.send_user_to_client()

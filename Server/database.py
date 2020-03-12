@@ -23,10 +23,10 @@ class DataBase:
 
     def __init__(self, user: str, passwd: str, addr: str, schema='', voc=None):
         '''Setting params for the connection'''
-        self._user = user # database user
-        self._pw = passwd # password
-        self._addr = addr # a tuple (host, port)
-        self._schema = schema # schemaname 
+        self._user = user  # database user
+        self._pw = passwd  # password
+        self._addr = addr  # a tuple (host, port)
+        self._schema = schema  # schemaname
         self._connection_string = None
         self._database = None
 
@@ -88,7 +88,8 @@ class DataBase:
     async def get_current_user(self, login: str):
         ''' Get user with specified UUID. Just send str representation of UUID '''
         # query = UserAccount.select().where(UserAccount.c.login == login)
-        query = ("select * from messenger.user_account ua where ua.login::text = :login")
+        query = (
+            "select * from messenger.user_account ua where ua.login::text = :login")
         result = await self.fetch_one(query=query, login=login)
         return result
 
@@ -103,7 +104,7 @@ class DataBase:
         return result
 
     async def all_people_in_personal_list(self, list_id: int):
-        query = ("select * from messenger.personal_lists pl " 
+        query = ("select * from messenger.personal_lists pl "
                  "inner join messenger.people_inlist pi "
                  "on pl.list_id = pi.list_id "
                  "where pl.list_id = :list_id")
@@ -119,12 +120,11 @@ class DataBase:
         result = await self.fetch_all(query, login=login)
         return result
 
-
     async def all_people_in_current_tred(self, tred_id: int):
         query = ("select * from messenger.tred_participation tp "
                  "inner join messenger.tred t "
                  "on tp.tred_id = t.tred_id "
-                 "where t.tred_id = :tred_id;") 
+                 "where t.tred_id = :tred_id;")
         result = await self.fetch_all(query, tred_id=tred_id)
         return result
 
@@ -132,15 +132,16 @@ class DataBase:
         query = SuperAccount.insert()
         result = await self.execute(query=query, super_id=super_id)
         return result
-        
+
     async def create_new_user(self, values):
         query = UserAccount.insert()
         result = await self.execute(query, **values)
         return result
 
     async def create_new_message(self, values):
-        query = ("insert into messenger.message(author_login, tred_id, body, is_deleted) "
-                 "values(:author_login, :tred_id, :body, :is_deleted);")
+        query = (
+            "insert into messenger.message(author_login, tred_id, body, is_deleted) "
+            "values(:author_login, :tred_id, :body, :is_deleted);")
         result = await self.execute(query=query, **values)
         return result
 
@@ -151,14 +152,16 @@ class DataBase:
         return result
 
     async def create_new_tred_participation(self, values):
-        query = ("insert into messenger.tred_participation(tred_id, superacc_id) "
-                 "values (:tred_id, :superacc_id);")
+        query = (
+            "insert into messenger.tred_participation(tred_id, superacc_id) "
+            "values (:tred_id, :superacc_id);")
         result = await self.execute(query=query, **values)
         return result
 
     async def create_new_union_request(self, values):
-        query = ("insert into messenger.union_requests(from_super_id, to_super_id, is_accepted) "
-                 "values (:from_super_id, :to_super_id, :is_accepted);")
+        query = (
+            "insert into messenger.union_requests(from_super_id, to_super_id, is_accepted) "
+            "values (:from_super_id, :to_super_id, :is_accepted);")
         result = await self.execute(query=query, **values)
         return result
 
