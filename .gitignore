@@ -4,8 +4,9 @@
 /Server/__pycache__/
 /Server/logs
 /Server/*.log
-/Server/congfig.py
-*_pb2.py
-Server/google/
 *.DotSettings.user
 .vs
+
+# protobuffers
+/Server/proto/
+/DesktopFrontend/DesktopFrontend/Proto
