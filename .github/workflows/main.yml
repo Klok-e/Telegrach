@@ -57,7 +57,7 @@ jobs:
       - name: Print changed files debug
         run: |
           echo "python exit ${{ steps.autopep8.outputs.exit-code }}"
-          echo "csharp has-changes ${{ steps.csharp.outputs.has-changes }}"
+          echo "csharp changed-files ${{ steps.csharp.outputs.changed-files }}"
 
       - name: Commit changes
         if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files == 1
