@@ -41,8 +41,8 @@ jobs:
         id: csharp
         run: |
           cd DesktopFrontend/
-          dotnet format --check || true
-          if [ $? -eq 0 ]; then
+          dotnet format --check || CHANGED=1
+          if [ $CHANGED -ne 1 ]; then
             echo "::set-output changed-files=0"
           else
             echo "::set-output changed-files=1"
