@@ -42,7 +42,7 @@ jobs:
         run: |
           cd DesktopFrontend/
           dotnet format --check
-          if [ $? -eq 0]; then
+          if [ $? -eq 0 ]; then
             echo "::set-output changed-files=0"
           else
             echo "::set-output changed-files=1"
