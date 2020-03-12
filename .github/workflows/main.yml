@@ -4,29 +4,64 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '3.1.102'
-    - name: Install dotnet-format
-      run: |
-        dotnet tool install -g dotnet-format
-        # fix global config
-        echo "::set-env name=PATH::${PATH}:${HOME}/.dotnet/tools"
-    
-    - name: Check formatting
-      run: |
-        cd DesktopFrontend
-        dotnet format --check --dry-run
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "3.1.102"
 
-    - name: Compile protobuffers
-      run: sh protobuffers/compile.sh
-    
-    - name: Build the executable
-      run: |
-        cd DesktopFrontend/DesktopFrontend
-        dotnet build
+      - name: Compile protobuffers
+        run: sh protobuffers/compile.sh
+
+      - name: Build the executable
+        run: |
+          cd DesktopFrontend/DesktopFrontend
+          dotnet build
+
+  format-commit:
+    # Check if the PR is not from a fork
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "3.1.102"
+
+      - name: Install dotnet-format
+        run: |
+          dotnet tool install -g dotnet-format
+          # fix global config
+          echo "::set-env name=PATH::${PATH}:${HOME}/.dotnet/tools"
+
+      - name: Run dotnet format
+        id: csharp
+        uses: xt0rted/dotnet-format@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          only-changed-files: "true"
+          action: "fix"
+          args: -w DesktopFrontend/
+
+      - name: Format python code
+        id: autopep8
+        uses: peter-evans/autopep8@v1
+        with:
+          args: --exit-code --recursive --in-place --aggressive --aggressive ./Server
+
+      - name: Commit changes
+        if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.has-changes == 'true'
+        run: |
+          git config --global user.name "Code Formatter"
+          git commit -am "Format code"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
