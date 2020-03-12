@@ -53,6 +53,8 @@ jobs:
       - name: Commit changes
         if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.has-changes == 'true'
         run: |
+          echo "python exit ${{ steps.autopep8.outputs.exit-code }}"
+          echo "csharp has-changes ${{ steps.csharp.outputs.has-changes }}"
           git config --global user.name "Code Formatter"
           git commit -am "Format code"
           git push
