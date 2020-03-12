@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # cd to the directory of the script
 # https://stackoverflow.com/a/16349776
 cd "${0%/*}"
