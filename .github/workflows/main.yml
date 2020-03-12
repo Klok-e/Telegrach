@@ -35,6 +35,7 @@ jobs:
       - name: Restore local tools
         working-directory: gatsby  # Error Line Referred to by error response
         uses: xt0rted/dotnet-tool-restore@v1
+        run: echo 0 > /dev/null
 
       - name: Run dotnet format
         id: csharp
