@@ -3,11 +3,17 @@ syntax = "proto3";
 
 package messenger;
 
-message user_creation_request{
-	int64 super_id = 1;
+message user_creation_request { int64 super_id = 1; }
+
+message send_user_to_client {
+  string login = 1;
+  string password = 2;
 }
 
-message send_user_to_client{
-	string login = 1;
-	string password = 2;
+message ThreadMessage {
+  int64 msg_id = 1;
+  string body = 2;
+  uint64 send_time = 3;
 }
+
+message ThreadMessagePack { repeated ThreadMessage messages = 1; }
