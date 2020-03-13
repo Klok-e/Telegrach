@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace DesktopFrontend.Models
 {
@@ -11,5 +12,7 @@ namespace DesktopFrontend.Models
         Task<bool> LogInWithCredentials(string user, string pass);
 
         Task<bool> RequestANewAccount();
+
+        Task<List<string>> RequestThreadSet(string name);
     }
 }

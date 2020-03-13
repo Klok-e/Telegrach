@@ -8,6 +8,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DesktopFrontend.Views.ChatView">
+    
     <UserControl.DataTemplates>
         <DataTemplate DataType="m:ChatMessage">
             <StackPanel>
@@ -19,11 +20,27 @@
         </DataTemplate>
     </UserControl.DataTemplates>
 
-    <Grid RowDefinitions="*,Auto" ColumnDefinitions="Auto,*">
-        <ListBox Name="MessageList" Items="{Binding Messages}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
-        <Button Command="{Binding SendMessage}"
-                Content="Send"
-                Margin="2" Grid.Row="1" Grid.Column="0" />
-        <TextBox Text="{Binding CurrentMessage}" AcceptsReturn="True" Margin="2" Grid.Row="1" Grid.Column="1" />
-    </Grid>
+    <UserControl.DataTemplates>
+        <DataTemplate DataType="m:ThreadItem">
+            <Button Content="{Binding Name}" />
+        </DataTemplate>
+    </UserControl.DataTemplates>
+    
+    <DockPanel>
+        <Grid DockPanel.Dock="Left"  RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*">
+            <Button Command="{Binding GetTreadList}"
+                Content="Get"
+                Margin="2" Grid.Row="0" Grid.Column="0" />
+            <ListBox Items="{Binding Threads}" Grid.ColumnSpan="2" Grid.Row="1" Grid.Column="1" IsVisible="True" />
+            <TextBox Text="{Binding ThreadSearch}" AcceptsReturn="True" Width="200"  Grid.Row="0" Grid.Column="1" />
+        </Grid>
+    
+        <Grid RowDefinitions="*,Auto" ColumnDefinitions="Auto,*">
+            <ListBox Name="MessageList" Items="{Binding Messages}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
+            <Button Command="{Binding SendMessage}"
+                    Content="Send"
+                    Margin="2" Grid.Row="1" Grid.Column="0" />
+            <TextBox Text="{Binding CurrentMessage}" AcceptsReturn="True" Margin="2" Grid.Row="1" Grid.Column="1" />
+        </Grid>
+    </DockPanel>
 </UserControl>

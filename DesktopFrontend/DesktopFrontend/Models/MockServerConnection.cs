@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace DesktopFrontend.Models
 {
@@ -19,6 +20,11 @@ namespace DesktopFrontend.Models
         }
 
         public Task<bool> RequestANewAccount()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<string>> RequestThreadSet(string name)
         {
             throw new NotImplementedException();
         }

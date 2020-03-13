@@ -6,7 +6,6 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <Folder Include="Models\" />
         <Compile Update="**\*.xaml.cs">
             <DependentUpon>%(Filename)</DependentUpon>
         </Compile>
@@ -14,7 +13,7 @@
             <SubType>Designer</SubType>
         </AvaloniaResource>
         <AvaloniaResource Include="Assets\**" />
-    </ItemGroup>
+    </ItemGroup>        
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="0.9.999-cibuild0006096-beta" />
         <PackageReference Include="Avalonia.Desktop" Version="0.9.999-cibuild0006096-beta" />

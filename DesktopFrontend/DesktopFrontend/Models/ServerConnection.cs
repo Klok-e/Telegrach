@@ -50,5 +50,12 @@ namespace DesktopFrontend.Models
             // TODO: request a new account
             throw new NotImplementedException();
         }
+
+        public Task<List<string>> RequestThreadSet(string name)
+        {
+            var stream = _client.GetStream();
+            //TODO: request threads
+            throw new NotImplementedException();
+        }
     }
 }
