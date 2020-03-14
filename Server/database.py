@@ -94,13 +94,14 @@ class DataBase:
         return result
 
     async def all_messages_in_tred(self, tred_id: int):
-        query = ("select author_login, m.timestamp as message_time, m.body as message_body, header as head_tred, t.body as tred_body, t.timestamp as tred_time, creator_id " 
-                 "from messenger.message m "
-                 "inner join messenger.tred t "
-                 "on m.tred_id  = t.tred_id "
-                 "where m.is_deleted is false "
-                 "and t.tred_id = :tred_id "
-                 "order by m.timestamp; ") 
+        query = (
+            "select author_login, m.timestamp as message_time, m.body as message_body, header as head_tred, t.body as tred_body, t.timestamp as tred_time, creator_id "
+            "from messenger.message m "
+            "inner join messenger.tred t "
+            "on m.tred_id  = t.tred_id "
+            "where m.is_deleted is false "
+            "and t.tred_id = :tred_id "
+            "order by m.timestamp; ")
         result = await self.fetch_all(query, tred_id=tred_id)
         return result
 

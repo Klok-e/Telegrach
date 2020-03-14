@@ -18,6 +18,7 @@ CODES = {}
 #                     level=LOG_LEVEL_SERVER,
 #                     format=LOG_FORMAT_SERVER)
 
+
 def code(code, *args, **kwargs):
     '''
         A decorator which associates fynction with specified code recieved from clients
@@ -56,7 +57,7 @@ async def create_user(db, message):
 @code(1)
 async def send_users_data(data):
     '''
-        This function sends user`s generated data. 
+        This function sends user`s generated data.
     '''
     response = signals.send_user_to_client()
     response.login = data[0]
@@ -76,7 +77,8 @@ async def get_all_messages_from_tred(db, message):
     request.ParseFromString(message)
     result = await db.all_messages_in_tred(request.tred_id)
     result = [dict(i.items()) for i in result]
-    tred_creator, tred_time = result[0]["creator_id"], str(result[0]["tred_time"])
+    tred_creator, tred_time = result[0]["creator_id"], str(
+        result[0]["tred_time"])
     tred_head, tred_body = result[0]["head_tred"], result[0]["tred_body"]
     for i in result:
         i.pop("creator_id")
@@ -121,10 +123,10 @@ async def create_tred(db, message):
         This is required because all of them are encoded similary in CODES
         All of fucntions decorated by @code must return a Tuple[code_number, other_data] where
             code_number - the code of a function, that will process response
-            other_data - data that must be processed by the response function 
+            other_data - data that must be processed by the response function
         Also for the creation and other functions that are not assume the specified output
         (database response for example): must be created a single function that will process all of them
-        AAAAND Also the code numbers even for the requests and odd for the responses 
+        AAAAND Also the code numbers even for the requests and odd for the responses
     '''
     request = signals.tred_to_create()
     request.ParseFromString(message)
@@ -142,7 +144,10 @@ async def response_creation(data):
 async def create_message(db, message):
     request = signals.message_to_create()
     request.ParseFromString(message)
-    values = ctrl.create_message(request.login, request.tred_id, request.message)
+    values = ctrl.create_message(
+        request.login,
+        request.tred_id,
+        request.message)
     await db.create_new_message(values)
     return (5, ("#TODO. SEND NORMAL RESPONSE", ))
 
@@ -188,7 +193,6 @@ async def make_output(db, data: Tuple[int, bytes]):
     response = data[1]
     result = await CODES[code](response)
     return result
-    
 
 
 async def send_users_data(data):
