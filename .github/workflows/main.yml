@@ -69,5 +69,6 @@ jobs:
         if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files == 1
         run: |
           git config --global user.name "Code Formatter"
+          git config --global user.email code@formatter.com
           git commit -am "Format code"
           git push
