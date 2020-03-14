@@ -1,5 +1,10 @@
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+
 
 namespace DesktopFrontend.Models
 {
@@ -35,6 +40,11 @@ namespace DesktopFrontend.Models
         }
 
         public Task<List<string>> RequestThreadSet(string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> RequestANewAccount()
         {
             throw new NotImplementedException();
         }

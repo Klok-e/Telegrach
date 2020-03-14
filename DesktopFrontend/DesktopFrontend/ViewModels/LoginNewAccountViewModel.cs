@@ -35,13 +35,13 @@ namespace DesktopFrontend.ViewModels
             Captcha = c;
             c.CaptchaPassed.Subscribe(pl =>
             {
-                stack.Push(new ChatViewModel());
+                stack.Push(new ChatViewModel(connection));
                 return true;
             });
             Back = ReactiveCommand.Create(() => { stack.Pop(); });
             var canExec = this.WhenAny(x => x.CaptchaPassed,
                 s => s.Value);
-            SignIn = ReactiveCommand.CreateFromTask(async () => { stack.Push(new ChatViewModel()); }, canExec);
+            SignIn = ReactiveCommand.CreateFromTask(async () => { stack.Push(new ChatViewModel(connection)); }, canExec);
         }
     }
 }
