@@ -1,4 +1,7 @@
+using System.Drawing;
 using System.Reactive;
+using System.Threading.Tasks;
+using System;
 using DesktopFrontend.Models;
 using ReactiveUI;
 
@@ -6,35 +9,39 @@ namespace DesktopFrontend.ViewModels
 {
     public class LoginNewAccountViewModel : ViewModelBase
     {
-        private string _receivedPassword = "";
+        private bool _captchaPassed;
 
-        public string ReceivedPassword
+        public bool CaptchaPassed
         {
-            get => _receivedPassword;
-            private set => this.RaiseAndSetIfChanged(ref _receivedPassword, value);
+            get => _captchaPassed;
+            set => this.RaiseAndSetIfChanged(ref _captchaPassed, value);
         }
 
-        private string _receivedLogin = "";
+        private ViewModelBase _captcha;
 
-        public string ReceivedLogin
+        public ViewModelBase Captcha
         {
-            get => _receivedLogin;
-            private set => this.RaiseAndSetIfChanged(ref _receivedLogin, value);
+            get => _captcha;
+            set => this.RaiseAndSetIfChanged(ref _captcha, value);
         }
 
         public ReactiveCommand<Unit, Unit> Back { get; }
 
-        public ReactiveCommand<Unit, bool> SignIn { get; }
+        public ReactiveCommand<Unit, Unit> SignIn { get; }
 
         public LoginNewAccountViewModel(INavigationStack stack, IServerConnection connection)
         {
-            Back = ReactiveCommand.Create(() => { stack.Pop(); });
-            // TODO: make this into a real sign in
-            SignIn = ReactiveCommand.Create(() =>
+            var c = new CaptchaViewModel(connection);
+            Captcha = c;
+            c.CaptchaPassed.Subscribe(pl =>
             {
-                stack.Push(new ChatViewModel(connection));
+                stack.Push(new ChatViewModel());
                 return true;
             });
+            Back = ReactiveCommand.Create(() => { stack.Pop(); });
+            var canExec = this.WhenAny(x => x.CaptchaPassed,
+                s => s.Value);
+            SignIn = ReactiveCommand.CreateFromTask(async () => { stack.Push(new ChatViewModel()); }, canExec);
         }
     }
 }
