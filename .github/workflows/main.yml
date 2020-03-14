@@ -31,6 +31,9 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "3.1.102"
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.8.x'
 
       - name: Restore local tools
         run: |
@@ -50,9 +53,12 @@ jobs:
 
       - name: Format python code
         id: autopep8
-        uses: peter-evans/autopep8@v1
-        with:
-          args: --exit-code --recursive --in-place --aggressive --aggressive ./Server
+        run: |
+          set -uo pipefail
+          pip install autopep8
+          pip install --upgrade git+https://github.com/PyCQA/pycodestyle.git@master
+          autopep8 --exit-code --recursive --in-place --aggressive --aggressive ./Server
+          echo ::set-output name=exit-code::$?
 
       - name: Print changed files debug
         run: |
