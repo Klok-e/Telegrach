@@ -16,13 +16,6 @@ message ThreadMessage {
   uint64 send_time = 3;
 }
 
-
-message send_user_to_client{
-	string login = 1;
-	string password = 2;
-}
-
-
 message get_tred_data{
 	int64 tred_id = 1;
 }
