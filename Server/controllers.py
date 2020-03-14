@@ -86,13 +86,4 @@ def validate_user(values: Dict, password: str):
     stored_salt = values["salt"]
     stored_pword = values["pword"]
     result = validate_password(stored_salt, stored_pword, password)
-
-
-if __name__ == '__main__':
-    print(create_user(1))
-    print(create_people_inlist(1,1))
-    print(create_personal_list(1, "test", 1))
-    print(create_message(1, generate_uuid4(), 1, "test"))
-    print(create_tred_participation(1, 1, 1))
-    print(create_tred(1, 1, "test_header", "test_body"))
-    print(create_union_request(1, 1))
+    return result

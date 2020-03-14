@@ -1,7 +1,7 @@
 # constants to connect to the db *to edit*
 DB = 'postgresql'
-DB_USER = ''
-DB_PW = ''
+DB_USER = 'sskcvqikf'
+DB_PW = 'barico33'
 DB_HOST = 'localhost'
 DB_PORT = 5432 # Default port for PostgreSQL
 
