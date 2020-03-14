@@ -73,18 +73,18 @@ namespace DesktopFrontend.ViewModels
 #endif
 
             }, isSendEnabled);
-           GetTreadList.Subscribe(_ => ThreadSearch = string.Empty);
+            GetTreadList.Subscribe(_ => ThreadSearch = string.Empty);
         }
         public string ThreadSearch
         {
             get => _threadSearch;
             set => this.RaiseAndSetIfChanged(ref _threadSearch, value);
-        }        
-        
+        }
+
         public ReactiveCommand<Unit, Unit> GetTreadList { get; private set; }
 
         public ObservableCollection<ThreadItem> Threads => _threadSet.Threads;
-        
+
 
     }
 }

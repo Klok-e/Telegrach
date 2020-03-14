@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "DesktopFrontend": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "MOCK_CONNECTION": "true"
+      }
+    }
+  }
+}

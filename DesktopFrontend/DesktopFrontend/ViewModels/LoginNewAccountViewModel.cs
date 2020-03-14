@@ -35,8 +35,8 @@ namespace DesktopFrontend.ViewModels
             Captcha = c;
             c.CaptchaPassed.Subscribe(pl =>
             {
-                stack.Push(new ChatViewModel(connection));
-                return true;
+                CaptchaPassed = true;
+                Captcha = new LoginShowPasswdViewModel(pl.login, pl.pass);
             });
             Back = ReactiveCommand.Create(() => { stack.Pop(); });
             var canExec = this.WhenAny(x => x.CaptchaPassed,

@@ -11,10 +11,11 @@ namespace DesktopFrontend.Models
     public class ThreadItem
     {
         public string Name { get; set; }
-       
+
     }
 
-    
+
+
     public class ThreadSet
     {
         public ThreadSet()
