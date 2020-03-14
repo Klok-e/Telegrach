@@ -2,6 +2,7 @@ import asyncio
 # import logging
 import socket
 import sys
+import os
 import crypto
 import controllers as ctrl
 import proto.signals_pb2 as signals
@@ -14,6 +15,7 @@ from database import DataBase
 TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
 CODES = {}
 
+
 # logging.basicConfig(filename=LOG_FILE_SERVER,
 #                     level=LOG_LEVEL_SERVER,
 #                     format=LOG_FORMAT_SERVER)
@@ -23,9 +25,11 @@ def code(code, *args, **kwargs):
     '''
         A decorator which associates fynction with specified code recieved from clients
     '''
+
     def inner(f):
         CODES[code] = f
         return f
+
     return inner
 
 
@@ -132,7 +136,7 @@ async def create_tred(db, message):
     request.ParseFromString(message)
     values = ctrl.create_tred(request.creator_id, request.header, request.body)
     await db.create_new_tred(values)
-    return (5, ("#TODO. SEND NORMAL RESPONSE", ))
+    return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
 @code(5)
@@ -149,7 +153,7 @@ async def create_message(db, message):
         request.tred_id,
         request.message)
     await db.create_new_message(values)
-    return (5, ("#TODO. SEND NORMAL RESPONSE", ))
+    return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
 @code(8)
@@ -158,7 +162,7 @@ async def create_tred_participation(db, message):
     request.ParseFromString(message)
     values = ctrl.create_tred_participation(request.tred_id, request.super_id)
     await db.create_new_tred_participation(values)
-    return (5, ("#TODO. SEND NORMAL RESPONSE", ))
+    return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
 @code(10)
@@ -167,7 +171,7 @@ async def create_union_request(db, message):
     request.ParseFromString(message)
     values = ctrl.create_union_request(request._from, request.to)
     await db.create_new_union_request(values)
-    return (5, ("#TODO. SEND NORMAL RESPONSE", ))
+    return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
 @code(12)
@@ -176,7 +180,7 @@ async def create_personal_list(db, message):
     request.ParseFromString(message)
     values = ctrl.create_personal_list(request.list_name, request.owner_id)
     await db.create_new_personal_list(values)
-    return (5, ("#TODO. SEND NORMAL RESPONSE", ))
+    return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
 @code(14)
@@ -185,7 +189,7 @@ async def create_people_inlist(db, message):
     request.ParseFromString(message)
     values = ctrl.create_people_inlist(request.list_id, request.friend_id)
     await db.create_new_people_inlist(values)
-    return (5, ("#TODO. SEND NORMAL RESPONSE", ))
+    return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
 async def make_output(db, data: Tuple[int, bytes]):
@@ -231,7 +235,17 @@ async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
 
 
 async def main():
-    db = DataBase(DB_USER, DB_PW, (DB_HOST, DB_PORT), SCHEMA_NAME, VOCAB)
+    user = os.getenv("TELEGRACH_DB_USER", None) or DB_USER
+    password = os.getenv("TELEGRACH_DB_PW", None) or DB_PW
+    hostname = os.getenv("TELEGRACH_DB_HOST", None) or DB_HOST
+    port = os.getenv("TELEGRACH_DB_PORT", None) or DB_PORT
+    if any((us := not user, pa := not password, ho := not hostname, po := not port)):
+        for v in [x[1] for x in [(us, "User"), (pa, "Password"), (ho, "DB Hostname"), (po, "DB Port")] if x[0]]:
+            print(f"Error: {v} not specified")
+        print("Shutting down...")
+        return
+
+    db = DataBase(user, password, (hostname, port), SCHEMA_NAME, VOCAB)
     await db.connect(DB)
 
     server = await asyncio.start_server(lambda r, w: handler(db, r, w), *ADDRESS)
