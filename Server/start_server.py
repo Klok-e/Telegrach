@@ -249,7 +249,6 @@ async def main():
                 (us, "User"), (pa, "Password"), (ho, "DB Hostname"), (po, "DB Port")] if x[0]]:
             print(f"Error: {v} not specified")
         print("Shutting down...")
-
         return
 
     db = DataBase(user, password, (hostname, port), SCHEMA_NAME, VOCAB)
