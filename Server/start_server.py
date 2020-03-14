@@ -20,6 +20,9 @@ CODES = {}
 #                     format=LOG_FORMAT_SERVER)
 
 def code(code, *args, **kwargs):
+    '''
+        A decorator which associates fynction with specified code recieved from clients
+    '''
     def inner(f):
         CODES[code] = f
         return f
@@ -30,8 +33,10 @@ def code(code, *args, **kwargs):
 async def create_user(db, message):
     ''' 
         Returns new_users with code data and commits its data to database
+        Works lil bit different from other similar creation functions
+        I super_id is provided it will link users together
+        Either it will create new super_account and link new user with it
     '''
-    # message = crypto.decrypt_message(TEST_KEY, message)
     request = signals.user_creation_request()
     request.ParseFromString(message)
 
@@ -48,6 +53,9 @@ async def create_user(db, message):
 
 @code(1)
 async def send_users_data(data):
+    '''
+        This function sends user`s generated data. 
+    '''
     response = signals.send_user_to_client()
     response.login = data[0]
     response.password = data[1]
@@ -58,6 +66,10 @@ async def send_users_data(data):
 
 @code(2)
 async def get_all_messages_from_tred(db, message):
+    '''
+        Function returns all message in tred by one query.
+        It assumes the
+    '''
     request = signals.get_tred_data()
     request.ParseFromString(message)
     result = await db.all_messages_in_tred(request.tred_id)
@@ -80,7 +92,7 @@ async def send_all_messages_from_tred(data):
         Recieves a pair:
          1 - Tuple with the tred info
          2 - List of Dicts with specified field for each message
-         ASYNC НУЖЕН!!!
+         For polymorfical reasons it`s need to be a coroutine
     """
     response = signals.messages_in_tred()
     response.tred_creator = data[0][0]
@@ -99,16 +111,28 @@ async def send_all_messages_from_tred(data):
 
 @code(4)
 async def create_tred(db, message):
+    '''
+        This fucntion is similar to the other ones, so ill explain everything common here
+        Every function, that processes input and generates output must recieve 2 args:
+            1 - Database instance to work with
+            2 - Bytes data that ready to be parsed using protobuffers
+        This is required because all of them are encoded similary in CODES
+        All of fucntions decorated by @code must return a Tuple[code_number, other_data] where
+            code_number - the code of a function, that will process response
+            other_data - data that must be processed by the response function 
+        Also for the creation and other functions that are not assume the specified output
+        (database response for example): must be created a single function that will process all of them
+        AAAAND Also the code numbers even for the requests and odd for the responses 
+    '''
     request = signals.tred_to_create()
     request.ParseFromString(message)
-    creator_id, header, body = request.creator_id, request.header, request.body
-    values = ctrl.create_tred(creator_id, header, body)
+    values = ctrl.create_tred(request.creator_id, request.header, request.body)
     await db.create_new_tred(values)
     return (5, ("#TODO. SEND NORMAL RESPONSE", ))
 
 
 @code(5)
-async def response_tred_creation(data):
+async def response_creation(data):
     return b"CODE=5\n\n" + data[0].encode() + b"\n\n\n\n"
 
 
