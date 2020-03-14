@@ -54,11 +54,11 @@ jobs:
       - name: Format python code
         id: autopep8
         run: |
-          set -uo pipefail
           pip install autopep8
           pip install --upgrade git+https://github.com/PyCQA/pycodestyle.git@master
-          autopep8 --exit-code --recursive --in-place --aggressive --aggressive ./Server
-          echo ::set-output name=exit-code::$?
+          EXIT=0
+          autopep8 --exit-code --recursive --in-place --aggressive --aggressive ./Server || EXIT=$?
+          echo ::set-output name=exit-code::$EXIT
 
       - name: Print changed files debug
         run: |
