@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # cd to the directory of the script

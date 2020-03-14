@@ -4,10 +4,16 @@
 */__pycache__*
 /Server/proto/
 Server/google/
-/Server/logs/
 /Server/congfig.py
 /Server/test_*.py
 /Server/*.log
 *_pb2.py
+/Server/__pycache__/
+/Server/logs
+/Server/*.log
 *.DotSettings.user
 .vs
+
+# protobuffers
+/Server/proto/
+/DesktopFrontend/DesktopFrontend/Proto

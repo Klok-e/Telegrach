@@ -25,7 +25,7 @@ from Crypto import Random
 #     iv = Random.new().read(AES.block_size)
 
 #     # Convert the IV to a Python integer.
-#     iv_int = int(binascii.hexlify(iv), 16) 
+#     iv_int = int(binascii.hexlify(iv), 16)
 
 #     # Create a new Counter object with IV = iv_int.
 #     ctr = Counter.new(AES.block_size * 8, initial_value=iv_int)
@@ -44,7 +44,7 @@ from Crypto import Random
 
 #     # Initialize counter for decryption. iv should be the same as the output of
 #     # encrypt().
-#     iv_int = int(iv.encode('hex'), 16) 
+#     iv_int = int(iv.encode('hex'), 16)
 #     ctr = Counter.new(AES.block_size * 8, initial_value=iv_int)
 
 #     # Create AES-CTR cipher.
@@ -65,7 +65,7 @@ def generate_password() -> str:
     return password
 
 
-def hash_password(password: str) -> Tuple[str,str]:
+def hash_password(password: str) -> Tuple[str, str]:
     '''Hash a given password.'''
     salt = binascii.hexlify(os.urandom(16))
     hashed_password = hashlib.pbkdf2_hmac("sha256", password.encode(),
@@ -75,7 +75,10 @@ def hash_password(password: str) -> Tuple[str,str]:
     return salt, hashed_password
 
 
-def validate_password(stored_salt: str, stored_password: str, provided_password: str) -> bool:
+def validate_password(
+        stored_salt: str,
+        stored_password: str,
+        provided_password: str) -> bool:
     '''Verify a stored password'''
     hashed_password = hashlib.pbkdf2_hmac("sha256", provided_password.encode(),
                                           stored_salt.encode(), 10000, 64)

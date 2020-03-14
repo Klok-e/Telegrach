@@ -14,7 +14,6 @@ from database import DataBase
 TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
 CODES = {}
 
-
 # logging.basicConfig(filename=LOG_FILE_SERVER,
 #                     level=LOG_LEVEL_SERVER,
 #                     format=LOG_FORMAT_SERVER)
@@ -31,7 +30,7 @@ def code(code, *args, **kwargs):
 
 @code(0)
 async def create_user(db, message):
-    ''' 
+    '''
         Returns new_users with code data and commits its data to database
         Works lil bit different from other similar creation functions
         I super_id is provided it will link users together
@@ -40,12 +39,15 @@ async def create_user(db, message):
     request = signals.user_creation_request()
     request.ParseFromString(message)
 
-    if request.super_id == -1: # That part of code required if user is using the service for the first time, so super_account does not exists
+    if request.super_id == - \
+            1:  # That part of code required if user is using the service for the first time, so super_account does not exists
         select = await db.get_max_super_id()
         super_id = dict(select.items())["max"] + 1
-        await db.create_new_super_account(super_id) # creating super_account before user_account
+        # creating super_account before user_account
+        await db.create_new_super_account(super_id)
 
-    data: Tuple[Tuple[str, str], Dict] = ctrl.create_user(super_id) # a tuple(User`s data to send, Database data to store)
+    # a tuple(User`s data to send, Database data to store)
+    data: Tuple[Tuple[str, str], Dict] = ctrl.create_user(super_id)
     await db.create_new_user(data[1])
 
     return 1, data[0]
@@ -187,6 +189,15 @@ async def make_output(db, data: Tuple[int, bytes]):
     result = await CODES[code](response)
     return result
     
+
+
+async def send_users_data(data):
+    users_data = signals.send_user_to_client()
+    users_data.login = data[0]
+    users_data.password = data[1]
+    response = users_data.SerializeToString()
+    response = b"CODE=1\n\n" + response + b"\n\n\n\n"
+    return response
 
 
 async def handle_write(db, writer: asyncio.StreamWriter, sockname: Tuple[str, int], message: Tuple[int, bytes]):
