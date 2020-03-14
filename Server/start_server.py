@@ -240,10 +240,10 @@ async def main():
     hostname = os.getenv("TELEGRACH_DB_HOST", None) or DB_HOST
     port = os.getenv("TELEGRACH_DB_PORT", None) or DB_PORT
     if any(
-        (us := not user,
-         pa := not password,
-         ho := not hostname,
-         po := not port)):
+            (us := not user,
+             pa := not password,
+             ho := not hostname,
+             po := not port)):
         for v in [
             x[1] for x in [
                 (us, "User"), (pa, "Password"), (ho, "DB Hostname"), (po, "DB Port")] if x[0]]:
