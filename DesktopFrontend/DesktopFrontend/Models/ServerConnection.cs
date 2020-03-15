@@ -23,6 +23,11 @@ namespace DesktopFrontend.Models
             _client = new TcpClient();
         }
 
+        ~ServerConnection()
+        {
+            _client.Close();
+        }
+
         public async Task<bool> Connect()
         {
             try
