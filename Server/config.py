@@ -66,4 +66,4 @@ def get_connect_string():
                 (po, "TELEGRACH_DB_PORT", (sc, "TELEGRACH_SCHEMA_NAME"))] if x[0]]:
             msg += f"Error: {v} not specified\n"
         raise RuntimeError(msg)
-    return f'{DB}://{user}{":" if password else ""}{password}@{hostname}:{port}/{SCHEMA_NAME}'
+    return f'{DB}://{user}{":" if password else ""}{password}@{hostname}:{port}/{schema}'
