@@ -234,16 +234,26 @@ async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
     writer.close()
 
 
-async def main():
+def main():
     db = DataBase(connect_string())
-    await db.connect()
+    with db as db:
+        loop = asyncio.get_event_loop()
+        server = asyncio.start_server(lambda r, w: handler(db, r, w), *ADDRESS)
+        server = loop.run_until_complete(server)
 
-    server = await asyncio.start_server(lambda r, w: handler(db, r, w), *ADDRESS)
-    async with server:
-        await server.serve_forever()
+        # serve until CTRL + C
+        print(f'Serving on {server.sockets[0].getsockname()}')
+        try:
+            loop.run_forever()
+        except KeyboardInterrupt:
+            pass
 
-    await db.disconnect()
+        print(f'Stopped serving on {server.sockets[0].getsockname()}')
+        server.close()
+
+    loop.run_until_complete(server.wait_closed())
+    loop.close()
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()

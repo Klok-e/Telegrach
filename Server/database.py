@@ -13,6 +13,7 @@ from sqlalchemy.sql import select, text
 # from asyncpg.pgproto.pgproto import UUID
 # from sqlalchemy.dialects.postgresql import UUID
 from typing import List, Generator, Dict
+import typing
 from config import *
 from models import *
 from crypto import *
@@ -25,6 +26,13 @@ class DataBase:
         '''Setting params for the connection'''
         self._connection_string = connect_string
         self._database = None
+
+    def __enter__(self) -> "DataBase":
+        asyncio.get_event_loop().run_until_complete(self.connect())
+        return self
+
+    def __exit__(self, exc_type=None, exc_value=None, traceback=None) -> None:
+        asyncio.get_event_loop().run_until_complete(self.disconnect())
 
     def _t(self, key):
         '''Translates tablename according to self._voc'''
