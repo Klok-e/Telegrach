@@ -229,6 +229,8 @@ async def handle_read(db, reader: asyncio.StreamReader, sockname: Tuple[str, int
 
 async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     sockname = writer.get_extra_info('peername')
+    print(f"new connection! {sockname}")
+    
     result = await handle_read(db, reader, sockname)
     await handle_write(db, writer, sockname, result)
     writer.close()
