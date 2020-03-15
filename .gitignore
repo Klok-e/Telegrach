@@ -1,16 +1,10 @@
 **/.idea
 /DesktopFrontend/DesktopFrontend/bin/
 /DesktopFrontend/DesktopFrontend/obj/
-*/__pycache__*
+**/__pycache__
 /Server/proto/
-Server/google/
-/Server/congfig.py
-/Server/test_*.py
 /Server/*.log
-*_pb2.py
-/Server/__pycache__/
 /Server/logs
-/Server/*.log
 *.DotSettings.user
 .vs
 

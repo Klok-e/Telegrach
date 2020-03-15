@@ -236,7 +236,7 @@ async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
 
 async def main():
     db = DataBase(connect_string())
-    await db.connect(DB)
+    await db.connect()
 
     server = await asyncio.start_server(lambda r, w: handler(db, r, w), *ADDRESS)
     async with server:

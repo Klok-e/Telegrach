@@ -30,7 +30,7 @@ class DataBase:
         '''Translates tablename according to self._voc'''
         return self._voc[key] if self._voc else key
 
-    async def connect(self, dbname: str):
+    async def connect(self):
         '''Establishing connection with the database
         Example for PostgreSQL - postgresql://scott:tiger@localhost/mydatabase
         Can be useful https://stackoverflow.com/questions/769683/show-tables-in-postgresql'''
