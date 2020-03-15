@@ -69,8 +69,16 @@ def connect_string():
         msg = ""
         for v in [
             x[1] for x in [
-                (us, "TELEGRACH_DB_USER"), (ho, "TELEGRACH_DB_HOST"),
-                (po, "TELEGRACH_DB_PORT", (sc, "TELEGRACH_SCHEMA_NAME"), (db_n, "TELEGRACH_DB_NAME"))] if x[0]]:
+                (us,
+                 "TELEGRACH_DB_USER"),
+                (ho,
+                 "TELEGRACH_DB_HOST"),
+                (po,
+                 "TELEGRACH_DB_PORT",
+                 (sc,
+                  "TELEGRACH_SCHEMA_NAME"),
+                    (db_n,
+                     "TELEGRACH_DB_NAME"))] if x[0]]:
             msg += f"Error: {v} not specified\n"
         raise RuntimeError(msg)
     return f'{__DB}://{user}{":" if password else ""}{password}@{hostname}:{port}/{db_name}'
