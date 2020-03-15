@@ -228,12 +228,12 @@ async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
 
     is_closed = False
     while not is_closed:
+        # read prefix
         prefix = int.from_bytes(await reader.readexactly(4), byteorder='little')
 
-        # read prefix
+        # read message
         msg = await reader.readexactly(prefix)
 
-        # read message
         req = signals.UserLogInRequest().FromString(msg)
         print(f"Sign in request: {req}")
 
