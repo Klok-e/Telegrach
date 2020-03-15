@@ -4,7 +4,9 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 
 namespace DesktopFrontend.Models
 {
@@ -50,21 +52,20 @@ namespace DesktopFrontend.Models
             throw new NotImplementedException();
         }
 
-        public Task<Bitmap> RequestCaptcha()
+        public async Task<Bitmap> RequestCaptcha()
         {
-            throw new NotImplementedException();
+            var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+            Bitmap b;
+            await using (var s = assets.Open(new Uri("avares://DesktopFrontend/Assets/mock-captcha.jpg")))
+                b = new Bitmap(s);
+            return b;
         }
 
-        public Task<(string login, string pass)?> TryRequestAccount(string tryText)
+        public async Task<(string login, string pass)?> TryRequestAccount(string tryText)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> RequestANewAccount()
-        {
-            var stream = _client.GetStream();
-            // TODO: request a new account
-            throw new NotImplementedException();
+            if (tryText == "hey /b/")
+                return ("rwerwer", "564756868");
+            return null;
         }
     }
 }
