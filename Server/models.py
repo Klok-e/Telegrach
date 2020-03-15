@@ -3,9 +3,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.types import BigInteger
 from sqlalchemy.sql import func
 from helpers import generate_uuid4
-from config import SCHEMA_NAME
+import config
 
-metadata = MetaData(schema=SCHEMA_NAME)
+metadata = MetaData(schema=config.schema_name())
 
 SuperAccount = Table("super_account", metadata,
                      Column('super_id', BigInteger, primary_key=True))
@@ -20,7 +20,7 @@ UserAccount = Table(
         "pword", String(128), nullable=False),
     Column(
         "super_id", BigInteger, ForeignKey(
-            SCHEMA_NAME + ".super_account.super_id")))
+            metadata.schema + ".super_account.super_id")))
 
 UnionRequests = Table(
     "union_requests",
@@ -29,14 +29,14 @@ UnionRequests = Table(
         "from_super_id",
         BigInteger,
         ForeignKey(
-            SCHEMA_NAME +
+            metadata.schema +
             ".super_account.super_id"),
         primary_key=True),
     Column(
         "to_super_id",
         BigInteger,
         ForeignKey(
-            SCHEMA_NAME +
+            metadata.schema +
             ".super_account.super_id"),
         primary_key=True),
     Column(
@@ -62,7 +62,7 @@ Tred = Table(
         "creator_id",
         BigInteger,
         ForeignKey(
-            SCHEMA_NAME +
+            metadata.schema +
             ".super_account.super_id")),
     Column(
         "header",
@@ -88,13 +88,13 @@ TredParticipation = Table(
         "tred_id",
         BigInteger,
         ForeignKey(
-            SCHEMA_NAME +
+            metadata.schema +
             ".tred.tred_id")),
     Column(
         "superacc_id",
         BigInteger,
         ForeignKey(
-            SCHEMA_NAME +
+            metadata.schema +
             ".super_account.super_id")))
 
 Message = Table(
@@ -108,13 +108,13 @@ Message = Table(
         "author_login",
         UUID,
         ForeignKey(
-            SCHEMA_NAME +
+            metadata.schema +
             ".user_account.login")),
     Column(
         "tred_id",
         BigInteger,
         ForeignKey(
-            SCHEMA_NAME +
+            metadata.schema +
             ".tred.tred_id")),
     Column(
         "timestamp",
@@ -134,7 +134,7 @@ PersonalLists = Table(
         "list_id", BigInteger, primary_key=True), Column(
         "list_name", String(32), nullable=False), Column(
         "owner_id", BigInteger, ForeignKey(
-            SCHEMA_NAME + ".super_account.super_id")))
+            metadata.schema + ".super_account.super_id")))
 
 PeopleInList = Table(
     "people_inlist",
@@ -143,11 +143,11 @@ PeopleInList = Table(
         "list_id",
         BigInteger,
         ForeignKey(
-            SCHEMA_NAME +
+            metadata.schema +
             ".personal_lists.list_id")),
     Column(
         "friend_id",
         BigInteger,
         ForeignKey(
-            SCHEMA_NAME +
+            metadata.schema +
             ".super_account.super_id")))
