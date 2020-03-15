@@ -1,0 +1,75 @@
+
+syntax = "proto3";
+
+package messenger;
+
+message user_creation_request { int64 super_id = 1; }
+
+message send_user_to_client {
+  string login = 1;
+  string password = 2;
+}
+
+message ThreadMessage {
+  int64 msg_id = 1;
+  string body = 2;
+  uint64 send_time = 3;
+}
+
+message get_tred_data{
+	int64 tred_id = 1;
+}
+
+
+message message_from_tred{
+	string author_login = 1;
+	string message_time = 2;
+	string message_body = 3;
+}
+
+
+message messages_in_tred{
+	int64 tred_creator = 1;
+	string tred_time = 2;
+	string tred_head = 3;
+	string tred_body = 4;
+	repeated message_from_tred messages = 5;
+}
+
+
+message tred_to_create{
+	int64 creator_id = 1;
+	string header = 2;
+	string body = 3;
+}
+
+
+message message_to_create{
+	string login = 1;
+	int64 tred_id = 2;
+	string message = 3;
+}
+
+
+message tred_participation_to_create{
+	int64 tred_id = 1;
+	int64 super_id = 2;
+}
+
+
+message union_request_to_create{
+	int64 _from = 1;
+	int64 to = 2;
+}
+
+message personal_list_to_create{
+	string list_name = 1;
+	int64 owner_id = 2; 
+}
+
+message people_inlist_to_create{
+	int64 list_id = 1;
+	int64 friend_id = 2;
+}
+
+message ThreadMessagePack { repeated ThreadMessage messages = 1; }

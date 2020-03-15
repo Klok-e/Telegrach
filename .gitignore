@@ -1,8 +1,13 @@
 **/.idea
 /DesktopFrontend/DesktopFrontend/bin/
 /DesktopFrontend/DesktopFrontend/obj/
-/Server/__pycache__/
-/Server/logs
+**/__pycache__
+/Server/proto/
 /Server/*.log
+/Server/logs
 *.DotSettings.user
 .vs
+
+# protobuffers
+/Server/proto/
+/DesktopFrontend/DesktopFrontend/Proto

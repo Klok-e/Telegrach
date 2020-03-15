@@ -3,27 +3,72 @@ name: CI
 on: [push]
 
 jobs:
-  build-desktop-frontend:
-
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '3.1.102'
-    - name: Install dotnet-format
-      run: |
-        dotnet tool install -g dotnet-format
-        # fix global config
-        echo "::set-env name=PATH::${PATH}:${HOME}/.dotnet/tools"
-    
-    - name: Check formatting
-      run: |
-        cd DesktopFrontend
-        dotnet format --check --dry-run
-    
-    - name: Build the executable
-      run: |
-        cd DesktopFrontend/DesktopFrontend
-        dotnet build
+      - uses: actions/checkout@v2
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "3.1.102"
+      - name: Setup protoc
+        uses: arduino/setup-protoc@v1.1.0
+
+      - name: Compile protobuffers
+        run: bash ./protobuffers/compile.sh
+
+      - name: Build the executable
+        run: |
+          cd DesktopFrontend/DesktopFrontend
+          dotnet build
+
+  format-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "3.1.102"
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.8.x'
+
+      - name: Restore local tools
+        run: |
+          cd DesktopFrontend/
+          dotnet tool restore
+
+      - name: Run dotnet format
+        id: csharp
+        run: |
+          cd DesktopFrontend/
+          dotnet format --check || CHANGED=1
+          if [ "$CHANGED" != "1" ]; then
+            echo "::set-output name=changed-files::0"
+          else
+            echo "::set-output name=changed-files::1"
+          fi
+
+      - name: Format python code
+        id: autopep8
+        run: |
+          pip install autopep8
+          pip install --upgrade git+https://github.com/PyCQA/pycodestyle.git@master
+          EXIT=0
+          autopep8 --exit-code --recursive --in-place --aggressive --aggressive ./Server || EXIT=$?
+          echo ::set-output name=exit-code::$EXIT
+
+      - name: Print changed files debug
+        run: |
+          echo "python exit ${{ steps.autopep8.outputs.exit-code }}"
+          echo "csharp changed-files ${{ steps.csharp.outputs.changed-files }}"
+
+      - name: Commit changes
+        if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files == 1
+        run: |
+          git config --global user.name "Code Formatter"
+          git config --global user.email code@formatter.com
+          git commit -am "Format code"
+          git push

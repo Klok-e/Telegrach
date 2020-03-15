@@ -4,16 +4,14 @@ SELECT * FROM pg_available_extensions;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 SELECT * FROM pg_extension;
 
-select uuid_generate_v1();
-
 create table messenger.super_account(
 	super_id bigserial primary keybigint references messenger.super_account(super_id),
 );
 
 create table messenger.user_account(
 	login uuid primary key default uuid_generate_v4(),
-	salt char(16) not null,
-	pword char(64) not null,
+	salt char(32) not null,
+	pword char(128) not null,
 	super_id bigint references messenger.super_account(super_id)
 );
 
@@ -59,3 +57,7 @@ create table messenger.people_inlist(
 	friend_id bigint references messenger.super_account(super_id)
 );
 
+-- If you`ve already created schema - Run this. Old values was too short to store generated password
+-- ALTER TABLE messenger.user_account 
+--     ALTER COLUMN salt TYPE CHAR(32),
+--     ALTER COLUMN pword TYPE CHAR(128);
