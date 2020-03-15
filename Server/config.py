@@ -1,3 +1,5 @@
+import os
+
 # constants to connect to the db *to edit*
 DB = 'postgresql'
 DB_USER = ''
@@ -7,7 +9,7 @@ DB_PORT = 5432  # Default port for PostgreSQL
 
 # Schema name in dbsm. Change if you have prefer another.
 # It also assumes that you have created schema via schema_creation.sql
-SCHEMA_NAME = 'messenger'
+SCHEMA_NAME = ''
 
 # Params for server address
 HOST = 'localhost'
@@ -43,3 +45,25 @@ VOCAB = {
     'ms': 'message',
     'u_acc': 'user_account',
 }
+
+
+def get_connect_string():
+    # password is optional
+    password = os.getenv("TELEGRACH_DB_PW", None) or DB_PW
+    user = os.getenv("TELEGRACH_DB_USER", None) or DB_USER
+    hostname = os.getenv("TELEGRACH_DB_HOST", None) or DB_HOST
+    port = os.getenv("TELEGRACH_DB_PORT", None) or DB_PORT
+    schema = os.getenv("TELEGRACH_SCHEMA_NAME", None) or SCHEMA_NAME
+    if any(
+            (us := not user,
+             ho := not hostname,
+             po := not port,
+             sc := not schema)):
+        msg = ""
+        for v in [
+            x[1] for x in [
+                (us, "TELEGRACH_DB_USER"), (ho, "TELEGRACH_DB_HOST"),
+                (po, "TELEGRACH_DB_PORT", (sc, "TELEGRACH_SCHEMA_NAME"))] if x[0]]:
+            msg += f"Error: {v} not specified\n"
+        raise RuntimeError(msg)
+    return f'{DB}://{user}{":" if password else ""}{password}@{hostname}:{port}/{SCHEMA_NAME}'

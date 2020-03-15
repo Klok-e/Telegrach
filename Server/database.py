@@ -21,13 +21,9 @@ from helpers import *
 
 class DataBase:
 
-    def __init__(self, user: str, passwd: str, addr: str, schema='', voc=None):
+    def __init__(self, connect_string=""):
         '''Setting params for the connection'''
-        self._user = user  # database user
-        self._pw = passwd  # password
-        self._addr = addr  # a tuple (host, port)
-        self._schema = schema  # schemaname
-        self._connection_string = None
+        self._connection_string = connect_string
         self._database = None
 
     def _t(self, key):
@@ -38,7 +34,6 @@ class DataBase:
         '''Establishing connection with the database
         Example for PostgreSQL - postgresql://scott:tiger@localhost/mydatabase
         Can be useful https://stackoverflow.com/questions/769683/show-tables-in-postgresql'''
-        self._connection_string = f'{dbname}://{self._user}:{self._pw}@{self._addr[0]}'
         self._database = Database(self._connection_string)
         await self._database.connect()
 

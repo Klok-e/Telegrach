@@ -235,23 +235,7 @@ async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
 
 
 async def main():
-    user = os.getenv("TELEGRACH_DB_USER", None) or DB_USER
-    password = os.getenv("TELEGRACH_DB_PW", None) or DB_PW
-    hostname = os.getenv("TELEGRACH_DB_HOST", None) or DB_HOST
-    port = os.getenv("TELEGRACH_DB_PORT", None) or DB_PORT
-    if any(
-        (us := not user,
-         pa := not password,
-         ho := not hostname,
-         po := not port)):
-        for v in [
-            x[1] for x in [
-                (us, "User"), (pa, "Password"), (ho, "DB Hostname"), (po, "DB Port")] if x[0]]:
-            print(f"Error: {v} not specified")
-        print("Shutting down...")
-        return
-
-    db = DataBase(user, password, (hostname, port), SCHEMA_NAME, VOCAB)
+    db = DataBase(get_connect_string())
     await db.connect(DB)
 
     server = await asyncio.start_server(lambda r, w: handler(db, r, w), *ADDRESS)
