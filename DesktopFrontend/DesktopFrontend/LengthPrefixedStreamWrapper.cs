@@ -21,7 +21,7 @@ namespace DesktopFrontend
             var read = 0;
             while (read < PrefixSize)
             {
-                prefix[read] = (byte) Stream.ReadByte();
+                prefix[read] = (byte)Stream.ReadByte();
                 read += 1;
             }
 
