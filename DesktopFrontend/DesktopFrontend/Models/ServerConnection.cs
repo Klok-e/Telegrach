@@ -3,15 +3,21 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Logging;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Google.Protobuf;
+using Messenger;
 
 namespace DesktopFrontend.Models
 {
     public class ServerConnection : IServerConnection
     {
+        public const int BufferSize = 1024 * 64;
+
         private readonly string _connectString;
         private readonly int _port;
         private TcpClient _client;
@@ -45,11 +51,41 @@ namespace DesktopFrontend.Models
             return IsConnected;
         }
 
-        public Task<bool> LogInWithCredentials(string user, string pass)
+        public async Task<bool> LogInWithCredentials(string user, string pass)
         {
-            var stream = _client.GetStream();
-            // TODO: send login request witch credentials
-            throw new NotImplementedException();
+            var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
+            var req = new UserLogInRequest
+            {
+                Login = user,
+                Password = pass
+            };
+            stream.WritePrefix(req.CalculateSize());
+            req.WriteTo(stream.Stream);
+            var response = new byte[BufferSize];
+            var count = stream.ReadPrefix();
+            Logger.Sink.Log(LogEventLevel.Information, "Network", this,
+                $"Response prefix: {count}");
+            if (count > BufferSize)
+            {
+                Logger.Sink.Log(LogEventLevel.Error, "Network", this,
+                    $"Message size is too big ({count} > {BufferSize})");
+                return false;
+            }
+
+            Logger.Sink.Log(LogEventLevel.Information, "Network", this,
+                $"Reading {count} bytes");
+            var bytesRead = await stream.Stream.ReadAsync(response, 0, count);
+            if (bytesRead != count)
+            {
+                Logger.Sink.Log(LogEventLevel.Error, "Network", this,
+                    $"Message wasn't read fully ({bytesRead} != {count})");
+                return false;
+            }
+
+            var resp = UserLogInResponse.Parser.ParseFrom(response[..count]);
+            Logger.Sink.Log(LogEventLevel.Information, "Network", this,
+                $"Response to the login requst is {resp}");
+            return resp.IsOk;
         }
 
         public async Task<Bitmap> RequestCaptcha()
