@@ -27,7 +27,7 @@ namespace DesktopFrontend
         private static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .LogToTrace()
+                .LogToTrace(LogEventLevel.Information)
                 .UseReactiveUI();
     }
 }

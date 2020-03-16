@@ -37,7 +37,7 @@ namespace DesktopFrontend
                 connection = new MockServerConnection();
             else
 #endif
-                connection = new ServerConnection("blah blah", 30303);
+                connection = new ServerConnection("127.0.0.1", 9999);
 
             return connection;
         }

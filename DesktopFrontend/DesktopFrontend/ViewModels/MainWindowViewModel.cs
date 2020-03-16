@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Text;
+using Avalonia.Logging;
+using Avalonia.Logging.Serilog;
 using DesktopFrontend.Models;
 using DynamicData.Binding;
 using ReactiveUI;
-using Serilog;
-using Serilog.Core;
 
 namespace DesktopFrontend.ViewModels
 {
@@ -22,7 +23,22 @@ namespace DesktopFrontend.ViewModels
 
         public MainWindowViewModel(IServerConnection connection)
         {
-            Push(new LoginViewModel(this, connection));
+            connection.Connect()
+                .ToObservable()
+                .Subscribe(connected =>
+                {
+                    if (connected)
+                    {
+                        Logger.Sink.Log(LogEventLevel.Information, "Network", this,
+                            "Connected to the server");
+                        Push(new LoginViewModel(this, connection));
+                    }
+                    else
+                    {
+                        Logger.Sink.Log(LogEventLevel.Error, "Network", this,
+                            "Could not connect to the server");
+                    }
+                });
         }
 
         #region INavigationStack

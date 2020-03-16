@@ -222,15 +222,43 @@ async def parse_input(db, data):
     return await CODES[code](db, message)
 
 
-async def handle_read(db, reader: asyncio.StreamReader, sockname: Tuple[str, int]):
-    data = await reader.readuntil(SEPARATOR)
-    return await parse_input(db, data)
-
-
 async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     sockname = writer.get_extra_info('peername')
-    result = await handle_read(db, reader, sockname)
-    await handle_write(db, writer, sockname, result)
+    print(f"new connection! {sockname}")
+
+    is_closed = False
+    while not is_closed:
+        # read prefix
+        prefix = int.from_bytes(await reader.readexactly(4), byteorder='little')
+
+        # read message
+        msg = await reader.readexactly(prefix)
+
+        req = signals.UserLogInRequest().FromString(msg)
+        print(f"Sign in request: {req}")
+
+        if req.login == "rwerwer" and req.password == "564756868":
+            print(f"Sign in successful")
+            ok = True
+        else:
+            print(f"Sign in failed")
+            ok = False
+
+        # create response
+        response = signals.UserLogInResponse()
+        response.is_ok = ok
+
+        # write prefix
+        prefix = response.ByteSize().to_bytes(4, byteorder='little')
+        writer.write(prefix)
+
+        # write message
+        writer.write(response.SerializeToString())
+
+        await writer.drain()
+
+        is_closed = True
+
     writer.close()
 
 
