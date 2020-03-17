@@ -9,6 +9,7 @@ import proto.signals_pb2 as signals
 from typing import Tuple
 from config import *
 from database import DataBase
+import utils
 
 # TODO LOG ALL EXCEPTIONS WITH sys.exc_info
 
@@ -228,16 +229,10 @@ async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
 
     is_closed = False
     while not is_closed:
-        # read prefix
-        prefix = int.from_bytes(await reader.readexactly(4), byteorder='little')
+        request = await utils.read_proto_message(reader, signals.UserLogInRequest)
+        print(f"Sign in request: {request}")
 
-        # read message
-        msg = await reader.readexactly(prefix)
-
-        req = signals.UserLogInRequest().FromString(msg)
-        print(f"Sign in request: {req}")
-
-        if req.login == "rwerwer" and req.password == "564756868":
+        if request.login == "rwerwer" and request.password == "564756868":
             print(f"Sign in successful")
             ok = True
         else:
@@ -248,14 +243,8 @@ async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
         response = signals.UserLogInResponse()
         response.is_ok = ok
 
-        # write prefix
-        prefix = response.ByteSize().to_bytes(4, byteorder='little')
-        writer.write(prefix)
-
         # write message
-        writer.write(response.SerializeToString())
-
-        await writer.drain()
+        await utils.write_proto_message(writer, response)
 
         is_closed = True
 
