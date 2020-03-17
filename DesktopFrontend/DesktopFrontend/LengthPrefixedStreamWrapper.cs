@@ -24,7 +24,7 @@ namespace DesktopFrontend
         {
             var size = message.CalculateSize();
             WritePrefix(size);
-            await using var mem = new MemoryStream(new byte[size]);
+            await using var mem = new MemoryStream(size);
             message.WriteTo(mem);
             await Stream.WriteAsync(mem.GetBuffer());
         }
