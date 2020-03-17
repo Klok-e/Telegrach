@@ -21,6 +21,8 @@ SEPARATOR = b'\n\n\n\n'
 # Size of buffer for recieving and sending data
 BUFFSIZE = 2048
 
+MESSAGE_PREFIX_SIZE = 4
+
 # Some logging params
 # Levels:
 #	CRITICAL 50
@@ -77,8 +79,8 @@ def connect_string():
                  "TELEGRACH_DB_PORT",
                  (sc,
                   "TELEGRACH_SCHEMA_NAME"),
-                    (db_n,
-                     "TELEGRACH_DB_NAME"))] if x[0]]:
+                 (db_n,
+                  "TELEGRACH_DB_NAME"))] if x[0]]:
             msg += f"Error: {v} not specified\n"
         raise RuntimeError(msg)
     return f'{__DB}://{user}{":" if password else ""}{password}@{hostname}:{port}/{db_name}'

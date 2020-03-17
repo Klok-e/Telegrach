@@ -54,38 +54,18 @@ namespace DesktopFrontend.Models
         public async Task<bool> LogInWithCredentials(string user, string pass)
         {
             var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
-            var req = new UserLogInRequest
+            var request = new UserLogInRequest
             {
                 Login = user,
                 Password = pass
             };
-            stream.WritePrefix(req.CalculateSize());
-            req.WriteTo(stream.Stream);
-            var response = new byte[BufferSize];
-            var count = stream.ReadPrefix();
-            Logger.Sink.Log(LogEventLevel.Information, "Network", this,
-                $"Response prefix: {count}");
-            if (count > BufferSize)
-            {
-                Logger.Sink.Log(LogEventLevel.Error, "Network", this,
-                    $"Message size is too big ({count} > {BufferSize})");
-                return false;
-            }
+            await stream.WriteProtoMessageAsync(request);
+
+            var response = await stream.ReadProtoMessageAsync(UserLogInResponse.Parser);
 
             Logger.Sink.Log(LogEventLevel.Information, "Network", this,
-                $"Reading {count} bytes");
-            var bytesRead = await stream.Stream.ReadAsync(response, 0, count);
-            if (bytesRead != count)
-            {
-                Logger.Sink.Log(LogEventLevel.Error, "Network", this,
-                    $"Message wasn't read fully ({bytesRead} != {count})");
-                return false;
-            }
-
-            var resp = UserLogInResponse.Parser.ParseFrom(response[..count]);
-            Logger.Sink.Log(LogEventLevel.Information, "Network", this,
-                $"Response to the login requst is {resp}");
-            return resp.IsOk;
+                $"Response to the login request is {response}");
+            return response.IsOk;
         }
 
         public async Task<Bitmap> RequestCaptcha()
