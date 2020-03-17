@@ -54,14 +54,25 @@ namespace DesktopFrontend.Models
         public async Task<bool> LogInWithCredentials(string user, string pass)
         {
             var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
-            var request = new UserLogInRequest
+            var request = new ClientMessage()
             {
-                Login = user,
-                Password = pass
+                LoginRequest = new UserCredentials
+                {
+                    Login = user,
+                    Password = pass
+                }
             };
             await stream.WriteProtoMessageAsync(request);
 
-            var response = await stream.ReadProtoMessageAsync(UserLogInResponse.Parser);
+            var responseUnion = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
+            if (responseUnion.InnerCase != ServerMessage.InnerOneofCase.UserLogInResponse)
+            {
+                Logger.Sink.Log(LogEventLevel.Error, "Network", this,
+                    $"Response to the login request was given an unexpected answer");
+                return false;
+            }
+
+            var response = responseUnion.UserLogInResponse;
 
             Logger.Sink.Log(LogEventLevel.Information, "Network", this,
                 $"Response to the login request is {response}");
