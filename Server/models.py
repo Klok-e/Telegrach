@@ -4,151 +4,67 @@ from sqlalchemy.types import BigInteger
 from sqlalchemy.sql import func
 from helpers import generate_uuid4
 import config
+from sqlalchemy.ext.declarative import declarative_base
 
-metadata = MetaData(schema=config.schema_name())
+Base = declarative_base(metadata=MetaData(schema=config.schema_name()))
 
-SuperAccount = Table("super_account", metadata,
-                     # the first integer is automatically autoincrement
-                     Column('super_id', BigInteger, primary_key=True))
 
-UserAccount = Table(
-    "user_account", metadata,
-    Column(
-        "login", UUID, primary_key=True, default=generate_uuid4),
-    Column(
-        "salt", String(32), nullable=False),
-    Column(
-        "pword", String(128), nullable=False),
-    Column(
-        "super_id", BigInteger, ForeignKey(
-            metadata.schema + ".super_account.super_id")))
+class SuperAccount(Base):
+    __tablename__ = "super_account"
+    # the first integer is automatically autoincrement
+    super_id = Column('super_id', BigInteger, primary_key=True)
 
-UnionRequests = Table(
-    "union_requests",
-    metadata,
-    Column(
-        "from_super_id",
-        BigInteger,
-        ForeignKey(
-            metadata.schema +
-            ".super_account.super_id"),
-        primary_key=True),
-    Column(
-        "to_super_id",
-        BigInteger,
-        ForeignKey(
-            metadata.schema +
-            ".super_account.super_id"),
-        primary_key=True),
-    Column(
-        "timestamp",
-        DateTime,
-        nullable=False,
-        default=func.now(),
-        primary_key=True),
-    Column(
-        "is_accepted",
-        Boolean,
-        nullable=False,
-        primary_key=True))
 
-Tred = Table(
-    "tred",
-    metadata,
-    Column(
-        "tred_id",
-        BigInteger,
-        primary_key=True),
-    Column(
-        "creator_id",
-        BigInteger,
-        ForeignKey(
-            metadata.schema +
-            ".super_account.super_id")),
-    Column(
-        "header",
-        String(128),
-        nullable=False),
-    Column(
-        "body",
-        String(256)),
-    Column(
-        "timestamp",
-        DateTime,
-        nullable=False,
-        default=func.now()))
+class UserAccount(Base):
+    __tablename__ = "user_account"
+    login = Column(UUID, primary_key=True, default=generate_uuid4)
+    salt = Column(String(32), nullable=False)
+    pword = Column(String(128), nullable=False)
+    super_id = Column(BigInteger, ForeignKey("super_account.super_id"))
 
-TredParticipation = Table(
-    "tred_participation",
-    metadata,
-    Column(
-        "participation_id",
-        BigInteger,
-        primary_key=True),
-    Column(
-        "tred_id",
-        BigInteger,
-        ForeignKey(
-            metadata.schema +
-            ".tred.tred_id")),
-    Column(
-        "superacc_id",
-        BigInteger,
-        ForeignKey(
-            metadata.schema +
-            ".super_account.super_id")))
 
-Message = Table(
-    "message",
-    metadata,
-    Column(
-        "message_id",
-        BigInteger,
-        primary_key=True),
-    Column(
-        "author_login",
-        UUID,
-        ForeignKey(
-            metadata.schema +
-            ".user_account.login")),
-    Column(
-        "tred_id",
-        BigInteger,
-        ForeignKey(
-            metadata.schema +
-            ".tred.tred_id")),
-    Column(
-        "timestamp",
-        DateTime,
-        nullable=False,
-        default=func.now()),
-    Column(
-        "body",
-        String(256)),
-    Column(
-        "is_deleted",
-        Boolean,
-        default=True))
+class UnionRequests(Base):
+    __tablename__ = "union_requests",
+    from_super_id = Column(BigInteger, ForeignKey("super_account.super_id"), primary_key=True)
+    to_super_id = Column(BigInteger, ForeignKey("super_account.super_id"), primary_key=True)
+    timestamp = Column(DateTime, nullable=False, default=func.now(), primary_key=True)
+    is_accepted = Column(Boolean, nullable=False, primary_key=True)
 
-PersonalLists = Table(
-    "personal_lists", metadata, Column(
-        "list_id", BigInteger, primary_key=True), Column(
-        "list_name", String(32), nullable=False), Column(
-        "owner_id", BigInteger, ForeignKey(
-            metadata.schema + ".super_account.super_id")))
 
-PeopleInList = Table(
-    "people_inlist",
-    metadata,
-    Column(
-        "list_id",
-        BigInteger,
-        ForeignKey(
-            metadata.schema +
-            ".personal_lists.list_id")),
-    Column(
-        "friend_id",
-        BigInteger,
-        ForeignKey(
-            metadata.schema +
-            ".super_account.super_id")))
+class Tred(Base):
+    __tablename__ = "tred",
+    tred_id = Column(BigInteger, primary_key=True),
+    creator_id = Column(BigInteger, ForeignKey("super_account.super_id")),
+    header = Column(String(128), nullable=False),
+    body = Column(String(256)),
+    timestamp = Column(DateTime, nullable=False, default=func.now())
+
+
+class TredParticipation(Base):
+    __tablename__ = "tred_participation",
+    participation_id = Column(BigInteger, primary_key=True),
+    tred_id = Column(BigInteger, ForeignKey("tred.tred_id")),
+    superacc_id = Column(BigInteger, ForeignKey("super_account.super_id"))
+
+
+class Message(Base):
+    __tablename__ = "message",
+    message_id = Column(BigInteger, primary_key=True),
+    author_login = Column(UUID, ForeignKey("user_account.login")),
+    tred_id = Column(BigInteger, ForeignKey("tred.tred_id")),
+    timestamp = Column(DateTime, nullable=False, default=func.now()),
+    body = Column(String(256)),
+    is_deleted = Column(Boolean, default=True)
+
+
+class PersonalLists(Base):
+    __tablename__ = "personal_lists",
+    list_id = Column(BigInteger, primary_key=True),
+    list_name = Column(String(32), nullable=False),
+    owner_id = Column(BigInteger, ForeignKey("super_account.super_id"))
+
+
+class PeopleInList(Base):
+    __tablename__ = "people_inlist",
+    list_id = Column(BigInteger, ForeignKey("personal_lists.list_id")),
+    friend_id = Column(BigInteger, ForeignKey("super_account.super_id"))
