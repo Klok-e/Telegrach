@@ -4,4 +4,4 @@ import models
 
 if __name__ == "__main__":
     engine = create_engine(config.connect_string(), echo=True)
-    models.metadata.drop_all(engine)
+    models.Base.metadata.drop_all(engine)
