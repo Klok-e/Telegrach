@@ -25,9 +25,19 @@ class UserAccount(Base):
 
 class UnionRequests(Base):
     __tablename__ = "union_requests"
-    from_super_id = Column(BigInteger, ForeignKey("super_account.super_id"), primary_key=True)
-    to_super_id = Column(BigInteger, ForeignKey("super_account.super_id"), primary_key=True)
-    timestamp = Column(DateTime, nullable=False, default=func.now(), primary_key=True)
+    from_super_id = Column(
+        BigInteger,
+        ForeignKey("super_account.super_id"),
+        primary_key=True)
+    to_super_id = Column(
+        BigInteger,
+        ForeignKey("super_account.super_id"),
+        primary_key=True)
+    timestamp = Column(
+        DateTime,
+        nullable=False,
+        default=func.now(),
+        primary_key=True)
     is_accepted = Column(Boolean, nullable=False, primary_key=True)
 
 
@@ -66,5 +76,11 @@ class PersonalLists(Base):
 
 class PeopleInList(Base):
     __tablename__ = "people_inlist"
-    list_id = Column(BigInteger, ForeignKey("personal_lists.list_id"), primary_key=True)
-    friend_id = Column(BigInteger, ForeignKey("super_account.super_id"), primary_key=True)
+    list_id = Column(
+        BigInteger,
+        ForeignKey("personal_lists.list_id"),
+        primary_key=True)
+    friend_id = Column(
+        BigInteger,
+        ForeignKey("super_account.super_id"),
+        primary_key=True)

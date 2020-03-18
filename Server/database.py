@@ -32,7 +32,9 @@ class DataBase:
         self.session_constr = sessionmaker()
 
     def __enter__(self) -> "DataBase":
-        self.engine = create_engine(self.connect_string, strategy=ASYNCIO_STRATEGY)
+        self.engine = create_engine(
+            self.connect_string,
+            strategy=ASYNCIO_STRATEGY)
         self.session_constr.configure(bind=self.engine)
         # asyncio.get_event_loop().run_until_complete(self.connect())
         return self
