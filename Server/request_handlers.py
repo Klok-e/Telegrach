@@ -180,10 +180,12 @@ async def create_user(message: ClientMessage.UserCreationRequest, session: Sessi
         Either it will create new super_account and link new user with it
     """
 
-    new_acc = await session.db.create_new_super_account()
+    new_acc, password = await session.db.create_new_user()
+    new_super = await session.db.create_new_super_account()
+    new_acc.super_id = new_super.super_id
 
     response = ServerMessage()
-    response.new_account_data.login = ""
-    response.new_account_data.password = ""
+    response.new_account_data.login = new_acc.login
+    response.new_account_data.password = password
 
     return response

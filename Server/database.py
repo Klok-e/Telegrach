@@ -141,13 +141,21 @@ class DataBase:
         session = self.session_constr()
         new_account = SuperAccount()
         session.add(new_account)
-        await session.commit()
+        session.commit()
         return new_account
 
-    async def create_new_user(self, values):
-        query = models.UserAccount.insert()
-        result = await self.execute(query, **values)
-        return result
+    async def create_new_user(self) -> Tuple[UserAccount, str]:
+        session = self.session_constr()
+        new_acc = UserAccount()
+
+        password = generate_password()
+        salt, hashed = hash_password(password)
+        new_acc.salt = salt
+        new_acc.pword = hashed
+
+        session.add(new_acc)
+        session.commit()
+        return new_acc, password
 
     async def create_new_message(self, values):
         query = (
