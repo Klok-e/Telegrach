@@ -2,6 +2,7 @@ import asyncio
 # import logging
 import controllers as ctrl
 from proto import client_pb2
+from proto import server_pb2
 from typing import Tuple
 from config import *
 from database import DataBase
@@ -225,22 +226,25 @@ async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
 
     is_closed = False
     while not is_closed:
-        request = await utils.read_proto_message(reader, signals.UserLogInRequest)
-        print(f"Sign in request: {request}")
+        request = await utils.read_proto_message(reader, client_pb2.ClientMessage)
+        req_type = request.WhichOneof('inner')
+        if req_type == "login_request":
+            request = getattr(request, "login_request")
+            print(f"Sign in request: {request}")
 
-        if request.login == "rwerwer" and request.password == "564756868":
-            print(f"Sign in successful")
-            ok = True
-        else:
-            print(f"Sign in failed")
-            ok = False
+            if request.login == "rwerwer" and request.password == "564756868":
+                print(f"Sign in successful")
+                ok = True
+            else:
+                print(f"Sign in failed")
+                ok = False
 
-        # create response
-        response = client_pb2.UserLogInResponse()
-        response.is_ok = ok
+            # create response
+            response = server_pb2.ServerMessage()
+            response.user_log_in_response.is_ok = ok
 
-        # write message
-        await utils.write_proto_message(writer, response)
+            # write message
+            await utils.write_proto_message(writer, response)
 
         is_closed = True
 
