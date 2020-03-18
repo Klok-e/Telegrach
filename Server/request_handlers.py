@@ -180,7 +180,7 @@ async def create_people_inlist(db, message):
 @request_handler(ClientMessage.login_request)
 async def login(message: UserCredentials, session: SessionData):
     print(f"Sign in request: {message}")
-    #session.db.get_current_user()
+    # session.db.get_current_user()
     if message.login == "rwerwer" and message.password == "564756868":
         print(f"Sign in successful")
         ok = True
