@@ -21,11 +21,10 @@ from helpers import *
 
 
 class DataBase:
-
     def __init__(self, connect_string=""):
         '''Setting params for the connection'''
         self._connection_string = connect_string
-        self._database = None
+        self.database = Database(self._connection_string)
 
     def __enter__(self) -> "DataBase":
         asyncio.get_event_loop().run_until_complete(self.connect())
@@ -42,15 +41,14 @@ class DataBase:
         '''Establishing connection with the database
         Example for PostgreSQL - postgresql://scott:tiger@localhost/mydatabase
         Can be useful https://stackoverflow.com/questions/769683/show-tables-in-postgresql'''
-        self._database = Database(self._connection_string)
-        await self._database.connect()
+        await self.database.connect()
 
     async def iterate(self, query: str, **kwargs) -> Generator[None, None, None]:
         '''
             https://www.encode.io/databases/database_queries/
             Actually returns a Generator of records
         '''
-        result = await self._database.iterate(query=query, kwargs=kwargs)
+        result = await self.database.iterate(query=query, kwargs=kwargs)
         return result
 
     async def fetch_all(self, query: str, **kwargs) -> List:
@@ -58,7 +56,7 @@ class DataBase:
             https://www.encode.io/databases/database_queries/
             Actually returns a List of Records
         '''
-        result = await self._database.fetch_all(query=query, values=kwargs)
+        result = await self.database.fetch_all(query=query, values=kwargs)
         return result
 
     async def fetch_one(self, query: str, **kwargs):
@@ -66,7 +64,7 @@ class DataBase:
             https://www.encode.io/databases/database_queries/
             Actually returns single Record
         '''
-        result = await self._database.fetch_one(query=query, values=kwargs)
+        result = await self.database.fetch_one(query=query, values=kwargs)
         return result
 
     async def execute(self, query: str, **kwargs):
@@ -74,7 +72,7 @@ class DataBase:
             https://www.encode.io/databases/database_queries/
             Actually returns something i cant explain
         '''
-        result = await self._database.execute(query=query, values=kwargs)
+        result = await self.database.execute(query=query, values=kwargs)
         return result
 
     async def execute_many(self, query: str, values: List[Dict]):
@@ -82,11 +80,11 @@ class DataBase:
             https://www.encode.io/databases/database_queries/
             Actually returns something i cant explain
         '''
-        result = await self._database.execute_many(query=query, values=values)
+        result = await self.database.execute_many(query=query, values=values)
         return result
 
     async def disconnect(self):
-        await self._database.disconnect()
+        await self.database.disconnect()
 
     async def get_current_user(self, login: str):
         ''' Get user with specified UUID. Just send str representation of UUID '''

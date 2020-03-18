@@ -3,6 +3,7 @@ from proto.server_pb2 import ServerMessage
 from proto.common_pb2 import UserCredentials
 from request_handling_utils import SessionData, request_handler, handle_request
 from typing import Tuple, Callable, Awaitable, Any, Dict
+import controllers as ctrl
 
 
 # TODO: fix me
@@ -179,6 +180,7 @@ async def create_people_inlist(db, message):
 @request_handler(ClientMessage.login_request)
 async def login(message: UserCredentials, session: SessionData):
     print(f"Sign in request: {message}")
+    #session.db.get_current_user()
     if message.login == "rwerwer" and message.password == "564756868":
         print(f"Sign in successful")
         ok = True

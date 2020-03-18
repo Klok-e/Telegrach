@@ -1,4 +1,5 @@
 from typing import Callable, Awaitable, Any
+from database import DataBase
 from proto.client_pb2 import ClientMessage
 from proto.server_pb2 import ServerMessage
 from proto.common_pb2 import UserCredentials
@@ -7,7 +8,7 @@ REQUEST_HANDLERS = {}
 
 
 class SessionData:
-    def __init__(self, database):
+    def __init__(self, database: DataBase):
         self.logged_in = False
         self.db = database
 
