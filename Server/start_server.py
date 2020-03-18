@@ -1,8 +1,9 @@
 import asyncio
 # import logging
 import controllers as ctrl
-from proto import client_pb2
-from proto import server_pb2
+from proto.client_pb2 import ClientMessage
+from proto.server_pb2 import ServerMessage
+from proto.common_pb2 import UserCredentials
 import typing
 from typing import Tuple, Callable, Awaitable, Any, Dict
 from config import *
@@ -19,8 +20,9 @@ TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
 #                     format=LOG_FORMAT_SERVER)
 
 class SessionData:
-    def __init__(self):
+    def __init__(self, database):
         self.logged_in = False
+        self.db = database
 
 
 REQUEST_HANDLERS = {}
@@ -41,7 +43,7 @@ def request_handler(accept_variant):
 
 
 # TODO: fix me
-@request_handler(client_pb2.ClientMessage.user_create_request)
+@request_handler(ClientMessage.user_create_request)
 async def create_user(db, message):
     '''
         Returns new_users with code data and commits its data to database
@@ -82,7 +84,7 @@ async def send_users_data(data):
 
 
 # TODO: fix me
-@request_handler(client_pb2.ClientMessage.thread_data_request)
+@request_handler(ClientMessage.thread_data_request)
 async def get_all_messages_from_tred(db, message):
     '''
         Function returns all message in tred by one query.
@@ -130,7 +132,7 @@ async def send_all_messages_from_tred(data):
 
 
 # TODO: fix me
-@request_handler(client_pb2.ClientMessage.create_thread_request)
+@request_handler(ClientMessage.create_thread_request)
 async def create_tred(db, message):
     '''
         This fucntion is similar to the other ones, so ill explain everything common here
@@ -159,7 +161,7 @@ async def response_creation(data):
 
 
 # TODO: fix me
-@request_handler(client_pb2.ClientMessage.send_msg_to_thread_request)
+@request_handler(ClientMessage.send_msg_to_thread_request)
 async def create_message(db, message):
     request = signals.message_to_create()
     request.ParseFromString(message)
@@ -182,7 +184,7 @@ async def create_tred_participation(db, message):
 
 
 # TODO: fix me
-@request_handler(client_pb2.ClientMessage.union_another_request)
+@request_handler(ClientMessage.union_another_request)
 async def create_union_request(db, message):
     request = signals.union_request_to_create()
     request.ParseFromString(message)
@@ -235,13 +237,28 @@ async def parse_input(db, data):
     return await REQUEST_HANDLERS[code](db, message)
 
 
-async def handle_request(message: client_pb2.ClientMessage, session_data: SessionData) -> Any:
-    msg_type: str = message.WhichOneof('inner')
-    msg_type: Any = getattr(client_pb2.ClientMessage, msg_type)
+@request_handler(ClientMessage.login_request)
+async def login(message: UserCredentials, session: SessionData):
+    print(f"Sign in request: {message}")
+    if message.login == "rwerwer" and message.password == "564756868":
+        print(f"Sign in successful")
+        ok = True
+    else:
+        print(f"Sign in failed")
+        ok = False
+    # create response
+    response = ServerMessage()
+    response.server_response.is_ok = ok
+    return response
+
+
+async def handle_request(message: ClientMessage, session_data: SessionData) -> Any:
+    msg_type_str: str = message.WhichOneof('inner')
+    msg_type: Any = getattr(ClientMessage, msg_type_str)
     handler = REQUEST_HANDLERS[msg_type]
 
     # invoke handler with a given variant
-    variant = getattr(message, message.WhichOneof('inner'))
+    variant = getattr(message, msg_type_str)
     return await handler(variant, session_data)
 
 
@@ -249,36 +266,17 @@ async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
     sockname = writer.get_extra_info('peername')
     print(f"new connection! {sockname}")
 
-    session_data = SessionData()
+    session_data = SessionData(db)
     is_closed = False
     while not is_closed:
         # read request
-        request = await utils.read_proto_message(reader, client_pb2.ClientMessage)
+        request = await utils.read_proto_message(reader, ClientMessage)
 
         # calculate response
         response = await handle_request(request, session_data)
 
         # send response
         await utils.write_proto_message(writer, response)
-
-        # req_type = request.WhichOneof('inner')
-        # if req_type == "login_request":
-        #    request = getattr(request, "login_request")
-        #    print(f"Sign in request: {request}")
-        #
-        #    if request.login == "rwerwer" and request.password == "564756868":
-        #        print(f"Sign in successful")
-        #        ok = True
-        #    else:
-        #        print(f"Sign in failed")
-        #        ok = False
-        #
-        #    # create response
-        #    response = server_pb2.ServerMessage()
-        #    response.user_log_in_response.is_ok = ok
-        #
-        #    # write message
-        #    await utils.write_proto_message(writer, response)
 
         is_closed = True
 

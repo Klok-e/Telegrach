@@ -65,14 +65,14 @@ namespace DesktopFrontend.Models
             await stream.WriteProtoMessageAsync(request);
 
             var responseUnion = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
-            if (responseUnion.InnerCase != ServerMessage.InnerOneofCase.UserLogInResponse)
+            if (responseUnion.InnerCase != ServerMessage.InnerOneofCase.ServerResponse)
             {
                 Logger.Sink.Log(LogEventLevel.Error, "Network", this,
                     $"Response to the login request was given an unexpected answer");
                 return false;
             }
 
-            var response = responseUnion.UserLogInResponse;
+            var response = responseUnion.ServerResponse;
 
             Logger.Sink.Log(LogEventLevel.Information, "Network", this,
                 $"Response to the login request is {response}");

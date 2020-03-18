@@ -7,7 +7,7 @@ import "proto/common.proto";
 
 // messages the server sends to the client
 message ServerMessage {
-  message UserLogInResponse { bool is_ok = 1; }
+  message ServerResponse { bool is_ok = 1; }
 
   message ThreadMessagePack {
     message ThreadSendMessageRequest {
@@ -30,7 +30,9 @@ message ServerMessage {
 
   oneof inner {
     UserCredentials new_account_data = 1;
-    UserLogInResponse user_log_in_response = 2;
+
+    // a universal response that can be sent on any request
+    ServerResponse server_response = 2;
     ThreadMessagePack new_messages_appeared = 3;
 
     // server sends all the threads to the client on any change (TODO)
