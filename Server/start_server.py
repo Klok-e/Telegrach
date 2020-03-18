@@ -53,7 +53,8 @@ async def create_user(db, message):
     request.ParseFromString(message)
 
     if request.super_id == 1:
-        # That part of code required if user is using the service for the first time, so super_account does not exists
+        # That part of code required if user is using the service for the first
+        # time, so super_account does not exists
         select = await db.get_max_super_id()
         super_id = dict(select.items())["max"] + 1
         # creating super_account before user_account
