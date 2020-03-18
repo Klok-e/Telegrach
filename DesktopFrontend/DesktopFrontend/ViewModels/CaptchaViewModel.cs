@@ -50,6 +50,12 @@ namespace DesktopFrontend.ViewModels
                     CaptchaImage = await connection.RequestCaptcha();
                 }
             });
+
+            // TODO: remove this to enable captcha requests
+            var credentials = connection.TryRequestAccount("").Result;
+            if (credentials != null)
+                _captchaPassed.OnNext(credentials.Value);
+            _captchaPassed.OnCompleted();
         }
     }
 }

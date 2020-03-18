@@ -15,7 +15,8 @@ from sqlalchemy.sql import select, text
 from typing import List, Generator, Dict
 import typing
 from config import *
-from models import *
+import models
+from models import Message, UserAccount, SuperAccount
 from crypto import *
 from helpers import *
 
@@ -86,12 +87,10 @@ class DataBase:
     async def disconnect(self):
         await self.database.disconnect()
 
-    async def get_current_user(self, login: str):
-        ''' Get user with specified UUID. Just send str representation of UUID '''
-        # query = UserAccount.select().where(UserAccount.c.login == login)
-        query = (
-            "select * from messenger.user_account ua where ua.login::text = :login")
-        result = await self.fetch_one(query=query, login=login)
+    async def get_user(self, login: str) -> typing.Optional[typing.Any]:
+        """ Get user with specified UUID. Just send str representation of UUID """
+        query = UserAccount.select().where(UserAccount.c.login == login)
+        result = await self.fetch_one(query=query, login_1=login)
         return result
 
     async def all_messages_in_tred(self, tred_id: int):
@@ -131,13 +130,13 @@ class DataBase:
         result = await self.fetch_all(query, tred_id=tred_id)
         return result
 
-    async def create_new_super_account(self, super_id):
+    async def create_new_super_account(self):
         query = SuperAccount.insert()
-        result = await self.execute(query=query, super_id=super_id)
+        result = await self.execute(query=query)
         return result
 
     async def create_new_user(self, values):
-        query = UserAccount.insert()
+        query = models.UserAccount.insert()
         result = await self.execute(query, **values)
         return result
 

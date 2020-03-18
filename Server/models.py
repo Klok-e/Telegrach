@@ -8,6 +8,7 @@ import config
 metadata = MetaData(schema=config.schema_name())
 
 SuperAccount = Table("super_account", metadata,
+                     # the first integer is automatically autoincrement
                      Column('super_id', BigInteger, primary_key=True))
 
 UserAccount = Table(

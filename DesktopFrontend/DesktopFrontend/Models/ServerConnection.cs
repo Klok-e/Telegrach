@@ -68,7 +68,7 @@ namespace DesktopFrontend.Models
             if (responseUnion.InnerCase != ServerMessage.InnerOneofCase.ServerResponse)
             {
                 Logger.Sink.Log(LogEventLevel.Error, "Network", this,
-                    $"Response to the login request was given an unexpected answer");
+                    $"Response to the login request was given an unexpected answer: {responseUnion}");
                 return false;
             }
 
@@ -90,9 +90,23 @@ namespace DesktopFrontend.Models
 
         public async Task<(string login, string pass)?> TryRequestAccount(string tryText)
         {
-            if (tryText == "hey /b/")
-                return ("rwerwer", "564756868");
-            return null;
+            var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
+
+            var msg = new ClientMessage();
+            msg.UserCreateRequest = new ClientMessage.Types.UserCreationRequest();
+
+            await stream.WriteProtoMessageAsync(msg);
+
+            var response = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
+            if (response.InnerCase != ServerMessage.InnerOneofCase.NewAccountData)
+            {
+                Logger.Sink.Log(LogEventLevel.Information, "Network", this,
+                    $"Response to the account creation request was unexpected: {response}");
+                return null;
+            }
+
+            var accData = response.NewAccountData;
+            return (accData.Login, accData.Password);
         }
     }
 }

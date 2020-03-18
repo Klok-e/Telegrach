@@ -4,33 +4,7 @@ from proto.common_pb2 import UserCredentials
 from request_handling_utils import SessionData, request_handler, handle_request
 from typing import Tuple, Callable, Awaitable, Any, Dict
 import controllers as ctrl
-
-
-# TODO: fix me
-@request_handler(ClientMessage.user_create_request)
-async def create_user(db, message):
-    '''
-        Returns new_users with code data and commits its data to database
-        Works lil bit different from other similar creation functions
-        I super_id is provided it will link users together
-        Either it will create new super_account and link new user with it
-    '''
-    request = signals.user_creation_request()
-    request.ParseFromString(message)
-
-    if request.super_id == 1:
-        # That part of code required if user is using the service for the first
-        # time, so super_account does not exists
-        select = await db.get_max_super_id()
-        super_id = dict(select.items())["max"] + 1
-        # creating super_account before user_account
-        await db.create_new_super_account(super_id)
-
-    # a tuple(User`s data to send, Database data to store)
-    data: Tuple[Tuple[str, str], Dict] = ctrl.create_user(super_id)
-    await db.create_new_user(data[1])
-
-    return 1, data[0]
+from crypto import validate_password
 
 
 # TODO: fix me
@@ -180,16 +154,36 @@ async def create_people_inlist(db, message):
 @request_handler(ClientMessage.login_request)
 async def login(message: UserCredentials, session: SessionData):
     print(f"Sign in request: {message}")
-    # session.db.get_current_user()
-    if message.login == "rwerwer" and message.password == "564756868":
+    user = session.db.get_user(message.login)
+    ok = False
+    if user is None:
+        print(f"Sign in failed")
+    elif validate_password(user.salt, user.pword, message.password):
         print(f"Sign in successful")
         ok = True
-    else:
-        print(f"Sign in failed")
-        ok = False
+
     session.logged_in = ok
 
     # create response
     response = ServerMessage()
     response.server_response.is_ok = ok
+    return response
+
+
+# TODO: fix me
+@request_handler(ClientMessage.user_create_request)
+async def create_user(message: ClientMessage.UserCreationRequest, session: SessionData):
+    """
+        Returns new_users with code data and commits its data to database
+        Works lil bit different from other similar creation functions
+        I super_id is provided it will link users together
+        Either it will create new super_account and link new user with it
+    """
+
+    garbage = await session.db.create_new_super_account()
+
+    response = ServerMessage()
+    response.new_account_data.login = ""
+    response.new_account_data.password = ""
+
     return response

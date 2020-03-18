@@ -75,10 +75,7 @@ def hash_password(password: str) -> Tuple[str, str]:
     return salt, hashed_password
 
 
-def validate_password(
-        stored_salt: str,
-        stored_password: str,
-        provided_password: str) -> bool:
+def validate_password(stored_salt: str, stored_password: str, provided_password: str) -> bool:
     '''Verify a stored password'''
     hashed_password = hashlib.pbkdf2_hmac("sha256", provided_password.encode(),
                                           stored_salt.encode(), 10000, 64)
