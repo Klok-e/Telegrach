@@ -1,7 +1,6 @@
-'''
-    A layer between the database and server.
-    Designed for datamanipulation and validation
-'''
+"""
+    Utils that help simplify filling in query parameters
+"""
 
 from sqlalchemy.sql import func
 from typing import Tuple, Dict
