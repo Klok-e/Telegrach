@@ -70,7 +70,9 @@ def main():
     db = DataBase(connect_string())
     with db as db:
         loop = asyncio.get_event_loop()
-        server = asyncio.start_server(lambda r, w: server_handler(db, r, w), *ADDRESS)
+        server = asyncio.start_server(
+            lambda r, w: server_handler(
+                db, r, w), *ADDRESS)
         server = loop.run_until_complete(server)
 
         # serve until CTRL + C
