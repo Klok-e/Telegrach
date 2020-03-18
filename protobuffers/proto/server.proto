@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package messenger;
+package proto;
 
 import "google/protobuf/timestamp.proto";
-import "common.proto";
+import "proto/common.proto";
 
 // messages the server sends to the client
 message ServerMessage {

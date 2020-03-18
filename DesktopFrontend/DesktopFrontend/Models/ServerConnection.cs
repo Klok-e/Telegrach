@@ -10,7 +10,7 @@ using Avalonia.Logging;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Google.Protobuf;
-using Messenger;
+using Proto;
 
 namespace DesktopFrontend.Models
 {

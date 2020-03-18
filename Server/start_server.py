@@ -1,11 +1,7 @@
 import asyncio
 # import logging
-import socket
-import sys
-import os
-import crypto
 import controllers as ctrl
-import proto.signals_pb2 as signals
+from proto import client_pb2
 from typing import Tuple
 from config import *
 from database import DataBase
@@ -240,7 +236,7 @@ async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
             ok = False
 
         # create response
-        response = signals.UserLogInResponse()
+        response = client_pb2.UserLogInResponse()
         response.is_ok = ok
 
         # write message
