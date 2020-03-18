@@ -3,7 +3,8 @@ import asyncio
 import controllers as ctrl
 from proto import client_pb2
 from proto import server_pb2
-from typing import Tuple
+import typing
+from typing import Tuple, Callable, Awaitable, Any, Dict
 from config import *
 from database import DataBase
 import utils
@@ -11,27 +12,36 @@ import utils
 # TODO LOG ALL EXCEPTIONS WITH sys.exc_info
 
 TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
-CODES = {}
 
 
 # logging.basicConfig(filename=LOG_FILE_SERVER,
 #                     level=LOG_LEVEL_SERVER,
 #                     format=LOG_FORMAT_SERVER)
 
+class SessionData:
+    def __init__(self):
+        self.logged_in = False
 
-def code(code, *args, **kwargs):
+
+REQUEST_HANDLERS = {}
+
+
+def request_handler(accept_variant):
     '''
         A decorator which associates fynction with specified code recieved from clients
     '''
 
-    def inner(f):
-        CODES[code] = f
-        return f
+    def inner(func: Callable[[Any, SessionData], Awaitable[Any]]):
+        if accept_variant in REQUEST_HANDLERS:
+            raise RuntimeError
+        REQUEST_HANDLERS[accept_variant] = func
+        return func
 
     return inner
 
 
-@code(0)
+# TODO: fix me
+@request_handler(client_pb2.ClientMessage.user_create_request)
 async def create_user(db, message):
     '''
         Returns new_users with code data and commits its data to database
@@ -42,8 +52,8 @@ async def create_user(db, message):
     request = signals.user_creation_request()
     request.ParseFromString(message)
 
-    if request.super_id == - \
-            1:  # That part of code required if user is using the service for the first time, so super_account does not exists
+    if request.super_id == 1:
+        # That part of code required if user is using the service for the first time, so super_account does not exists
         select = await db.get_max_super_id()
         super_id = dict(select.items())["max"] + 1
         # creating super_account before user_account
@@ -56,7 +66,8 @@ async def create_user(db, message):
     return 1, data[0]
 
 
-@code(1)
+# TODO: fix me
+# @request_handler(client_pb2.ClientMessage.user_create_request)
 async def send_users_data(data):
     '''
         This function sends user`s generated data.
@@ -69,7 +80,8 @@ async def send_users_data(data):
     return result
 
 
-@code(2)
+# TODO: fix me
+@request_handler(client_pb2.ClientMessage.thread_data_request)
 async def get_all_messages_from_tred(db, message):
     '''
         Function returns all message in tred by one query.
@@ -92,7 +104,8 @@ async def get_all_messages_from_tred(db, message):
     return (3, ((tred_creator, tred_time, tred_head, tred_body), result))
 
 
-@code(3)
+# TODO: fix me
+# @request_handler(client_pb2.ClientMessage.user_create_request)
 async def send_all_messages_from_tred(data):
     """
         Recieves a pair:
@@ -115,7 +128,8 @@ async def send_all_messages_from_tred(data):
     return result
 
 
-@code(4)
+# TODO: fix me
+@request_handler(client_pb2.ClientMessage.create_thread_request)
 async def create_tred(db, message):
     '''
         This fucntion is similar to the other ones, so ill explain everything common here
@@ -137,12 +151,14 @@ async def create_tred(db, message):
     return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
-@code(5)
+# TODO: fix me
+# @request_handler(client_pb2.ClientMessage.user_create_request)
 async def response_creation(data):
     return b"CODE=5\n\n" + data[0].encode() + b"\n\n\n\n"
 
 
-@code(6)
+# TODO: fix me
+@request_handler(client_pb2.ClientMessage.send_msg_to_thread_request)
 async def create_message(db, message):
     request = signals.message_to_create()
     request.ParseFromString(message)
@@ -154,7 +170,8 @@ async def create_message(db, message):
     return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
-@code(8)
+# TODO: fix me
+# @request_handler(client_pb2.ClientMessage.user_create_request)
 async def create_tred_participation(db, message):
     request = signals.tred_participation_to_create()
     request.ParseFromString(message)
@@ -163,7 +180,8 @@ async def create_tred_participation(db, message):
     return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
-@code(10)
+# TODO: fix me
+@request_handler(client_pb2.ClientMessage.union_another_request)
 async def create_union_request(db, message):
     request = signals.union_request_to_create()
     request.ParseFromString(message)
@@ -172,7 +190,8 @@ async def create_union_request(db, message):
     return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
-@code(12)
+# TODO: fix me
+# @request_handler(client_pb2.ClientMessage.user_create_request)
 async def create_personal_list(db, message):
     request = signals.personal_list_to_create()
     request.ParseFromString(message)
@@ -181,7 +200,8 @@ async def create_personal_list(db, message):
     return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
-@code(14)
+# TODO: fix me
+# @request_handler(client_pb2.ClientMessage.user_create_request)
 async def create_people_inlist(db, message):
     request = signals.people_inlist_to_create()
     request.ParseFromString(message)
@@ -190,61 +210,74 @@ async def create_people_inlist(db, message):
     return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
+# TODO: obsolete?
 async def make_output(db, data: Tuple[int, bytes]):
     code = data[0]
     response = data[1]
-    result = await CODES[code](response)
+    result = await REQUEST_HANDLERS[code](response)
     return result
 
 
-async def send_users_data(data):
-    users_data = signals.send_user_to_client()
-    users_data.login = data[0]
-    users_data.password = data[1]
-    response = users_data.SerializeToString()
-    response = b"CODE=1\n\n" + response + b"\n\n\n\n"
-    return response
-
-
+# TODO: obsolete?
 async def handle_write(db, writer: asyncio.StreamWriter, sockname: Tuple[str, int], message: Tuple[int, bytes]):
     response = await make_output(db, message)
     writer.write(response)
     await writer.drain()
 
 
+# TODO: obsolete?
 async def parse_input(db, data):
     commands, message = data.strip().split(b"\n\n")
     commands = commands.split(b"\n")
     commands = dict(i.split(b"=") for i in commands)
     code = int(commands[b"CODE"])
-    return await CODES[code](db, message)
+    return await REQUEST_HANDLERS[code](db, message)
+
+
+async def handle_request(message: client_pb2.ClientMessage, session_data: SessionData) -> Any:
+    msg_type: str = message.WhichOneof('inner')
+    msg_type: Any = getattr(client_pb2.ClientMessage, msg_type)
+    handler = REQUEST_HANDLERS[msg_type]
+
+    # invoke handler with a given variant
+    variant = getattr(message, message.WhichOneof('inner'))
+    return await handler(variant, session_data)
 
 
 async def handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     sockname = writer.get_extra_info('peername')
     print(f"new connection! {sockname}")
 
+    session_data = SessionData()
     is_closed = False
     while not is_closed:
+        # read request
         request = await utils.read_proto_message(reader, client_pb2.ClientMessage)
-        req_type = request.WhichOneof('inner')
-        if req_type == "login_request":
-            request = getattr(request, "login_request")
-            print(f"Sign in request: {request}")
 
-            if request.login == "rwerwer" and request.password == "564756868":
-                print(f"Sign in successful")
-                ok = True
-            else:
-                print(f"Sign in failed")
-                ok = False
+        # calculate response
+        response = await handle_request(request, session_data)
 
-            # create response
-            response = server_pb2.ServerMessage()
-            response.user_log_in_response.is_ok = ok
+        # send response
+        await utils.write_proto_message(writer, response)
 
-            # write message
-            await utils.write_proto_message(writer, response)
+        # req_type = request.WhichOneof('inner')
+        # if req_type == "login_request":
+        #    request = getattr(request, "login_request")
+        #    print(f"Sign in request: {request}")
+        #
+        #    if request.login == "rwerwer" and request.password == "564756868":
+        #        print(f"Sign in successful")
+        #        ok = True
+        #    else:
+        #        print(f"Sign in failed")
+        #        ok = False
+        #
+        #    # create response
+        #    response = server_pb2.ServerMessage()
+        #    response.user_log_in_response.is_ok = ok
+        #
+        #    # write message
+        #    await utils.write_proto_message(writer, response)
 
         is_closed = True
 
