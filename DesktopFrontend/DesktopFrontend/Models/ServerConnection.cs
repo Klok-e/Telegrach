@@ -35,11 +35,6 @@ namespace DesktopFrontend.Models
         {
             if (IsConnected)
             {
-                var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
-                stream.WriteProtoMessageAsync(new ClientMessage
-                {
-                    TerminateSessionRequest = new ClientMessage.Types.TerminateSessionRequest()
-                }).Wait();
                 _client.Close();
             }
         }
