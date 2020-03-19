@@ -19,29 +19,20 @@ import models
 from models import Message, UserAccount, SuperAccount
 from crypto import *
 from helpers import *
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy_aio import ASYNCIO_STRATEGY
 
 
 class DataBase:
-    def __init__(self, connect_string=""):
+    def __init__(self, connect_string):
         """Setting params for the connection"""
-        self.connect_string = connect_string
-        # self.database = Database(connect_string)
-        self.session_constr = sessionmaker()
+        self.database = Database(connect_string)
 
     def __enter__(self) -> "DataBase":
-        self.engine = create_engine(
-            self.connect_string,
-            strategy=ASYNCIO_STRATEGY)
-        self.session_constr.configure(bind=self.engine)
-        # asyncio.get_event_loop().run_until_complete(self.connect())
+        asyncio.get_event_loop().run_until_complete(self.connect())
         return self
 
     def __exit__(self, exc_type=None, exc_value=None, traceback=None) -> None:
         pass
-        # asyncio.get_event_loop().run_until_complete(self.disconnect())
+        asyncio.get_event_loop().run_until_complete(self.disconnect())
 
     # def _t(self, key):
     #    '''Translates tablename according to self._voc'''
@@ -51,39 +42,39 @@ class DataBase:
         '''Establishing connection with the database
         Example for PostgreSQL - postgresql://scott:tiger@localhost/mydatabase
         Can be useful https://stackoverflow.com/questions/769683/show-tables-in-postgresql'''
-        # await self.database.connect()
+        await self.database.connect()
 
-    # async def iterate(self, query: str, **kwargs) -> Generator[None, None, None]:
-    #    '''
-    #        https://www.encode.io/databases/database_queries/
-    #        Actually returns a Generator of records
-    #    '''
-    #    result = await self.database.iterate(query=query, kwargs=kwargs)
-    #    return result
+        # async def iterate(self, query: str, **kwargs) -> Generator[None, None, None]:
+        #    '''
+        #        https://www.encode.io/databases/database_queries/
+        #        Actually returns a Generator of records
+        #    '''
+        #    result = await self.database.iterate(query=query, kwargs=kwargs)
+        #    return result
 
-    # async def fetch_all(self, query: str, **kwargs) -> List:
-    #    '''
-    #        https://www.encode.io/databases/database_queries/
-    #        Actually returns a List of Records
-    #    '''
-    #    result = await self.database.fetch_all(query=query, values=kwargs)
-    #    return result
+    async def fetch_all(self, query: str, **kwargs) -> List:
+        '''
+            https://www.encode.io/databases/database_queries/
+            Actually returns a List of Records
+        '''
+        result = await self.database.fetch_all(query=query, values=kwargs)
+        return result
 
-    # async def fetch_one(self, query: str, **kwargs):
-    #    '''
-    #        https://www.encode.io/databases/database_queries/
-    #        Actually returns single Record
-    #    '''
-    #    result = await self.database.fetch_one(query=query, values=kwargs)
-    #    return result
+    async def fetch_one(self, query: str, **kwargs):
+        '''
+            https://www.encode.io/databases/database_queries/
+            Actually returns single Record
+        '''
+        result = await self.database.fetch_one(query=query, values=kwargs)
+        return result
 
-    # async def execute(self, query: str, **kwargs):
-    #    '''
-    #        https://www.encode.io/databases/database_queries/
-    #        Actually returns something i cant explain
-    #    '''
-    #    result = await self.database.execute(query=query, values=kwargs)
-    #    return result
+    async def execute(self, query: str, **kwargs):
+        '''
+            https://www.encode.io/databases/database_queries/
+            Actually returns something i cant explain
+        '''
+        result = await self.database.execute(query=query, values=kwargs)
+        return result
 
     # async def execute_many(self, query: str, values: List[Dict]):
     #    '''
@@ -93,13 +84,14 @@ class DataBase:
     #    result = await self.database.execute_many(query=query, values=values)
     #    return result
 
-    # async def disconnect(self):
-    #    await self.database.disconnect()
+    async def disconnect(self):
+        await self.database.disconnect()
 
     async def get_user(self, login: str) -> typing.Optional[typing.Any]:
         """ Get user with specified UUID. Just send str representation of UUID """
-        session = self.session_constr()
-        return await session.query(UserAccount).filter_by(login=login).first()
+        query = UserAccount.select().where(UserAccount.c.login == login)
+        result = await self.fetch_one(query=query, login_1=login)
+        return result
 
     async def all_messages_in_tred(self, tred_id: int):
         query = text(
@@ -110,8 +102,7 @@ class DataBase:
             "where m.is_deleted is false "
             "and t.tred_id = :tred_id "
             "order by m.timestamp; ")
-        session = self.session_constr()
-        result = await session.execute(query, {"tred_id": tred_id})
+        result = await self.fetch_all(query, tred_id=tred_id)
         return result
 
     async def all_people_in_personal_list(self, list_id: int):
@@ -140,11 +131,9 @@ class DataBase:
         return result
 
     async def create_new_super_account(self) -> SuperAccount:
-        session = self.session_constr()
-        new_account = SuperAccount()
-        session.add(new_account)
-        session.commit()
-        return new_account
+        query = SuperAccount.insert()
+        result = await self.execute(query=query)
+        return result
 
     async def create_new_user(self) -> Tuple[UserAccount, str]:
         session = self.session_constr()
@@ -157,6 +146,11 @@ class DataBase:
 
         session.add(new_acc)
         session.commit()
+
+        #query = models.UserAccount.insert()
+        #result = await self.execute(query, **values)
+        #return result
+
         return new_acc, password
 
     async def create_new_message(self, values):
