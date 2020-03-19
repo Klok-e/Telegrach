@@ -50,10 +50,14 @@ async def server_handler(db, reader: asyncio.StreamReader, writer: asyncio.Strea
     print(f"new connection! {sockname}")
 
     session_data = SessionData(db)
-    closed = False
-    while not closed:
+    while True:
         # read request
         request = await utils.read_proto_message(reader, ClientMessage)
+
+        # EOF is reached
+        if request is None:
+            print(f"connection {sockname} ended communications")
+            break
 
         # calculate response
         response = await handle_request(request, session_data)
