@@ -10,7 +10,7 @@ using Avalonia.Logging;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Google.Protobuf;
-using Messenger;
+using Proto;
 
 namespace DesktopFrontend.Models
 {
@@ -54,14 +54,25 @@ namespace DesktopFrontend.Models
         public async Task<bool> LogInWithCredentials(string user, string pass)
         {
             var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
-            var request = new UserLogInRequest
+            var request = new ClientMessage()
             {
-                Login = user,
-                Password = pass
+                LoginRequest = new UserCredentials
+                {
+                    Login = user,
+                    Password = pass
+                }
             };
             await stream.WriteProtoMessageAsync(request);
 
-            var response = await stream.ReadProtoMessageAsync(UserLogInResponse.Parser);
+            var responseUnion = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
+            if (responseUnion.InnerCase != ServerMessage.InnerOneofCase.ServerResponse)
+            {
+                Logger.Sink.Log(LogEventLevel.Error, "Network", this,
+                    $"Response to the login request was given an unexpected answer: {responseUnion}");
+                return false;
+            }
+
+            var response = responseUnion.ServerResponse;
 
             Logger.Sink.Log(LogEventLevel.Information, "Network", this,
                 $"Response to the login request is {response}");
@@ -79,9 +90,23 @@ namespace DesktopFrontend.Models
 
         public async Task<(string login, string pass)?> TryRequestAccount(string tryText)
         {
-            if (tryText == "hey /b/")
-                return ("rwerwer", "564756868");
-            return null;
+            var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
+
+            var msg = new ClientMessage();
+            msg.UserCreateRequest = new ClientMessage.Types.UserCreationRequest();
+
+            await stream.WriteProtoMessageAsync(msg);
+
+            var response = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
+            if (response.InnerCase != ServerMessage.InnerOneofCase.NewAccountData)
+            {
+                Logger.Sink.Log(LogEventLevel.Information, "Network", this,
+                    $"Response to the account creation request was unexpected: {response}");
+                return null;
+            }
+
+            var accData = response.NewAccountData;
+            return (accData.Login, accData.Password);
         }
     }
 }

@@ -1,7 +1,6 @@
-'''
-    A layer between the database and server.
-    Designed for datamanipulation and validation
-'''
+"""
+    Utils that help simplify filling in query parameters
+"""
 
 from sqlalchemy.sql import func
 from typing import Tuple, Dict
@@ -81,13 +80,6 @@ def create_people_inlist(list_id, friend_id):
         "friend_id": friend_id
     }
     return values
-
-
-def validate_user(values: Dict, password: str):
-    stored_salt = values["salt"]
-    stored_pword = values["pword"]
-    result = validate_password(stored_salt, stored_pword, password)
-    return result
 
 
 if __name__ == '__main__':
