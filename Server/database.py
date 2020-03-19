@@ -93,14 +93,23 @@ class DataBase:
     #    result = await self.database.execute_many(query=query, values=values)
     #    return result
 
-    async def get_user(self, login: str) -> typing.Optional[typing.Any]:
+    async def get_user(self, login: int) -> typing.Optional[typing.Any]:
         """ Get user with specified UUID. Just send str representation of UUID """
         query = (
-            "select u.login, u.salt, u.pword, u.super_id"
-            "from user_account u"
+            "select u.login, u.salt, u.pword, u.super_id "
+            "from user_account u "
             "where u.login = :login"
         )
         result = await self.fetch_one(query=query, login=login)
+        return result
+
+    async def get_super(self, super_id: str) -> typing.Optional[typing.Any]:
+        query = (
+            "select s.super_id "
+            "from super_account s "
+            "where s.super_id = :super_id"
+        )
+        result = await self.fetch_one(query=query, super_id=super_id)
         return result
 
     async def all_messages_in_tred(self, tred_id: int):
@@ -147,7 +156,7 @@ class DataBase:
             "insert into super_account (super_id)"
             "values (:next_id)"
         )
-        result = await self.execute(query=query, next_id=next_id)
+        await self.execute(query=query, next_id=next_id)
         return SuperAccount(super_id=next_id)
 
     async def create_new_user(self, super_acc: Optional[SuperAccount] = None) -> Tuple[UserAccount, str]:
@@ -166,11 +175,11 @@ class DataBase:
         # handle a minuscule chance that the login already exists in the
         # database
         count_user = (
-            "select count(*)"
-            "from user_account u"
-            "where u.login = :login"
+            "select count(*) "
+            "from user_account u "
+            "where u.login = :login "
         )
-        while (res := await self.fetch_one(count_user, login=new_acc.login))['count'] > 0:
+        while (await self.fetch_one(count_user, login=new_acc.login))['count'] > 0:
             new_acc.login = generate_uuid4()
 
         query = (
@@ -178,8 +187,8 @@ class DataBase:
             "values (:login, :salt, :pword, :super_id)"
         )
 
-        result = await self.execute(query, login=new_acc.login, salt=new_acc.salt,
-                                    pword=new_acc.pword, super_id=new_acc.super_id)
+        await self.execute(query, login=new_acc.login, salt=new_acc.salt,
+                           pword=new_acc.pword, super_id=new_acc.super_id)
         return new_acc, password
 
     async def create_new_message(self, values):
