@@ -163,7 +163,8 @@ class DataBase:
         new_acc.super_id = super_acc.super_id
         new_acc.login = generate_uuid4()
 
-        # handle a minuscule chance that the login already exists in the database
+        # handle a minuscule chance that the login already exists in the
+        # database
         count_user = (
             "select count(*)"
             "from user_account u"
