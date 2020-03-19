@@ -33,7 +33,10 @@ namespace DesktopFrontend.Models
 
         ~ServerConnection()
         {
-            _client.Close();
+            if (IsConnected)
+            {
+                _client.Close();
+            }
         }
 
         public async Task<bool> Connect()
@@ -44,7 +47,7 @@ namespace DesktopFrontend.Models
             }
             catch (SocketException e)
             {
-                Console.WriteLine(e);
+                Logger.Sink.Log(LogEventLevel.Error, "Network", this, e.Message);
                 return false;
             }
 
@@ -92,8 +95,8 @@ namespace DesktopFrontend.Models
         {
             var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
 
-            var msg = new ClientMessage();
-            msg.UserCreateRequest = new ClientMessage.Types.UserCreationRequest();
+            var msg = new ClientMessage
+            { UserCreateRequest = new ClientMessage.Types.UserCreationRequest { Link = false } };
 
             await stream.WriteProtoMessageAsync(msg);
 

@@ -2,14 +2,18 @@ syntax = "proto3";
 
 package proto;
 
-//import "google/protobuf/timestamp.proto";
+// import "google/protobuf/timestamp.proto";
 import "proto/common.proto";
 
 // messages the client sends to the server
 message ClientMessage {
   message ThreadDataRequest { int64 tred_id = 1; }
 
-  message UserCreationRequest {}
+  message UserCreationRequest {
+    // whether to link the new account to the same super account
+    // irrelevant if user isn't logged in
+    bool link = 1;
+  }
 
   message ThreadSendMessageRequest {
     uint64 thread_id = 1;
