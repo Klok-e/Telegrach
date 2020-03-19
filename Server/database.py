@@ -93,7 +93,7 @@ class DataBase:
     #    result = await self.database.execute_many(query=query, values=values)
     #    return result
 
-    async def get_user(self, login: int) -> typing.Optional[typing.Any]:
+    async def get_user(self, login: str) -> typing.Optional[typing.Any]:
         """ Get user with specified UUID. Just send str representation of UUID """
         query = (
             "select u.login, u.salt, u.pword, u.super_id "
@@ -103,7 +103,7 @@ class DataBase:
         result = await self.fetch_one(query=query, login=login)
         return result
 
-    async def get_super(self, super_id: str) -> typing.Optional[typing.Any]:
+    async def get_super(self, super_id: int) -> typing.Optional[typing.Any]:
         query = (
             "select s.super_id "
             "from super_account s "
