@@ -50,8 +50,8 @@ async def server_handler(db, reader: asyncio.StreamReader, writer: asyncio.Strea
     print(f"new connection! {sockname}")
 
     session_data = SessionData(db)
-    is_closed = False
-    while not is_closed:
+    closed = False
+    while not closed:
         # read request
         request = await utils.read_proto_message(reader, ClientMessage)
 
@@ -61,9 +61,9 @@ async def server_handler(db, reader: asyncio.StreamReader, writer: asyncio.Strea
         # send response
         await utils.write_proto_message(writer, response)
 
-        is_closed = True
-
+    print(f"connection {sockname} closed")
     writer.close()
+    await writer.wait_closed()
 
 
 def main():

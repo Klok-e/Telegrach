@@ -5,6 +5,7 @@ from request_handling_utils import SessionData, request_handler, handle_request
 from typing import Tuple, Callable, Awaitable, Any, Dict
 import controllers as ctrl
 from crypto import validate_password
+from models import SuperAccount
 
 
 # TODO: fix me
@@ -154,7 +155,7 @@ async def create_people_inlist(db, message):
 @request_handler(ClientMessage.login_request)
 async def login(message: UserCredentials, session: SessionData):
     print(f"Sign in request: {message}")
-    user = session.db.get_user(message.login)
+    user = await session.db.get_user(message.login)
     ok = False
     if user is None:
         print(f"Sign in failed")
@@ -170,7 +171,6 @@ async def login(message: UserCredentials, session: SessionData):
     return response
 
 
-# TODO: fix me
 @request_handler(ClientMessage.user_create_request)
 async def create_user(message: ClientMessage.UserCreationRequest, session: SessionData):
     """
@@ -180,7 +180,12 @@ async def create_user(message: ClientMessage.UserCreationRequest, session: Sessi
         Either it will create new super_account and link new user with it
     """
 
-    new_acc, password = await session.db.create_new_user()
+    super_acc = None
+    if session.logged_in and message.link:
+        user = await session.db.get_user(session.login)
+        super_acc = SuperAccount(super_id=user.super_id)
+
+    new_acc, password = await session.db.create_new_user(super_acc)
 
     response = ServerMessage()
     response.new_account_data.login = new_acc.login
