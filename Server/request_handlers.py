@@ -181,8 +181,6 @@ async def create_user(message: ClientMessage.UserCreationRequest, session: Sessi
     """
 
     new_acc, password = await session.db.create_new_user()
-    new_super = await session.db.create_new_super_account()
-    new_acc.super_id = new_super.super_id
 
     response = ServerMessage()
     response.new_account_data.login = new_acc.login
