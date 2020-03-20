@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using DynamicData;
 
 
 namespace DesktopFrontend.Models
@@ -37,9 +38,15 @@ namespace DesktopFrontend.Models
             return ("rwerwer", "564756868");
         }
 
-        public Task<List<string>> RequestThreadSet(string name)
+        public async Task<ThreadSet> RequestThreadSet()
         {
-            throw new NotImplementedException();
+            var threadSet = new ThreadSet();
+            threadSet.Threads.AddRange(new[]
+            {
+                new ThreadItem("мозкоподібні структури", "dasdasdasd", "мозкоподібні структури", 1),
+                new ThreadItem("блаблабла", "dasdasdasd", "блаблабла", 2),
+            });
+            return threadSet;
         }
     }
 }

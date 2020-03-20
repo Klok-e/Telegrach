@@ -10,11 +10,19 @@ namespace DesktopFrontend.Models
 {
     public class ThreadItem
     {
-        public string Name { get; set; }
+        public string Head { get; }
+        public string Body { get; }
+        public string Name { get; }
+        public ulong Id { get; }
 
+        public ThreadItem(string head, string body, string name, ulong id)
+        {
+            Head = head;
+            Body = body;
+            Name = name;
+            Id = id;
+        }
     }
-
-
 
     public class ThreadSet
     {
@@ -23,6 +31,6 @@ namespace DesktopFrontend.Models
             Threads = new ObservableCollection<ThreadItem>();
         }
 
-        public ObservableCollection<ThreadItem> Threads { get; private set; }
+        public ObservableCollection<ThreadItem> Threads { get; }
     }
 }

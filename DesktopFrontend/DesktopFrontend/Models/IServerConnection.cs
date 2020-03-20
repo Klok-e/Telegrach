@@ -16,5 +16,7 @@ namespace DesktopFrontend.Models
         Task<Bitmap> RequestCaptcha();
 
         Task<(string login, string pass)?> TryRequestAccount(string tryText);
+
+        Task<ThreadSet> RequestThreadSet();
     }
 }

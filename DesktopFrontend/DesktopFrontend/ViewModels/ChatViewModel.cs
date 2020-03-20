@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Reactive;
 using DesktopFrontend.Models;
+using DynamicData;
 using ReactiveUI;
 
 namespace DesktopFrontend.ViewModels
@@ -74,15 +75,11 @@ namespace DesktopFrontend.ViewModels
                 x => !string.IsNullOrEmpty(x)
             );
 
-            GetTreadList = ReactiveCommand.Create(() =>
+            GetTreadList = ReactiveCommand.CreateFromTask(async() =>
             {
-#if DEBUG
-                Threads.Add(new ThreadItem { Name = _threadSearch });
-#else
                 Threads.Clear();
-                foreach (var item in connection.RequestThreadSet(_threadSearch).Result)
-                     _threadSet.Threads.Add(new ThreadItem { Name = item });
-#endif
+                var threadSet = await connection.RequestThreadSet();
+                Threads.AddRange(threadSet.Threads);
             }, isSendEnabled);
             GetTreadList.Subscribe(_ => ThreadSearch = string.Empty);
         }

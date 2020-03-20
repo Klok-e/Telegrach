@@ -96,7 +96,7 @@ namespace DesktopFrontend.Models
             var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
 
             var msg = new ClientMessage
-            { UserCreateRequest = new ClientMessage.Types.UserCreationRequest { Link = false } };
+                {UserCreateRequest = new ClientMessage.Types.UserCreationRequest {Link = false}};
 
             await stream.WriteProtoMessageAsync(msg);
 
@@ -112,10 +112,12 @@ namespace DesktopFrontend.Models
             return (accData.Login, accData.Password);
         }
 
-        public Task<List<string>> RequestThreadSet(string name)
+        public Task<ThreadSet> RequestThreadSet()
         {
-            var stream = _client.GetStream();
-            //TODO: request threads
+            var msg = new ClientMessage
+            {
+                GetAllJoinedThreadsRequest = new ClientMessage.Types.GetAllJoinedThreadsRequest()
+            };
             throw new NotImplementedException();
         }
     }
