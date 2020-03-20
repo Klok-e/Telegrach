@@ -20,7 +20,7 @@ namespace DesktopFrontend.Models
 
         public async Task<bool> LogInWithCredentials(string user, string pass)
         {
-            throw new NotImplementedException();
+            return user == "rwerwer" && pass == "564756868";
         }
 
         public async Task<Bitmap> RequestCaptcha()
@@ -34,9 +34,7 @@ namespace DesktopFrontend.Models
 
         public async Task<(string login, string pass)?> TryRequestAccount(string tryText)
         {
-            if (tryText == "hey /b/")
-                return ("rwerwer", "564756868");
-            return null;
+            return ("rwerwer", "564756868");
         }
 
         public Task<List<string>> RequestThreadSet(string name)
