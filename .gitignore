@@ -6,3 +6,4 @@
 /Server/*.log
 *.DotSettings.user
 .vs
+*.csproj.user
