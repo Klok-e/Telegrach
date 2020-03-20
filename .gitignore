@@ -7,3 +7,4 @@
 *.DotSettings.user
 .vs
 *.csproj.user
+/DesktopFrontend/DesktopFrontend/Properties
