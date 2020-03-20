@@ -2,6 +2,7 @@ using System.Drawing;
 using System.Reactive;
 using System.Threading.Tasks;
 using System;
+using Avalonia.Logging;
 using DesktopFrontend.Models;
 using ReactiveUI;
 
@@ -33,15 +34,32 @@ namespace DesktopFrontend.ViewModels
         {
             var c = new CaptchaViewModel(connection);
             Captcha = c;
+            string login = null;
+            string pass = null;
             c.CaptchaPassed.Subscribe(pl =>
             {
                 CaptchaPassed = true;
-                Captcha = new LoginShowPasswdViewModel(pl.login, pl.pass);
+                login = pl.login;
+                pass = pl.pass;
+                Captcha = new LoginShowPasswdViewModel(login, pass);
             });
             Back = ReactiveCommand.Create(() => { stack.Pop(); });
             var canExec = this.WhenAny(x => x.CaptchaPassed,
                 s => s.Value);
-            SignIn = ReactiveCommand.CreateFromTask(async () => { stack.Push(new ChatViewModel(connection)); }, canExec);
+            SignIn = ReactiveCommand.CreateFromTask(async () =>
+            {
+                if (await connection.LogInWithCredentials(login!, pass!))
+                {
+                    Logger.Sink.Log(LogEventLevel.Information, "Network", this,
+                        $"Logged in successfully as {login}");
+                    stack.Push(new ChatViewModel());
+                }
+                else
+                {
+                    Logger.Sink.Log(LogEventLevel.Warning, "Network", this,
+                        $"Could not log in as {login}");
+                }
+            }, canExec);
         }
     }
 }

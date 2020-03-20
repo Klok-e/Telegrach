@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package proto;
+
+// import "google/protobuf/timestamp.proto";
+import "proto/common.proto";
+
+// messages the client sends to the server
+message ClientMessage {
+  message ThreadDataRequest { int64 tred_id = 1; }
+
+  message UserCreationRequest {
+    // whether to link the new account to the same super account
+    // irrelevant if user isn't logged in
+    bool link = 1;
+  }
+
+  message ThreadSendMessageRequest {
+    uint64 thread_id = 1;
+    string body = 2;
+  }
+
+  message ThreadCreateRequest {
+    string head = 1;
+    string body = 2;
+  }
+
+  message JoinThreadRequest { uint64 thread_id = 1; }
+
+  message UnionAnotherAccountRequest { uint64 other_id = 1; }
+
+  oneof inner {
+    UserCredentials login_request = 1;
+    ThreadDataRequest thread_data_request = 2;
+    UserCreationRequest user_create_request = 3;
+    ThreadSendMessageRequest send_msg_to_thread_request = 4;
+    ThreadCreateRequest create_thread_request = 5;
+    JoinThreadRequest join_thread_request = 6;
+    UnionAnotherAccountRequest union_another_request = 7;
+  }
+}

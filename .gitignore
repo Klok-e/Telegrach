@@ -1,10 +1,15 @@
 **/.idea
 /DesktopFrontend/DesktopFrontend/bin/
 /DesktopFrontend/DesktopFrontend/obj/
-/Server/__pycache__/
-/Server/logs
+**/__pycache__
+/Server/proto/
 /Server/*.log
+/Server/logs
 *.DotSettings.user
 .vs
 *.csproj.user
 /DesktopFrontend/DesktopFrontend/Properties
+
+# protobuffers
+/Server/proto/
+/DesktopFrontend/DesktopFrontend/Proto

@@ -5,6 +5,7 @@ using System.Reactive.Threading.Tasks;
 using DesktopFrontend.Models;
 using ReactiveUI;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 
 namespace DesktopFrontend.ViewModels
 {
@@ -50,6 +51,14 @@ namespace DesktopFrontend.ViewModels
                     CaptchaImage = await connection.RequestCaptcha();
                 }
             });
+            // TODO: remove this to enable captcha requests
+            DispatcherTimer.RunOnce(() =>
+            {
+                var credentials = connection.TryRequestAccount("").Result;
+                if (credentials != null)
+                    _captchaPassed.OnNext(credentials.Value);
+                _captchaPassed.OnCompleted();
+            }, TimeSpan.FromMilliseconds(0.1));
         }
     }
 }
