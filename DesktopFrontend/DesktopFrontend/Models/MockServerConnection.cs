@@ -41,10 +41,5 @@ namespace DesktopFrontend.Models
         {
             throw new NotImplementedException();
         }
-
-        public Task<bool> RequestANewAccount()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

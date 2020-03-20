@@ -112,11 +112,6 @@ namespace DesktopFrontend.Models
             return (accData.Login, accData.Password);
         }
 
-        public Task<bool> RequestANewAccount()
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<List<string>> RequestThreadSet(string name)
         {
             var stream = _client.GetStream();
