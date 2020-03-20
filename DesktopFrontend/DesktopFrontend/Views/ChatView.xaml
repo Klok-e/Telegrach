@@ -18,9 +18,6 @@
                 </Grid>
             </StackPanel>
         </DataTemplate>
-    </UserControl.DataTemplates>
-
-    <UserControl.DataTemplates>
         <DataTemplate DataType="m:ThreadItem">
             <Button Content="{Binding Name}" />
         </DataTemplate>
