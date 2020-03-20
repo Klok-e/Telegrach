@@ -9,6 +9,8 @@ import "proto/common.proto";
 message ClientMessage {
   message ThreadDataRequest { int64 tred_id = 1; }
 
+  message GetAllJoinedThreadsRequest {}
+
   message UserCreationRequest {
     // whether to link the new account to the same super account
     // irrelevant if user isn't logged in
@@ -37,5 +39,6 @@ message ClientMessage {
     ThreadCreateRequest create_thread_request = 5;
     JoinThreadRequest join_thread_request = 6;
     UnionAnotherAccountRequest union_another_request = 7;
+    GetAllJoinedThreadsRequest get_all_joined_threads_request = 8;
   }
 }

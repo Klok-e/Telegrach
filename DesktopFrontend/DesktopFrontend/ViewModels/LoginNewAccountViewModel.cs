@@ -52,7 +52,7 @@ namespace DesktopFrontend.ViewModels
                 {
                     Logger.Sink.Log(LogEventLevel.Information, "Network", this,
                         $"Logged in successfully as {login}");
-                    stack.Push(new ChatViewModel());
+                    stack.Push(new ChatViewModel(connection));
                 }
                 else
                 {

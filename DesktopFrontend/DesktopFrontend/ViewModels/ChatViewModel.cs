@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Reactive;
 using DesktopFrontend.Models;
+using DynamicData;
 using ReactiveUI;
 
 namespace DesktopFrontend.ViewModels
@@ -10,7 +11,27 @@ namespace DesktopFrontend.ViewModels
     {
         private ChatMessages _model;
 
-        public ChatViewModel()
+        public ChatViewModel(IServerConnection connection)
+        {
+            ChatInit();
+            ThreadSearchInit(connection);
+        }
+
+        #region Chat
+
+        public ReactiveCommand<Unit, Unit> SendMessage { get; private set; }
+
+        private string _currentMessage = "";
+
+        public string CurrentMessage
+        {
+            get => _currentMessage;
+            set => this.RaiseAndSetIfChanged(ref _currentMessage, value);
+        }
+
+        public ObservableCollection<ChatMessage> Messages => _model.Messages;
+
+        private void ChatInit()
         {
             _model = new ChatMessages();
             var isSendEnabled = this.WhenAnyValue(
@@ -29,16 +50,40 @@ namespace DesktopFrontend.ViewModels
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
         }
 
-        public ReactiveCommand<Unit, Unit> SendMessage { get; }
+        #endregion
 
-        private string _description = "";
+        #region Threads
 
-        public string CurrentMessage
+        private string _threadSearch = string.Empty;
+
+        public string ThreadSearch
         {
-            get => _description;
-            set => this.RaiseAndSetIfChanged(ref _description, value);
+            get => _threadSearch;
+            set => this.RaiseAndSetIfChanged(ref _threadSearch, value);
         }
 
-        public ObservableCollection<ChatMessage> Messages => _model.Messages;
+        public ReactiveCommand<Unit, Unit> GetTreadList { get; private set; }
+
+        private ThreadSet _threadSet;
+        public ObservableCollection<ThreadItem> Threads => _threadSet.Threads;
+
+        private void ThreadSearchInit(IServerConnection connection)
+        {
+            _threadSet = new ThreadSet();
+            var isSendEnabled = this.WhenAnyValue(
+                x => x.ThreadSearch,
+                x => !string.IsNullOrEmpty(x)
+            );
+
+            GetTreadList = ReactiveCommand.CreateFromTask(async () =>
+            {
+                Threads.Clear();
+                var threadSet = await connection.RequestThreadSet();
+                Threads.AddRange(threadSet.Threads);
+            }, isSendEnabled);
+            GetTreadList.Subscribe(_ => ThreadSearch = string.Empty);
+        }
+
+        #endregion
     }
 }

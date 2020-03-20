@@ -1,8 +1,11 @@
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using DynamicData;
+
 
 namespace DesktopFrontend.Models
 {
@@ -18,7 +21,7 @@ namespace DesktopFrontend.Models
 
         public async Task<bool> LogInWithCredentials(string user, string pass)
         {
-            throw new NotImplementedException();
+            return user == "rwerwer" && pass == "564756868";
         }
 
         public async Task<Bitmap> RequestCaptcha()
@@ -32,9 +35,18 @@ namespace DesktopFrontend.Models
 
         public async Task<(string login, string pass)?> TryRequestAccount(string tryText)
         {
-            if (tryText == "hey /b/")
-                return ("rwerwer", "564756868");
-            return null;
+            return ("rwerwer", "564756868");
+        }
+
+        public async Task<ThreadSet> RequestThreadSet()
+        {
+            var threadSet = new ThreadSet();
+            threadSet.Threads.AddRange(new[]
+            {
+                new ThreadItem("мозкоподібні структури", "dasdasdasd", "мозкоподібні структури", 1),
+                new ThreadItem("блаблабла", "dasdasdasd", "блаблабла", 2),
+            });
+            return threadSet;
         }
     }
 }

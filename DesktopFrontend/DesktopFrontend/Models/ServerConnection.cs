@@ -111,5 +111,14 @@ namespace DesktopFrontend.Models
             var accData = response.NewAccountData;
             return (accData.Login, accData.Password);
         }
+
+        public Task<ThreadSet> RequestThreadSet()
+        {
+            var msg = new ClientMessage
+            {
+                GetAllJoinedThreadsRequest = new ClientMessage.Types.GetAllJoinedThreadsRequest()
+            };
+            throw new NotImplementedException();
+        }
     }
 }

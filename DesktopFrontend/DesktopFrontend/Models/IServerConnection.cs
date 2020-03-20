@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 
 namespace DesktopFrontend.Models
 {
@@ -14,5 +16,7 @@ namespace DesktopFrontend.Models
         Task<Bitmap> RequestCaptcha();
 
         Task<(string login, string pass)?> TryRequestAccount(string tryText);
+
+        Task<ThreadSet> RequestThreadSet();
     }
 }

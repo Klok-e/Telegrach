@@ -7,6 +7,8 @@
 /Server/logs
 *.DotSettings.user
 .vs
+*.csproj.user
+/DesktopFrontend/DesktopFrontend/Properties
 
 # protobuffers
 /Server/proto/
