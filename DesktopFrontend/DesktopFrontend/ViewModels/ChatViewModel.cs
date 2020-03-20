@@ -77,7 +77,7 @@ namespace DesktopFrontend.ViewModels
             GetTreadList = ReactiveCommand.Create(() =>
             {
 #if DEBUG
-                Threads.Add(new ThreadItem {Name = _threadSearch});
+                Threads.Add(new ThreadItem { Name = _threadSearch });
 #else
                 Threads.Clear();
                 foreach (var item in connection.RequestThreadSet(_threadSearch).Result)
