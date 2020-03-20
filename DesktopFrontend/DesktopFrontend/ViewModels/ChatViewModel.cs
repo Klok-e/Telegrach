@@ -75,7 +75,7 @@ namespace DesktopFrontend.ViewModels
                 x => !string.IsNullOrEmpty(x)
             );
 
-            GetTreadList = ReactiveCommand.CreateFromTask(async() =>
+            GetTreadList = ReactiveCommand.CreateFromTask(async () =>
             {
                 Threads.Clear();
                 var threadSet = await connection.RequestThreadSet();
