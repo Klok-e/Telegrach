@@ -120,5 +120,10 @@ namespace DesktopFrontend.Models
             };
             throw new NotImplementedException();
         }
+
+        public Task<ThreadItem> CreateThread(string head, string body)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

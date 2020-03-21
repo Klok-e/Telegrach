@@ -10,16 +10,17 @@ namespace DesktopFrontend.Models
 {
     public class ThreadItem
     {
+        public const int NameCharCount = 15;
+
         public string Head { get; }
         public string Body { get; }
-        public string Name { get; }
+        public string Name => Head.PadRight(NameCharCount)[..NameCharCount].Trim();
         public ulong Id { get; }
 
-        public ThreadItem(string head, string body, string name, ulong id)
+        public ThreadItem(string head, string body, ulong id)
         {
             Head = head;
             Body = body;
-            Name = name;
             Id = id;
         }
     }

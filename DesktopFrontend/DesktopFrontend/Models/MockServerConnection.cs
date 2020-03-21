@@ -38,15 +38,29 @@ namespace DesktopFrontend.Models
             return ("rwerwer", "564756868");
         }
 
+        private List<ThreadItem> threads = new List<ThreadItem>
+        {
+            new[]
+            {
+                new ThreadItem("мозкоподібні структури", "dasdasdasd", 1),
+                new ThreadItem("блаблабла", "dasdasdasd", 2),
+            }
+        };
+
         public async Task<ThreadSet> RequestThreadSet()
         {
             var threadSet = new ThreadSet();
-            threadSet.Threads.AddRange(new[]
-            {
-                new ThreadItem("мозкоподібні структури", "dasdasdasd", "мозкоподібні структури", 1),
-                new ThreadItem("блаблабла", "dasdasdasd", "блаблабла", 2),
-            });
+            threadSet.Threads.AddRange(threads);
             return threadSet;
+        }
+
+        public async Task<ThreadItem> CreateThread(string head, string body)
+        {
+            // uncomment to test throwing
+            // throw new Exception();
+
+            threads.Add(new ThreadItem(head, body, (ulong)threads.Count + 1));
+            return threads[^1];
         }
     }
 }
