@@ -61,5 +61,43 @@ namespace DesktopFrontend.Models
 
             threads.Add(new ThreadItem(head, body, (ulong)threads.Count + 1));
         }
+
+        public async Task<ChatMessages> RequestMessagesForThread(ThreadItem thread)
+        {
+            if (thread.Id == 1)
+            {
+                var msgs = new ChatMessages();
+                msgs.Messages.AddRange(new[]
+                {
+                    new ChatMessage
+                    {
+                        Body = "i like potatoes",
+                        Time = DateTime.Now,
+                    },
+                    new ChatMessage
+                    {
+                        Body = "me too",
+                        Time = DateTime.Now,
+                    },
+                });
+                return msgs;
+            }
+
+            if (thread.Id == 2)
+            {
+                var msgs = new ChatMessages();
+                msgs.Messages.AddRange(new[]
+                {
+                    new ChatMessage
+                    {
+                        Body = "anyone here",
+                        Time = DateTime.Now,
+                    },
+                });
+                return msgs;
+            }
+
+            return new ChatMessages();
+        }
     }
 }

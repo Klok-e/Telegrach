@@ -26,5 +26,7 @@ namespace DesktopFrontend.Models
         /// <param name="body"></param>
         /// <returns></returns>
         Task CreateThread(string head, string body);
+
+        Task<ChatMessages> RequestMessagesForThread(ThreadItem thread);
     }
 }

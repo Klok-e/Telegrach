@@ -169,5 +169,37 @@ namespace DesktopFrontend.Models
                 throw new Exception();
             }
         }
+
+        public async Task<ChatMessages> RequestMessagesForThread(ThreadItem thread)
+        {
+            var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
+
+            var msg = new ClientMessage
+            {
+                ThreadDataRequest = new ClientMessage.Types.ThreadDataRequest
+                {
+                    TredId = thread.Id,
+                }
+            };
+
+            await stream.WriteProtoMessageAsync(msg);
+
+            var response = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
+            if (response.InnerCase != ServerMessage.InnerOneofCase.NewMessagesAppeared)
+            {
+                Log.Error("Network", this,
+                    $"Response to the messages request was unexpected: {response}");
+                throw new Exception();
+            }
+
+            var msgs = response.NewMessagesAppeared;
+            var res = new ChatMessages();
+            res.Messages.AddRange(msgs.Messages.Select(m => new ChatMessage
+            {
+                Body = m.Body,
+                Time = m.Time.ToDateTime()
+            }));
+            return res;
+        }
     }
 }

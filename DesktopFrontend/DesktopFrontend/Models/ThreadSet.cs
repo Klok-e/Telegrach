@@ -17,6 +17,8 @@ namespace DesktopFrontend.Models
         public string Name => Head.PadRight(NameCharCount)[..NameCharCount].Trim();
         public ulong Id { get; }
 
+        public ChatMessages? Messages { get; set; }
+
         public ThreadItem(string head, string body, ulong id)
         {
             Head = head;
