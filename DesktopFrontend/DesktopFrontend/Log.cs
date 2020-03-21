@@ -8,6 +8,7 @@ namespace DesktopFrontend
         public static class Areas
         {
             public const string Network = "Network";
+            public const string Application = "Application";
         }
 
         public static void Error(string area, object source, string message)

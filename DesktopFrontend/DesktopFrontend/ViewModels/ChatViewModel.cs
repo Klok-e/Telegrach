@@ -69,6 +69,8 @@ namespace DesktopFrontend.ViewModels
 
         public ReactiveCommand<Unit, Unit> UpdateThreadList { get; private set; }
 
+        public ReactiveCommand<ThreadItem, Unit> SelectThread { get; private set; }
+
         private void ThreadSearchInit(INavigationStack stack, IServerConnection connection)
         {
             _threadSet = new ThreadSet();
@@ -95,6 +97,11 @@ namespace DesktopFrontend.ViewModels
             });
             CreateNewThread.ThrownExceptions.Subscribe(
                 e => Log.Error(Log.Areas.Network, this, e.ToString()));
+
+            SelectThread = ReactiveCommand.Create<ThreadItem>(thread =>
+            {
+                Log.Info(Log.Areas.Application, this, $"Selected thread with name {thread.Name}");
+            });
         }
 
         #endregion
