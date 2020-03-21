@@ -33,7 +33,6 @@ class DataBase:
     def __exit__(self, exc_type=None, exc_value=None, traceback=None) -> None:
         asyncio.get_event_loop().run_until_complete(self.disconnect())
 
-
     async def connect(self):
         '''Establishing connection with the database
         Example for PostgreSQL - postgresql://scott:tiger@localhost/mydatabase

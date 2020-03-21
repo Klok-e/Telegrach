@@ -67,7 +67,7 @@ async def get_all_messages_from_tred(message: ThreadDataRequest, session: Sessio
         appendable.body = mess["message_body"]
         time = mess["message_time"].timestamp()
         appendable.time.seconds = int(time)
-        appendable.time.nanos = 0 # actually i dont think we need to send fractions of second
+        appendable.time.nanos = 0  # actually i dont think we need to send fractions of second
 
     return response
 
@@ -81,14 +81,16 @@ async def thread_creation(message: ThreadCreateRequest, session: SessionData):
         "super_id": 1,
         "header": message.head,
         "body": message.body
-        })
+    })
 
     response = ServerMessage()
     response.server_response.is_ok = True
-    
+
     return response
 
 # TODO: fix me
+
+
 @request_handler(ClientMessage.create_thread_request)
 async def create_tred(db, message):
     """
@@ -168,6 +170,3 @@ async def create_people_inlist(db, message):
     values = ctrl.create_people_inlist(request.list_id, request.friend_id)
     await db.create_new_people_inlist(values)
     return (5, ("#TODO. SEND NORMAL RESPONSE",))
-
-
-

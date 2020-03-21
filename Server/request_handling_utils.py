@@ -7,6 +7,7 @@ from proto.common_pb2 import UserCredentials
 
 REQUEST_HANDLERS = {}
 
+
 @dataclass
 class SessionData:
     db: DataBase
