@@ -62,12 +62,13 @@ def connect_string():
     port = os.getenv("TELEGRACH_DB_PORT", None) or __DB_PORT
     schema = schema_name()
     db_name = os.getenv("TELEGRACH_DB_NAME", None) or __DB_NAME
-    if any(
-            (us := not user,
-             ho := not hostname,
-             po := not port,
-             sc := not schema,
-             db_n := not db_name)):
+    if any((not user, not hostname, not port,
+            not schema, not db_name)):
+        us = not user
+        ho = not hostname
+        po = not port
+        sc = not schema
+        db_n = not db_name
         msg = ""
         for v in [
             x[1] for x in [

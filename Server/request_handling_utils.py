@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Callable, Awaitable, Any, Optional
 from database import DataBase
 from proto.client_pb2 import ClientMessage
@@ -6,12 +7,11 @@ from proto.common_pb2 import UserCredentials
 
 REQUEST_HANDLERS = {}
 
-
+@dataclass
 class SessionData:
-    def __init__(self, database: DataBase):
-        self.logged_in: bool = False
-        self.db: DataBase = database
-        self.login: Optional[str] = None
+    db: DataBase
+    logged_in: bool = False
+    login: Optional[str] = None
 
 
 async def handle_request(message: ClientMessage, session_data: SessionData) -> Any:

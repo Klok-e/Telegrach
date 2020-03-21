@@ -33,9 +33,6 @@ class DataBase:
     def __exit__(self, exc_type=None, exc_value=None, traceback=None) -> None:
         asyncio.get_event_loop().run_until_complete(self.disconnect())
 
-    # def _t(self, key):
-    #    '''Translates tablename according to self._voc'''
-    #    return self._voc[key] if self._voc else key
 
     async def connect(self):
         '''Establishing connection with the database
@@ -116,9 +113,9 @@ class DataBase:
     async def all_messages_in_tred(self, tred_id: int):
         query = (
             "select author_login, m.timestamp as message_time, m.body as message_body, header as head_tred, "
-            "   t.body as tred_body, t.timestamp as tred_time, creator_id "
-            "from message m "
-            "inner join tred t "
+            "t.body as tred_body, t.timestamp as tred_time, creator_id, m.tred_id "
+            "from messenger.message m "
+            "inner join messenger.tred t "
             "on m.tred_id  = t.tred_id "
             "where m.is_deleted is false "
             "and t.tred_id = :tred_id "
