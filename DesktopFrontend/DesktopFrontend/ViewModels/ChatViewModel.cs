@@ -86,7 +86,7 @@ namespace DesktopFrontend.ViewModels
                 stack.Push(createThread);
 
                 createThread.Create
-                    .Merge(createThread.Cancel.Select(_ => (ThreadItem)null))
+                    .Merge(createThread.Cancel)
                     .Subscribe(_ =>
                     {
                         UpdateThreadList.Execute();

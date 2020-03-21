@@ -8,7 +8,7 @@ namespace DesktopFrontend.ViewModels
 {
     public class CreateNewThreadViewModel : ViewModelBase
     {
-        public ReactiveCommand<Unit, ThreadItem> Create { get; }
+        public ReactiveCommand<Unit, Unit> Create { get; }
 
         public ReactiveCommand<Unit, Unit> Cancel { get; }
 
@@ -32,13 +32,13 @@ namespace DesktopFrontend.ViewModels
             var canOk = this.WhenAny(a => a.Head,
                 h => !string.IsNullOrEmpty(h.GetValue()));
 
-            Create = ReactiveCommand.CreateFromTask(async () => await connection.CreateThread(Head, Body),
+            Create = ReactiveCommand.CreateFromTask(async () => { await connection.CreateThread(Head, Body); },
                 canOk);
             // Create thread throws if the thread wasn't created successfully
             Create.ThrownExceptions.Subscribe(e =>
             {
                 Logger.Sink.Log(LogEventLevel.Warning, "Network", this,
-                    $"Exception while creating a thread: {e.Message}; {e.StackTrace}");
+                    $"Exception while creating a thread: {e}");
                 // TODO: add a nice pop up explaining the situation
             });
             Cancel = ReactiveCommand.Create(() => { });

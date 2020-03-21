@@ -25,6 +25,6 @@ namespace DesktopFrontend.Models
         /// <param name="head"></param>
         /// <param name="body"></param>
         /// <returns></returns>
-        Task<ThreadItem> CreateThread(string head, string body);
+        Task CreateThread(string head, string body);
     }
 }

@@ -54,13 +54,12 @@ namespace DesktopFrontend.Models
             return threadSet;
         }
 
-        public async Task<ThreadItem> CreateThread(string head, string body)
+        public async Task CreateThread(string head, string body)
         {
             // uncomment to test throwing
             // throw new Exception();
 
             threads.Add(new ThreadItem(head, body, (ulong)threads.Count + 1));
-            return threads[^1];
         }
     }
 }
