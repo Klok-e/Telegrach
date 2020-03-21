@@ -56,7 +56,7 @@ async def get_all_messages_from_tred(message: ThreadDataRequest, session: Sessio
     """Function returns all message in tred by one query."""
     result = await session.db.all_messages_in_tred(message.tred_id)
     result = [dict(i.items()) for i in result]
-    await db.disconnect()
+
     response = ServerMessage()
 
     for mess in result:
@@ -72,7 +72,21 @@ async def get_all_messages_from_tred(message: ThreadDataRequest, session: Sessio
     return response
 
 
+# @request_handler(ClientMessage.get_all_joined_threads_request)
 
+
+@request_handler(ClientMessage.create_thread_request)
+async def thread_creation(message: ThreadCreateRequest, session: SessionData):
+    await session.db.create_new_tred({
+        "super_id": 1,
+        "header": message.head,
+        "body": message.body
+        })
+
+    response = ServerMessage()
+    response.server_response.is_ok = True
+    
+    return response
 
 # TODO: fix me
 @request_handler(ClientMessage.create_thread_request)
