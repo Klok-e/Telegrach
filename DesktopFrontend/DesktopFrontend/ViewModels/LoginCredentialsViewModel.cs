@@ -39,7 +39,7 @@ namespace DesktopFrontend.ViewModels
             // TODO: make this into a real sign in
             SignIn = ReactiveCommand.Create(() =>
             {
-                stack.Push(new ChatViewModel(connection));
+                stack.Push(new ChatViewModel(stack, connection));
                 return true;
             });
         }

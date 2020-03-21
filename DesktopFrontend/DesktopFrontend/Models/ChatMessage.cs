@@ -29,6 +29,6 @@ namespace DesktopFrontend.Models
             //    TimeSpan.FromSeconds(Interval));
         }
 
-        public ObservableCollection<ChatMessage> Messages { get; }
+        public ObservableCollection<ChatMessage> Messages { get; set; }
     }
 }

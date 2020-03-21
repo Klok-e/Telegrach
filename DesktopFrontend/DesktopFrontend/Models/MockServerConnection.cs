@@ -38,15 +38,66 @@ namespace DesktopFrontend.Models
             return ("rwerwer", "564756868");
         }
 
+        private List<ThreadItem> threads = new List<ThreadItem>
+        {
+            new[]
+            {
+                new ThreadItem("мозкоподібні структури", "dasdasdasd", 1),
+                new ThreadItem("блаблабла", "dasdasdasd", 2),
+            }
+        };
+
         public async Task<ThreadSet> RequestThreadSet()
         {
             var threadSet = new ThreadSet();
-            threadSet.Threads.AddRange(new[]
-            {
-                new ThreadItem("мозкоподібні структури", "dasdasdasd", "мозкоподібні структури", 1),
-                new ThreadItem("блаблабла", "dasdasdasd", "блаблабла", 2),
-            });
+            threadSet.Threads.AddRange(threads);
             return threadSet;
+        }
+
+        public async Task CreateThread(string head, string body)
+        {
+            // uncomment to test throwing
+            // throw new Exception();
+
+            threads.Add(new ThreadItem(head, body, (ulong)threads.Count + 1));
+        }
+
+        public async Task<ChatMessages> RequestMessagesForThread(ThreadItem thread)
+        {
+            if (thread.Id == 1)
+            {
+                var msgs = new ChatMessages();
+                msgs.Messages.AddRange(new[]
+                {
+                    new ChatMessage
+                    {
+                        Body = "i like potatoes",
+                        Time = DateTime.Now,
+                    },
+                    new ChatMessage
+                    {
+                        Body = "me too",
+                        Time = DateTime.Now,
+                    },
+                });
+                return msgs;
+            }
+
+            if (thread.Id == 2)
+            {
+                var msgs = new ChatMessages();
+                msgs.Messages.AddRange(new[]
+                {
+                    new ChatMessage
+                    {
+                        Body = "anyone here",
+                        Time = DateTime.Now,
+                    },
+                });
+                return msgs;
+            }
+
+            return new ChatMessages();
         }
     }
 }

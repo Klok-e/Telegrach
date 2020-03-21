@@ -1,20 +1,20 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Linq;
 using DesktopFrontend.Models;
 using DynamicData;
+using DynamicData.Binding;
 using ReactiveUI;
 
 namespace DesktopFrontend.ViewModels
 {
     public class ChatViewModel : ViewModelBase
     {
-        private ChatMessages _model;
-
-        public ChatViewModel(IServerConnection connection)
+        public ChatViewModel(INavigationStack stack, IServerConnection connection)
         {
             ChatInit();
-            ThreadSearchInit(connection);
+            ThreadSearchInit(stack, connection);
         }
 
         #region Chat
@@ -29,22 +29,33 @@ namespace DesktopFrontend.ViewModels
             set => this.RaiseAndSetIfChanged(ref _currentMessage, value);
         }
 
-        public ObservableCollection<ChatMessage> Messages => _model.Messages;
+        private ChatMessages _messagesModel;
+
+        public ChatMessages MessagesModel
+        {
+            get => _messagesModel;
+            set => this.RaiseAndSetIfChanged(ref _messagesModel, value);
+        }
+
+        public ObservableCollection<ChatMessage> Messages { get; private set; }
 
         private void ChatInit()
         {
-            _model = new ChatMessages();
+            MessagesModel = new ChatMessages();
+            Messages = new ObservableCollection<ChatMessage>();
+
             var isSendEnabled = this.WhenAnyValue(
                 x => x.CurrentMessage,
                 x => !string.IsNullOrEmpty(x)
             );
             SendMessage = ReactiveCommand.Create(() =>
                 {
-                    _model.Messages.Add(new ChatMessage
+                    MessagesModel.Messages.Add(new ChatMessage
                     {
                         Body = CurrentMessage,
                         Time = DateTime.Now
                     });
+                    Messages.Add(MessagesModel.Messages[^1]);
                 },
                 isSendEnabled);
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
@@ -62,26 +73,54 @@ namespace DesktopFrontend.ViewModels
             set => this.RaiseAndSetIfChanged(ref _threadSearch, value);
         }
 
-        public ReactiveCommand<Unit, Unit> GetTreadList { get; private set; }
+        public ReactiveCommand<Unit, Unit> CreateNewThread { get; private set; }
 
         private ThreadSet _threadSet;
         public ObservableCollection<ThreadItem> Threads => _threadSet.Threads;
 
-        private void ThreadSearchInit(IServerConnection connection)
+        public ReactiveCommand<Unit, Unit> UpdateThreadList { get; private set; }
+
+        public ReactiveCommand<ThreadItem, Unit> SelectThread { get; private set; }
+
+        private void ThreadSearchInit(INavigationStack stack, IServerConnection connection)
         {
             _threadSet = new ThreadSet();
-            var isSendEnabled = this.WhenAnyValue(
-                x => x.ThreadSearch,
-                x => !string.IsNullOrEmpty(x)
-            );
-
-            GetTreadList = ReactiveCommand.CreateFromTask(async () =>
+            UpdateThreadList = ReactiveCommand.CreateFromTask(async () =>
             {
                 Threads.Clear();
                 var threadSet = await connection.RequestThreadSet();
                 Threads.AddRange(threadSet.Threads);
-            }, isSendEnabled);
-            GetTreadList.Subscribe(_ => ThreadSearch = string.Empty);
+            });
+            UpdateThreadList.Execute();
+
+            CreateNewThread = ReactiveCommand.Create(() =>
+            {
+                var createThread = new CreateNewThreadViewModel(connection);
+                stack.Push(createThread);
+
+                createThread.Create
+                    .Merge(createThread.Cancel)
+                    .Subscribe(_ =>
+                    {
+                        UpdateThreadList.Execute();
+                        stack.Pop();
+                    });
+            });
+            CreateNewThread.ThrownExceptions.Subscribe(
+                e => Log.Error(Log.Areas.Network, this, e.ToString()));
+
+            SelectThread = ReactiveCommand.CreateFromTask<ThreadItem>(async thread =>
+            {
+                Log.Info(Log.Areas.Application, this, $"Selected thread with name {thread.Name}");
+                if (thread.Messages == null)
+                {
+                    thread.Messages = await connection.RequestMessagesForThread(thread);
+                }
+
+                MessagesModel = thread.Messages;
+                Messages.Clear();
+                Messages.AddRange(MessagesModel.Messages);
+            });
         }
 
         #endregion

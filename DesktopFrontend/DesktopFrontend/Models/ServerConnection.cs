@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
@@ -9,6 +10,7 @@ using Avalonia;
 using Avalonia.Logging;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using DynamicData;
 using Google.Protobuf;
 using Proto;
 
@@ -112,13 +114,92 @@ namespace DesktopFrontend.Models
             return (accData.Login, accData.Password);
         }
 
-        public Task<ThreadSet> RequestThreadSet()
+        public async Task<ThreadSet> RequestThreadSet()
         {
+            var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
+
             var msg = new ClientMessage
             {
                 GetAllJoinedThreadsRequest = new ClientMessage.Types.GetAllJoinedThreadsRequest()
             };
-            throw new NotImplementedException();
+
+            await stream.WriteProtoMessageAsync(msg);
+
+            var response = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
+            if (response.InnerCase != ServerMessage.InnerOneofCase.AllTheThreads)
+            {
+                Log.Error("Network", this,
+                    $"Response to the threads request was unexpected: {response}");
+                throw new Exception();
+            }
+
+            var threads = response.AllTheThreads;
+            var set = new ThreadSet();
+            set.Threads.AddRange(threads.Threads.Select(data => new ThreadItem(data.Head, data.Body, data.Id)));
+            return set;
+        }
+
+        public async Task CreateThread(string head, string body)
+        {
+            var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
+
+            var msg = new ClientMessage
+            {
+                CreateThreadRequest = new ClientMessage.Types.ThreadCreateRequest
+                {
+                    Head = head,
+                    Body = body,
+                }
+            };
+
+            await stream.WriteProtoMessageAsync(msg);
+
+            var response = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
+            if (response.InnerCase != ServerMessage.InnerOneofCase.ServerResponse)
+            {
+                Log.Error("Network", this,
+                    $"Response to the thread creation request was unexpected: {response}");
+                throw new Exception();
+            }
+
+            if (!response.ServerResponse.IsOk)
+            {
+                Log.Warn(Log.Areas.Network, this, "Server didn't allow the creation of a thread");
+                // TODO: show a popup explaining the situation
+                throw new Exception();
+            }
+        }
+
+        public async Task<ChatMessages> RequestMessagesForThread(ThreadItem thread)
+        {
+            var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
+
+            var msg = new ClientMessage
+            {
+                ThreadDataRequest = new ClientMessage.Types.ThreadDataRequest
+                {
+                    TredId = thread.Id,
+                }
+            };
+
+            await stream.WriteProtoMessageAsync(msg);
+
+            var response = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
+            if (response.InnerCase != ServerMessage.InnerOneofCase.NewMessagesAppeared)
+            {
+                Log.Error("Network", this,
+                    $"Response to the messages request was unexpected: {response}");
+                throw new Exception();
+            }
+
+            var msgs = response.NewMessagesAppeared;
+            var res = new ChatMessages();
+            res.Messages.AddRange(msgs.Messages.Select(m => new ChatMessage
+            {
+                Body = m.Body,
+                Time = m.Time.ToDateTime()
+            }));
+            return res;
         }
     }
 }
