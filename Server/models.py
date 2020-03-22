@@ -64,7 +64,10 @@ class Message(Base):
     tred_id = Column(BigInteger, ForeignKey("tred.tred_id"))
     timestamp = Column(DateTime, nullable=False, server_default=func.now())
     body = Column(String(256))
-    is_deleted = Column(Boolean, nullable=False, server_default=expression.false())
+    is_deleted = Column(
+        Boolean,
+        nullable=False,
+        server_default=expression.false())
 
 
 class PersonalLists(Base):

@@ -103,8 +103,11 @@ class DataBase:
         if result is None:
             return None
         else:
-            return UserAccount(login=result['login'], salt=result['salt'],
-                               pword=result['pword'], super_id=result['super_id'])
+            return UserAccount(
+                login=result['login'],
+                salt=result['salt'],
+                pword=result['pword'],
+                super_id=result['super_id'])
 
     async def get_super(self, super_id: int) -> Optional[SuperAccount]:
         query = (
@@ -121,8 +124,14 @@ class DataBase:
             "from tred"
         )
         threads = await self.fetch_all(query)
-        return map(lambda d: Tred(tred_id=d["tred_id"], creator_id=d["creator_id"], header=d["header"],
-                                  body=d["body"], timestamp=d["timestamp"]), threads)
+        return map(
+            lambda d: Tred(
+                tred_id=d["tred_id"],
+                creator_id=d["creator_id"],
+                header=d["header"],
+                body=d["body"],
+                timestamp=d["timestamp"]),
+            threads)
 
     async def all_messages_in_tred(self, tred_id: int):
         query = (
