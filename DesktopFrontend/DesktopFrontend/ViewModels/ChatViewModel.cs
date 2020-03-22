@@ -15,38 +15,56 @@ namespace DesktopFrontend.ViewModels
 {
     public class ChatViewModel : ViewModelBase
     {
-        bool _finished = true;
+        private bool _finished = true;
+        private TaskCompletionSource<Unit> _finish;
 
         public ChatViewModel(INavigationStack stack, IServerConnection connection)
         {
             ChatInit();
             ThreadSearchInit(stack, connection);
 
-
             DispatcherTimer.Run(() =>
             {
                 Debug.Assert(Dispatcher.UIThread.CheckAccess());
                 if (_finished)
                 {
+                    _finish = new TaskCompletionSource<Unit>();
+                    _finished = false;
                     Dispatcher.UIThread.InvokeAsync(async () =>
                     {
-                        Debug.Assert(Dispatcher.UIThread.CheckAccess());
-                        _finished = false;
-
-                        // TODO: make this request only new messages instead of ALL the messages
-                        foreach (var (chatMessages, thread) in (await Task.WhenAll(
-                            Threads.Select(connection.RequestMessagesForThread))).Zip(Threads))
+                        try
                         {
-                            thread.Messages = chatMessages;
-                            if (_currentThread == thread)
+                            Debug.Assert(Dispatcher.UIThread.CheckAccess());
+
+                            // TODO: make this request only new messages instead of ALL the messages
+                            foreach (var (chatMessages, thread) in (await Task.WhenAll(
+                                Threads.Select(connection.RequestMessagesForThread))).Zip(Threads))
                             {
-                                SetMessages(chatMessages);
+                                // if no changes then continue (if anyMessages is null or false)
+                                var threadMessages = thread.Messages?.Messages;
+                                var anyMessages = threadMessages == null
+                                    ? null
+                                    : chatMessages?.Messages?.Except(threadMessages)?.Any();
+                                if (anyMessages != true)
+                                    continue;
+
+                                thread.Messages = chatMessages;
+                                if (_currentThread == thread)
+                                {
+                                    SetMessages(chatMessages);
+                                }
                             }
+
+                            await UpdateThreads(connection);
+
+                            _finished = true;
+                            _finish.SetResult(default);
                         }
-
-                        UpdateThreadList.Execute();
-
-                        _finished = true;
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            throw;
+                        }
                     });
                 }
 
@@ -125,10 +143,11 @@ namespace DesktopFrontend.ViewModels
             _threadSet = new ThreadSet();
             UpdateThreadList = ReactiveCommand.CreateFromTask(async () =>
             {
+                if (!_finished)
+                    await _finish.Task;
+
                 Debug.Assert(_finished);
-                Threads.Clear();
-                var threadSet = await connection.RequestThreadSet();
-                Threads.AddRange(threadSet.Threads);
+                await UpdateThreads(connection);
             });
             UpdateThreadList.Execute();
             UpdateThreadList.ThrownExceptions.Subscribe(
@@ -152,7 +171,11 @@ namespace DesktopFrontend.ViewModels
 
             SelectThread = ReactiveCommand.CreateFromTask<ThreadItem>(async thread =>
             {
+                if (!_finished)
+                    await _finish.Task;
+
                 Debug.Assert(_finished);
+
                 Log.Info(Log.Areas.Application, this, $"Selected thread with name {thread.Name}");
                 if (thread.Messages == null)
                 {
@@ -173,6 +196,18 @@ namespace DesktopFrontend.ViewModels
             MessagesModel = messages;
             Messages.Clear();
             Messages.AddRange(MessagesModel.Messages);
+        }
+
+        private async Task UpdateThreads(IServerConnection connection)
+        {
+            var threadSet = await connection.RequestThreadSet();
+
+            // if any changes
+            if (threadSet.Threads.Except(Threads).Any())
+            {
+                Threads.Clear();
+                Threads.AddRange(threadSet.Threads);
+            }
         }
     }
 }
