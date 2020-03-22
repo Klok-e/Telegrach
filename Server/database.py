@@ -16,7 +16,7 @@ from typing import List, Generator, Dict, Optional
 import typing
 from config import *
 import models
-from models import Message, UserAccount, SuperAccount
+from models import Message, UserAccount, SuperAccount, Tred
 from crypto import *
 from helpers import *
 
@@ -100,8 +100,14 @@ class DataBase:
             "where u.login = :login"
         )
         result = await self.fetch_one(query=query, login=login)
-        return UserAccount(login=result['login'], salt=result['salt'],
-                           pword=result['pword'], super_id=result['super_id'])
+        if result is None:
+            return None
+        else:
+            return UserAccount(
+                login=result['login'],
+                salt=result['salt'],
+                pword=result['pword'],
+                super_id=result['super_id'])
 
     async def get_super(self, super_id: int) -> Optional[SuperAccount]:
         query = (
@@ -111,6 +117,21 @@ class DataBase:
         )
         result = await self.fetch_one(query=query, super_id=super_id)
         return SuperAccount(super_id=result['super_id'])
+
+    async def get_all_threads(self):
+        query = (
+            "select tred_id, creator_id, header, body, timestamp "
+            "from tred"
+        )
+        threads = await self.fetch_all(query)
+        return map(
+            lambda d: Tred(
+                tred_id=d["tred_id"],
+                creator_id=d["creator_id"],
+                header=d["header"],
+                body=d["body"],
+                timestamp=d["timestamp"]),
+            threads)
 
     async def all_messages_in_tred(self, tred_id: int):
         query = (
@@ -191,17 +212,17 @@ class DataBase:
                            pword=new_acc.pword, super_id=new_acc.super_id)
         return new_acc, password
 
-    async def create_new_message(self, values):
+    async def create_new_message(self, author_login: str, tred_id: int, body: str):
         query = (
-            "insert into message(author_login, tred_id, body, is_deleted) "
-            "values(:author_login, :tred_id, :body, :is_deleted);")
-        result = await self.execute(query=query, **values)
+            "insert into message(author_login, tred_id, body) "
+            "values(:author_login, :tred_id, :body);")
+        result = await self.execute(query=query, author_login=author_login, tred_id=tred_id, body=body)
         return result
 
-    async def create_new_tred(self, values):
+    async def create_new_tred(self, creator_id: int, header: str, body: str):
         query = ("insert into tred(creator_id, header, body) "
                  "values (:creator_id, :header, :body);")
-        result = await self.execute(query=query, **values)
+        result = await self.execute(query=query, creator_id=creator_id, header=header, body=body)
         return result
 
     async def create_new_tred_participation(self, values):

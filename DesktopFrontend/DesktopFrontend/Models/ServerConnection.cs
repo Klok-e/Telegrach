@@ -170,6 +170,36 @@ namespace DesktopFrontend.Models
             }
         }
 
+        public async Task SendMessage(string body, ulong threadId)
+        {
+            var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
+
+            var msg = new ClientMessage
+            {
+                SendMsgToThreadRequest = new ClientMessage.Types.ThreadSendMessageRequest
+                {
+                    Body = body,
+                    ThreadId = threadId
+                }
+            };
+            await stream.WriteProtoMessageAsync(msg);
+
+            var response = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
+            if (response.InnerCase != ServerMessage.InnerOneofCase.ServerResponse)
+            {
+                Log.Error("Network", this,
+                    $"Response to the send message request was unexpected: {response}");
+                throw new Exception();
+            }
+
+            if (!response.ServerResponse.IsOk)
+            {
+                Log.Warn(Log.Areas.Network, this, "Server didn't allow to send a message");
+                // TODO: show a popup explaining the situation
+                throw new Exception();
+            }
+        }
+
         public async Task<ChatMessages> RequestMessagesForThread(ThreadItem thread)
         {
             var stream = new LengthPrefixedStreamWrapper(_client.GetStream());

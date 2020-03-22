@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media.Imaging;
@@ -26,6 +27,8 @@ namespace DesktopFrontend.Models
         /// <param name="body"></param>
         /// <returns></returns>
         Task CreateThread(string head, string body);
+
+        Task SendMessage(string body, ulong threadId);
 
         Task<ChatMessages> RequestMessagesForThread(ThreadItem thread);
     }

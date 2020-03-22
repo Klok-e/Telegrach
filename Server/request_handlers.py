@@ -17,6 +17,7 @@ async def login(message: UserCredentials, session: SessionData):
         print(f"Sign in failed")
     elif validate_password(user.salt, user.pword, message.password):
         print(f"Sign in successful")
+        session.login = user.login
         ok = True
 
     session.logged_in = ok
@@ -52,16 +53,18 @@ async def create_user(message: ClientMessage.UserCreationRequest, session: Sessi
 
 # TODO: fix me
 @request_handler(ClientMessage.thread_data_request)
-async def get_all_messages_from_tred(message: ThreadDataRequest, session: SessionData):
+async def get_all_messages_from_tred(message: ClientMessage.ThreadDataRequest, session: SessionData):
     """Function returns all message in tred by one query."""
     result = await session.db.all_messages_in_tred(message.tred_id)
     result = [dict(i.items()) for i in result]
 
     response = ServerMessage()
 
+    response.new_messages_appeared.messages.extend([])
     for mess in result:
         appendable = response.new_messages_appeared.messages.add()
 
+        # todo: fix this dictionary mess
         appendable.id = mess["creator_id"]
         appendable.thread_id = mess["tred_id"]
         appendable.body = mess["message_body"]
@@ -72,26 +75,41 @@ async def get_all_messages_from_tred(message: ThreadDataRequest, session: Sessio
     return response
 
 
-# @request_handler(ClientMessage.get_all_joined_threads_request)
+@request_handler(ClientMessage.get_all_joined_threads_request)
+async def get_all_threads(message: ClientMessage.GetAllJoinedThreadsRequest, session: SessionData):
+    all_threads = await session.db.get_all_threads()
+    response = ServerMessage()
+    response.all_the_threads.threads.extend([])
+    for thread in all_threads:
+        r_th = response.all_the_threads.threads.add()
+        r_th.id = thread.tred_id
+        r_th.head = thread.header
+        r_th.body = thread.body
+    return response
 
 
 @request_handler(ClientMessage.create_thread_request)
-async def thread_creation(message: ThreadCreateRequest, session: SessionData):
-    await session.db.create_new_tred({
-        "super_id": 1,
-        "header": message.head,
-        "body": message.body
-    })
+async def thread_creation(message: ClientMessage.ThreadCreateRequest, session: SessionData):
+    user = await session.db.get_user(session.login)
+    await session.db.create_new_tred(user.super_id, message.head, message.body)
 
     response = ServerMessage()
     response.server_response.is_ok = True
 
     return response
 
-# TODO: fix me
+
+@request_handler(ClientMessage.send_msg_to_thread_request)
+async def create_message(message: ClientMessage.ThreadSendMessageRequest, session: SessionData):
+    await session.db.create_new_message(session.login, message.thread_id, message.body)
+
+    response = ServerMessage()
+    response.server_response.is_ok = True
+
+    return response
 
 
-@request_handler(ClientMessage.create_thread_request)
+# @request_handler(ClientMessage.create_thread_request)
 async def create_tred(db, message):
     """
         This fucntion is similar to the other ones, so ill explain everything common here
@@ -117,19 +135,6 @@ async def create_tred(db, message):
 # @request_handler(client_pb2.ClientMessage.user_create_request)
 async def response_creation(data):
     return b"CODE=5\n\n" + data[0].encode() + b"\n\n\n\n"
-
-
-# TODO: fix me
-@request_handler(ClientMessage.send_msg_to_thread_request)
-async def create_message(db, message):
-    request = signals.message_to_create()
-    request.ParseFromString(message)
-    values = ctrl.create_message(
-        request.login,
-        request.tred_id,
-        request.message)
-    await db.create_new_message(values)
-    return (5, ("#TODO. SEND NORMAL RESPONSE",))
 
 
 # TODO: fix me
