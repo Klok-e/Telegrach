@@ -16,13 +16,13 @@ namespace DesktopFrontend.ViewModels
     public class ChatViewModel : ViewModelBase
     {
         bool _finished = true;
-        
+
         public ChatViewModel(INavigationStack stack, IServerConnection connection)
         {
             ChatInit();
             ThreadSearchInit(stack, connection);
 
-            
+
             DispatcherTimer.Run(() =>
             {
                 Debug.Assert(Dispatcher.UIThread.CheckAccess());
