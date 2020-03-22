@@ -104,6 +104,7 @@ namespace DesktopFrontend.Models
         public async Task SendMessage(string body, ulong threadId)
         {
             var thread = threads.Find(t => t.Id == threadId) ?? throw new Exception();
+            thread.Messages ??= new ChatMessages();
             thread.Messages.Messages.Add(new ChatMessage
             {
                 Body = body,

@@ -38,7 +38,7 @@ namespace DesktopFrontend.ViewModels
                         Debug.Assert(Dispatcher.UIThread.CheckAccess());
 
                         await UpdateThreads(connection);
-                        
+
                         // TODO: make this request only new messages instead of ALL the messages
                         foreach (var (chatMessages, thread) in (await Task.WhenAll(
                             Threads.Select(connection.RequestMessagesForThread))).Zip(Threads))
@@ -112,6 +112,8 @@ namespace DesktopFrontend.ViewModels
                 },
                 isSendEnabled);
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
+            SendMessage.ThrownExceptions.Subscribe(
+                e => Log.Error(Log.Areas.Network, this, e.ToString()));
         }
 
         #endregion
@@ -145,15 +147,15 @@ namespace DesktopFrontend.ViewModels
 
                 Debug.Assert(_finished);
                 await UpdateThreads(connection);
-                //if (_currentThread != null)
-                //{
-                //    if (_currentThread.Messages == null)
-                //    {
-                //        _currentThread.Messages = await connection.RequestMessagesForThread(_currentThread);
-                //    }
-//
-                //    SetMessages(_currentThread.Messages);
-                //}
+                if (_currentThread != null)
+                {
+                    if (_currentThread.Messages == null)
+                    {
+                        _currentThread.Messages = await connection.RequestMessagesForThread(_currentThread);
+                    }
+
+                    SetMessages(_currentThread.Messages);
+                }
             });
             UpdateThreadList.Execute();
             UpdateThreadList.ThrownExceptions.Subscribe(
