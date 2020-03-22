@@ -33,15 +33,14 @@ class DataBase:
     def __exit__(self, exc_type=None, exc_value=None, traceback=None) -> None:
         asyncio.get_event_loop().run_until_complete(self.disconnect())
 
-    # def _t(self, key):
-    #    '''Translates tablename according to self._voc'''
-    #    return self._voc[key] if self._voc else key
-
     async def connect(self):
         '''Establishing connection with the database
         Example for PostgreSQL - postgresql://scott:tiger@localhost/mydatabase
         Can be useful https://stackoverflow.com/questions/769683/show-tables-in-postgresql'''
         await self.database.connect()
+
+        # set default schema
+        await self.execute(f"set search_path to {schema_name()}")
 
     async def disconnect(self):
         await self.database.disconnect()
@@ -116,7 +115,7 @@ class DataBase:
     async def all_messages_in_tred(self, tred_id: int):
         query = (
             "select author_login, m.timestamp as message_time, m.body as message_body, header as head_tred, "
-            "   t.body as tred_body, t.timestamp as tred_time, creator_id "
+            "t.body as tred_body, t.timestamp as tred_time, creator_id, m.tred_id "
             "from message m "
             "inner join tred t "
             "on m.tred_id  = t.tred_id "
