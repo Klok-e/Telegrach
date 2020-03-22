@@ -1,7 +1,11 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 using DesktopFrontend.Models;
 using DynamicData;
 using DynamicData.Binding;
@@ -11,10 +15,43 @@ namespace DesktopFrontend.ViewModels
 {
     public class ChatViewModel : ViewModelBase
     {
+        bool _finished = true;
+        
         public ChatViewModel(INavigationStack stack, IServerConnection connection)
         {
             ChatInit();
             ThreadSearchInit(stack, connection);
+
+            
+            DispatcherTimer.Run(() =>
+            {
+                Debug.Assert(Dispatcher.UIThread.CheckAccess());
+                if (_finished)
+                {
+                    Dispatcher.UIThread.InvokeAsync(async () =>
+                    {
+                        Debug.Assert(Dispatcher.UIThread.CheckAccess());
+                        _finished = false;
+
+                        // TODO: make this request only new messages instead of ALL the messages
+                        foreach (var (chatMessages, thread) in (await Task.WhenAll(
+                            Threads.Select(connection.RequestMessagesForThread))).Zip(Threads))
+                        {
+                            thread.Messages = chatMessages;
+                            if (_currentThread == thread)
+                            {
+                                SetMessages(chatMessages);
+                            }
+                        }
+
+                        UpdateThreadList.Execute();
+
+                        _finished = true;
+                    });
+                }
+
+                return true;
+            }, TimeSpan.FromSeconds(0.1));
         }
 
         #region Chat
@@ -30,6 +67,7 @@ namespace DesktopFrontend.ViewModels
         }
 
         private ChatMessages _messagesModel;
+        private ThreadItem? _currentThread;
 
         public ChatMessages MessagesModel
         {
@@ -87,11 +125,14 @@ namespace DesktopFrontend.ViewModels
             _threadSet = new ThreadSet();
             UpdateThreadList = ReactiveCommand.CreateFromTask(async () =>
             {
+                Debug.Assert(_finished);
                 Threads.Clear();
                 var threadSet = await connection.RequestThreadSet();
                 Threads.AddRange(threadSet.Threads);
             });
             UpdateThreadList.Execute();
+            UpdateThreadList.ThrownExceptions.Subscribe(
+                e => Log.Error(Log.Areas.Network, this, e.ToString()));
 
             CreateNewThread = ReactiveCommand.Create(() =>
             {
@@ -111,18 +152,27 @@ namespace DesktopFrontend.ViewModels
 
             SelectThread = ReactiveCommand.CreateFromTask<ThreadItem>(async thread =>
             {
+                Debug.Assert(_finished);
                 Log.Info(Log.Areas.Application, this, $"Selected thread with name {thread.Name}");
                 if (thread.Messages == null)
                 {
                     thread.Messages = await connection.RequestMessagesForThread(thread);
                 }
 
-                MessagesModel = thread.Messages;
-                Messages.Clear();
-                Messages.AddRange(MessagesModel.Messages);
+                SetMessages(thread.Messages);
+                _currentThread = thread;
             });
+            SelectThread.ThrownExceptions.Subscribe(
+                e => Log.Error(Log.Areas.Network, this, e.ToString()));
         }
 
         #endregion
+
+        private void SetMessages(ChatMessages messages)
+        {
+            MessagesModel = messages;
+            Messages.Clear();
+            Messages.AddRange(MessagesModel.Messages);
+        }
     }
 }
