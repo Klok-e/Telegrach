@@ -39,6 +39,9 @@ class DataBase:
         Can be useful https://stackoverflow.com/questions/769683/show-tables-in-postgresql'''
         await self.database.connect()
 
+        # set default schema
+        await self.execute(f"set search_path to {schema_name()}")
+
     async def disconnect(self):
         await self.database.disconnect()
 
@@ -113,8 +116,8 @@ class DataBase:
         query = (
             "select author_login, m.timestamp as message_time, m.body as message_body, header as head_tred, "
             "t.body as tred_body, t.timestamp as tred_time, creator_id, m.tred_id "
-            "from messenger.message m "
-            "inner join messenger.tred t "
+            "from message m "
+            "inner join tred t "
             "on m.tred_id  = t.tred_id "
             "where m.is_deleted is false "
             "and t.tred_id = :tred_id "
