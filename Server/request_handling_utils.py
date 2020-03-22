@@ -21,6 +21,8 @@ async def handle_request(message: ClientMessage, session_data: SessionData) -> A
 
     msg_type_str: str = message.WhichOneof('inner')
     msg_type: Any = getattr(ClientMessage, msg_type_str)
+    if msg_type not in REQUEST_HANDLERS:
+        raise RuntimeError
     handler = REQUEST_HANDLERS[msg_type]
 
     # invoke handler with a given variant

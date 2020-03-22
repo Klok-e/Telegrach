@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, MetaData, Table, ForeignKey, DateTime, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.types import BigInteger
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, expression
 from helpers import generate_uuid4
 import config
 from sqlalchemy.ext.declarative import declarative_base
@@ -47,7 +47,7 @@ class Tred(Base):
     creator_id = Column(BigInteger, ForeignKey("super_account.super_id"))
     header = Column(String(128), nullable=False)
     body = Column(String(256))
-    timestamp = Column(DateTime, nullable=False, default=func.now())
+    timestamp = Column(DateTime, nullable=False, server_default=func.now())
 
 
 class TredParticipation(Base):
@@ -62,9 +62,9 @@ class Message(Base):
     message_id = Column(BigInteger, primary_key=True)
     author_login = Column(UUID, ForeignKey("user_account.login"))
     tred_id = Column(BigInteger, ForeignKey("tred.tred_id"))
-    timestamp = Column(DateTime, nullable=False, default=func.now())
+    timestamp = Column(DateTime, nullable=False, server_default=func.now())
     body = Column(String(256))
-    is_deleted = Column(Boolean, default=True)
+    is_deleted = Column(Boolean, nullable=False, server_default=expression.false())
 
 
 class PersonalLists(Base):
