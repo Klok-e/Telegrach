@@ -20,56 +20,53 @@ namespace DesktopFrontend.ViewModels
 
         public ChatViewModel(INavigationStack stack, IServerConnection connection)
         {
-            ChatInit();
+            ChatInit(connection);
             ThreadSearchInit(stack, connection);
 
             DispatcherTimer.Run(() =>
             {
                 Debug.Assert(Dispatcher.UIThread.CheckAccess());
-                if (_finished)
+                if (!_finished)
+                    return true;
+
+                _finish = new TaskCompletionSource<Unit>();
+                _finished = false;
+                Dispatcher.UIThread.InvokeAsync(async () =>
                 {
-                    _finish = new TaskCompletionSource<Unit>();
-                    _finished = false;
-                    Dispatcher.UIThread.InvokeAsync(async () =>
+                    try
                     {
-                        try
-                        {
-                            Debug.Assert(Dispatcher.UIThread.CheckAccess());
+                        Debug.Assert(Dispatcher.UIThread.CheckAccess());
 
-                            // TODO: make this request only new messages instead of ALL the messages
-                            foreach (var (chatMessages, thread) in (await Task.WhenAll(
-                                Threads.Select(connection.RequestMessagesForThread))).Zip(Threads))
+                        await UpdateThreads(connection);
+                        
+                        // TODO: make this request only new messages instead of ALL the messages
+                        foreach (var (chatMessages, thread) in (await Task.WhenAll(
+                            Threads.Select(connection.RequestMessagesForThread))).Zip(Threads))
+                        {
+                            // if no changes then continue (if anyNew is null or false)
+                            var threadMessages = thread.Messages?.Messages;
+                            if (threadMessages != null && chatMessages.Messages.Count == threadMessages.Count)
+                                continue;
+
+                            thread.Messages = chatMessages;
+                            if (ReferenceEquals(_currentThread, thread))
                             {
-                                // if no changes then continue (if anyMessages is null or false)
-                                var threadMessages = thread.Messages?.Messages;
-                                var anyMessages = threadMessages == null
-                                    ? null
-                                    : chatMessages?.Messages?.Except(threadMessages)?.Any();
-                                if (anyMessages != true)
-                                    continue;
-
-                                thread.Messages = chatMessages;
-                                if (_currentThread == thread)
-                                {
-                                    SetMessages(chatMessages);
-                                }
+                                SetMessages(chatMessages);
                             }
-
-                            await UpdateThreads(connection);
-
-                            _finished = true;
-                            _finish.SetResult(default);
                         }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                            throw;
-                        }
-                    });
-                }
+
+                        _finished = true;
+                        _finish.SetResult(default);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        throw;
+                    }
+                });
 
                 return true;
-            }, TimeSpan.FromSeconds(0.1));
+            }, TimeSpan.FromSeconds(0.4));
         }
 
         #region Chat
@@ -95,7 +92,7 @@ namespace DesktopFrontend.ViewModels
 
         public ObservableCollection<ChatMessage> Messages { get; private set; }
 
-        private void ChatInit()
+        private void ChatInit(IServerConnection connection)
         {
             MessagesModel = new ChatMessages();
             Messages = new ObservableCollection<ChatMessage>();
@@ -104,14 +101,14 @@ namespace DesktopFrontend.ViewModels
                 x => x.CurrentMessage,
                 x => !string.IsNullOrEmpty(x)
             );
-            SendMessage = ReactiveCommand.Create(() =>
+            SendMessage = ReactiveCommand.CreateFromTask(
+                async () =>
                 {
-                    MessagesModel.Messages.Add(new ChatMessage
-                    {
-                        Body = CurrentMessage,
-                        Time = DateTime.Now
-                    });
-                    Messages.Add(MessagesModel.Messages[^1]);
+                    if (!_finished)
+                        await _finish.Task;
+
+                    Debug.Assert(_finished);
+                    await connection.SendMessage(CurrentMessage, _currentThread.Id);
                 },
                 isSendEnabled);
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
@@ -148,6 +145,15 @@ namespace DesktopFrontend.ViewModels
 
                 Debug.Assert(_finished);
                 await UpdateThreads(connection);
+                //if (_currentThread != null)
+                //{
+                //    if (_currentThread.Messages == null)
+                //    {
+                //        _currentThread.Messages = await connection.RequestMessagesForThread(_currentThread);
+                //    }
+//
+                //    SetMessages(_currentThread.Messages);
+                //}
             });
             UpdateThreadList.Execute();
             UpdateThreadList.ThrownExceptions.Subscribe(
@@ -203,10 +209,14 @@ namespace DesktopFrontend.ViewModels
             var threadSet = await connection.RequestThreadSet();
 
             // if any changes
-            if (threadSet.Threads.Except(Threads).Any())
+            if (threadSet.Threads.Count != Threads.Count)
             {
                 Threads.Clear();
                 Threads.AddRange(threadSet.Threads);
+                if (_currentThread != null)
+                {
+                    _currentThread = Threads.First(t => t.Id == _currentThread.Id);
+                }
             }
         }
     }
