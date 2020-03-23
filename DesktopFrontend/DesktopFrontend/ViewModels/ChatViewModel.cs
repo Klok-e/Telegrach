@@ -53,7 +53,7 @@ namespace DesktopFrontend.ViewModels
                                     continue;
 
                                 thread.Messages = chatMessages;
-                                if (ReferenceEquals(_currentThread, thread))
+                                if (ReferenceEquals(CurrentThread, thread))
                                 {
                                     SetMessages(chatMessages);
                                 }
@@ -120,7 +120,7 @@ namespace DesktopFrontend.ViewModels
                         await _finish.Task;
 
                     Debug.Assert(_finished);
-                    await connection.SendMessage(CurrentMessage, _currentThread.Id);
+                    await connection.SendMessage(CurrentMessage, CurrentThread.Id);
                 },
                 canSend);
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
@@ -159,14 +159,14 @@ namespace DesktopFrontend.ViewModels
 
                 Debug.Assert(_finished);
                 await UpdateThreads(connection);
-                if (_currentThread != null)
+                if (CurrentThread != null)
                 {
-                    if (_currentThread.Messages == null)
+                    if (CurrentThread.Messages == null)
                     {
-                        _currentThread.Messages = await connection.RequestMessagesForThread(_currentThread);
+                        CurrentThread.Messages = await connection.RequestMessagesForThread(CurrentThread);
                     }
 
-                    SetMessages(_currentThread.Messages);
+                    SetMessages(CurrentThread.Messages);
                 }
             });
             UpdateThreadList.Execute();
@@ -203,7 +203,7 @@ namespace DesktopFrontend.ViewModels
                 }
 
                 SetMessages(thread.Messages);
-                _currentThread = thread;
+                CurrentThread = thread;
             });
             SelectThread.ThrownExceptions.Subscribe(
                 e => Log.Error(Log.Areas.Network, this, e.ToString()));
@@ -227,9 +227,9 @@ namespace DesktopFrontend.ViewModels
             {
                 Threads.Clear();
                 Threads.AddRange(threadSet.Threads);
-                if (_currentThread != null)
+                if (CurrentThread != null)
                 {
-                    _currentThread = Threads.First(t => t.Id == _currentThread.Id);
+                    CurrentThread = Threads.First(t => t.Id == CurrentThread.Id);
                 }
             }
         }
