@@ -38,8 +38,9 @@
 
         <Grid RowDefinitions="*,Auto" ColumnDefinitions="Auto,*">
             <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
-                <Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                    <TextBlock Margin="5,10,0,0" Grid.Row="0" Grid.Column="0" Text="#" IsVisible="{Binding CurrThreadNotNull}"/>
+                <Grid ColumnDefinitions="Auto,Auto,*" RowDefinitions="Auto,Auto" HorizontalAlignment="Stretch">
+                    <TextBlock Margin="5,10,0,0" Grid.Row="0" Grid.Column="0" Text="#"
+                               IsVisible="{Binding CurrThreadNotNull}" />
                     <TextBlock Margin="0,10,5,0" Grid.Row="0" Grid.Column="1" Text="{Binding CurrentThread.Id}" />
                     <TextBlock Margin="5,10,5,0" Grid.Row="0" Grid.Column="2" Text="{Binding CurrentThread.Head}"
                                TextWrapping="Wrap" />
