@@ -20,53 +20,59 @@ namespace DesktopFrontend.ViewModels
 
         public ChatViewModel(INavigationStack stack, IServerConnection connection)
         {
-            ChatInit(connection);
-            ThreadSearchInit(stack, connection);
-
-            DispatcherTimer.Run(() =>
+            // run all this stuff on the UI thread because it doesn't work otherwise
+            Dispatcher.UIThread.Post(() =>
             {
                 Debug.Assert(Dispatcher.UIThread.CheckAccess());
-                if (!_finished)
-                    return true;
 
-                _finish = new TaskCompletionSource<Unit>();
-                _finished = false;
-                Dispatcher.UIThread.InvokeAsync(async () =>
+                ChatInit(connection);
+                ThreadSearchInit(stack, connection);
+
+                DispatcherTimer.Run(() =>
                 {
-                    try
+                    Debug.Assert(Dispatcher.UIThread.CheckAccess());
+                    if (!_finished)
+                        return true;
+
+                    _finish = new TaskCompletionSource<Unit>();
+                    _finished = false;
+                    Dispatcher.UIThread.InvokeAsync(async () =>
                     {
-                        Debug.Assert(Dispatcher.UIThread.CheckAccess());
-
-                        await UpdateThreads(connection);
-
-                        // TODO: make this request only new messages instead of ALL the messages
-                        foreach (var (chatMessages, thread) in (await Task.WhenAll(
-                            Threads.Select(connection.RequestMessagesForThread))).Zip(Threads))
+                        try
                         {
-                            // if no changes then continue (if anyNew is null or false)
-                            var threadMessages = thread.Messages?.Messages;
-                            if (threadMessages != null && chatMessages.Messages.Count == threadMessages.Count)
-                                continue;
+                            Debug.Assert(Dispatcher.UIThread.CheckAccess());
 
-                            thread.Messages = chatMessages;
-                            if (ReferenceEquals(_currentThread, thread))
+                            await UpdateThreads(connection);
+
+                            // TODO: make this request only new messages instead of ALL the messages
+                            foreach (var (chatMessages, thread) in (await Task.WhenAll(
+                                Threads.Select(connection.RequestMessagesForThread))).Zip(Threads))
                             {
-                                SetMessages(chatMessages);
+                                // if no changes then continue (if anyNew is null or false)
+                                var threadMessages = thread.Messages?.Messages;
+                                if (threadMessages != null && chatMessages.Messages.Count == threadMessages.Count)
+                                    continue;
+
+                                thread.Messages = chatMessages;
+                                if (ReferenceEquals(_currentThread, thread))
+                                {
+                                    SetMessages(chatMessages);
+                                }
                             }
+
+                            _finished = true;
+                            _finish.SetResult(default);
                         }
+                        catch (Exception e)
+                        {
+                            Log.Error(Log.Areas.Application, this, $"{e}");
+                            throw;
+                        }
+                    });
 
-                        _finished = true;
-                        _finish.SetResult(default);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        throw;
-                    }
-                });
-
-                return true;
-            }, TimeSpan.FromSeconds(0.4));
+                    return true;
+                }, TimeSpan.FromSeconds(0.4));
+            });
         }
 
         #region Chat

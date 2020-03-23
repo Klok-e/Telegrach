@@ -36,11 +36,16 @@ namespace DesktopFrontend.ViewModels
         public LoginCredentialsViewModel(INavigationStack stack, IServerConnection connection)
         {
             Back = ReactiveCommand.Create(() => { stack.Pop(); });
-            // TODO: make this into a real sign in
-            SignIn = ReactiveCommand.Create(() =>
+            SignIn = ReactiveCommand.CreateFromTask(async () =>
             {
-                stack.Push(new ChatViewModel(stack, connection));
-                return true;
+                if (await connection.LogInWithCredentials(Login, Password))
+                {
+                    stack.Push(new ChatViewModel(stack, connection));
+                    new CredentialsStorage().Store(Login, Password);
+                    return true;
+                }
+
+                return false;
             });
         }
     }

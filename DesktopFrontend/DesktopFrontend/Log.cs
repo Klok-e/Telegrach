@@ -9,6 +9,7 @@ namespace DesktopFrontend
         {
             public const string Network = "Network";
             public const string Application = "Application";
+            public const string Storage = "Storage";
         }
 
         public static void Error(string area, object source, string message)
