@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using DesktopFrontend.Models;
@@ -71,8 +72,6 @@ namespace DesktopFrontend.ViewModels
                     return true;
                 }, TimeSpan.FromSeconds(0.4));
             });
-            // doesn't work otherwise
-            Dispatcher.UIThread.RunJobs();
         }
 
         #region Chat
@@ -90,6 +89,12 @@ namespace DesktopFrontend.ViewModels
         private ChatMessages _messagesModel;
         private ThreadItem? _currentThread;
 
+        public ThreadItem? CurrentThread
+        {
+            get => _currentThread;
+            set => this.RaiseAndSetIfChanged(ref _currentThread, value);
+        }
+
         public ChatMessages MessagesModel
         {
             get => _messagesModel;
@@ -103,9 +108,10 @@ namespace DesktopFrontend.ViewModels
             MessagesModel = new ChatMessages();
             Messages = new ObservableCollection<ChatMessage>();
 
-            var isSendEnabled = this.WhenAnyValue(
+            var canSend = this.WhenAnyValue(
                 x => x.CurrentMessage,
-                x => !string.IsNullOrEmpty(x)
+                x => x.CurrentThread,
+                (msg, th) => !string.IsNullOrEmpty(msg) && th != null
             );
             SendMessage = ReactiveCommand.CreateFromTask(
                 async () =>
@@ -116,7 +122,7 @@ namespace DesktopFrontend.ViewModels
                     Debug.Assert(_finished);
                     await connection.SendMessage(CurrentMessage, _currentThread.Id);
                 },
-                isSendEnabled);
+                canSend);
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
             SendMessage.ThrownExceptions.Subscribe(
                 e => Log.Error(Log.Areas.Network, this, e.ToString()));
