@@ -92,8 +92,18 @@ namespace DesktopFrontend.ViewModels
         public ThreadItem? CurrentThread
         {
             get => _currentThread;
-            set => this.RaiseAndSetIfChanged(ref _currentThread, value);
+            set
+            {
+                if (_currentThread != value)
+                {
+                    _currentThread = value;
+                    this.RaisePropertyChanged();
+                    this.RaisePropertyChanged(nameof(CurrThreadNotNull));
+                }
+            }
         }
+
+        public bool CurrThreadNotNull => CurrentThread != null;
 
         public ChatMessages MessagesModel
         {
