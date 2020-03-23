@@ -31,6 +31,19 @@ namespace DesktopFrontend.ViewModels
                     {
                         Logger.Sink.Log(LogEventLevel.Information, "Network", this,
                             "Connected to the server");
+
+                        var storage = new CredentialsStorage();
+                        var cred = storage.Retrieve();
+                        if (cred != null)
+                        {
+                            if (connection.LogInWithCredentials(cred.Value.login, cred.Value.password).Result)
+                            {
+                                Push(new ChatViewModel(this, connection));
+                                return;
+                            }
+                        }
+
+                        storage.ResetConfig();
                         Push(new LoginViewModel(this, connection));
                     }
                     else
