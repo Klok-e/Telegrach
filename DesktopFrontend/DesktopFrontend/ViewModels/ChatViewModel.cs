@@ -73,6 +73,8 @@ namespace DesktopFrontend.ViewModels
                     return true;
                 }, TimeSpan.FromSeconds(0.4));
             });
+            // doesn't work otherwise
+            Dispatcher.UIThread.RunJobs();
         }
 
         #region Chat

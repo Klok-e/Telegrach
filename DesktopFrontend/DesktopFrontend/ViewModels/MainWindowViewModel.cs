@@ -25,7 +25,7 @@ namespace DesktopFrontend.ViewModels
         {
             connection.Connect()
                 .ToObservable()
-                .Subscribe(connected =>
+                .Subscribe(async connected =>
                 {
                     if (connected)
                     {
@@ -36,9 +36,11 @@ namespace DesktopFrontend.ViewModels
                         var cred = storage.Retrieve();
                         if (cred != null)
                         {
-                            if (connection.LogInWithCredentials(cred.Value.login, cred.Value.password).Result)
+                            if (await connection.LogInWithCredentials(cred.Value.login, cred.Value.password))
                             {
                                 Push(new ChatViewModel(this, connection));
+                                Log.Info(Log.Areas.Network, this,
+                                    $"Logged in successfully as {cred.Value.login}");
                                 return;
                             }
                         }

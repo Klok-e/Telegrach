@@ -50,7 +50,7 @@ namespace DesktopFrontend.ViewModels
             {
                 if (await connection.LogInWithCredentials(login!, pass!))
                 {
-                    Logger.Sink.Log(LogEventLevel.Information, "Network", this,
+                    Log.Info(Log.Areas.Network, this,
                         $"Logged in successfully as {login}");
                     stack.Push(new ChatViewModel(stack, connection));
 
