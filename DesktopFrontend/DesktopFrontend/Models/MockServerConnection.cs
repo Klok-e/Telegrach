@@ -18,7 +18,7 @@ namespace DesktopFrontend.Models
 
         public async Task<bool> Connect()
         {
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await Task.Delay(TimeSpan.FromSeconds(0.4));
             return IsConnected = true;
         }
 
@@ -45,7 +45,7 @@ namespace DesktopFrontend.Models
         {
             new[]
             {
-                new ThreadItem("мозкоподібні структури", "dasdasdasd", 1)
+                new ThreadItem("мозкоподібні структури", "fuck you", 1)
                 {
                     Messages = new ChatMessages()
                     {
@@ -67,7 +67,7 @@ namespace DesktopFrontend.Models
                         }
                     }
                 },
-                new ThreadItem("блаблабла", "dasdasdasd", 2)
+                new ThreadItem("блаблабла", "fuck me", 2)
                 {
                     Messages = new ChatMessages
                     {

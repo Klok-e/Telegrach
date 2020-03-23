@@ -23,8 +23,6 @@ namespace DesktopFrontend.ViewModels
             // run all this stuff on the UI thread because it doesn't work otherwise
             Dispatcher.UIThread.Post(() =>
             {
-                Debug.Assert(Dispatcher.UIThread.CheckAccess());
-
                 ChatInit(connection);
                 ThreadSearchInit(stack, connection);
 
