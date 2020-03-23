@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Text;
 using Avalonia.Logging;
 using Avalonia.Logging.Serilog;
+using Avalonia.Threading;
 using DesktopFrontend.Models;
 using DynamicData.Binding;
 using ReactiveUI;
@@ -25,7 +29,7 @@ namespace DesktopFrontend.ViewModels
         {
             connection.Connect()
                 .ToObservable()
-                .Subscribe(connected =>
+                .Subscribe(async connected =>
                 {
                     if (connected)
                     {
@@ -36,9 +40,11 @@ namespace DesktopFrontend.ViewModels
                         var cred = storage.Retrieve();
                         if (cred != null)
                         {
-                            if (connection.LogInWithCredentials(cred.Value.login, cred.Value.password).Result)
+                            if (await connection.LogInWithCredentials(cred.Value.login, cred.Value.password))
                             {
                                 Push(new ChatViewModel(this, connection));
+                                Log.Info(Log.Areas.Network, this,
+                                    $"Logged in successfully as {cred.Value.login}");
                                 return;
                             }
                         }

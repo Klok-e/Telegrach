@@ -14,16 +14,17 @@ namespace DesktopFrontend.Models
     public class MockServerConnection : IServerConnection
     {
         public bool IsConnected { get; private set; }
+        private bool _loggedIn;
 
         public async Task<bool> Connect()
         {
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await Task.Delay(TimeSpan.FromSeconds(0.4));
             return IsConnected = true;
         }
 
         public async Task<bool> LogInWithCredentials(string user, string pass)
         {
-            return user == "rwerwer" && pass == "564756868";
+            return _loggedIn = user == "rwerwer" && pass == "564756868";
         }
 
         public async Task<Bitmap> RequestCaptcha()
@@ -44,7 +45,7 @@ namespace DesktopFrontend.Models
         {
             new[]
             {
-                new ThreadItem("мозкоподібні структури", "dasdasdasd", 1)
+                new ThreadItem("мозкоподібні структури", "fuck you", 1)
                 {
                     Messages = new ChatMessages()
                     {
@@ -66,7 +67,7 @@ namespace DesktopFrontend.Models
                         }
                     }
                 },
-                new ThreadItem("блаблабла", "dasdasdasd", 2)
+                new ThreadItem("блаблабла", "fuck me", 2)
                 {
                     Messages = new ChatMessages
                     {
@@ -88,6 +89,8 @@ namespace DesktopFrontend.Models
 
         public async Task<ThreadSet> RequestThreadSet()
         {
+            if (!_loggedIn)
+                throw new Exception();
             var threadSet = new ThreadSet();
             threadSet.Threads.AddRange(threads.Select(t => new ThreadItem(t.Head, t.Body, t.Id)));
             return threadSet;
@@ -95,6 +98,8 @@ namespace DesktopFrontend.Models
 
         public async Task CreateThread(string head, string body)
         {
+            if (!_loggedIn)
+                throw new Exception();
             // uncomment to test throwing
             // throw new Exception();
 
@@ -103,6 +108,8 @@ namespace DesktopFrontend.Models
 
         public async Task SendMessage(string body, ulong threadId)
         {
+            if (!_loggedIn)
+                throw new Exception();
             var thread = threads.Find(t => t.Id == threadId) ?? throw new Exception();
             thread.Messages ??= new ChatMessages();
             thread.Messages.Messages.Add(new ChatMessage
@@ -114,6 +121,8 @@ namespace DesktopFrontend.Models
 
         public async Task<ChatMessages> RequestMessagesForThread(ThreadItem thread)
         {
+            if (!_loggedIn)
+                throw new Exception();
             var xxx = threads.Find(t => t.Id == thread.Id)?.Messages;
             if (xxx != null)
             {

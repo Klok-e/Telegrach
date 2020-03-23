@@ -10,7 +10,7 @@
              x:Class="DesktopFrontend.Views.CreateNewThreadView">
     <Grid ColumnDefinitions="*,Auto,Auto,*" RowDefinitions="Auto,*,Auto" HorizontalAlignment="Center"
           VerticalAlignment="Center" Width="400" Height="300">
-        <TextBox Text="{Binding Head}" AcceptsReturn="True" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" />
+        <TextBox Text="{Binding Head}" AcceptsReturn="False" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" />
         <TextBox Text="{Binding Body}" AcceptsReturn="True" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" />
 
         <Button Command="{Binding Create}"

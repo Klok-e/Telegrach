@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using DesktopFrontend.Models;
@@ -23,8 +24,6 @@ namespace DesktopFrontend.ViewModels
             // run all this stuff on the UI thread because it doesn't work otherwise
             Dispatcher.UIThread.Post(() =>
             {
-                Debug.Assert(Dispatcher.UIThread.CheckAccess());
-
                 ChatInit(connection);
                 ThreadSearchInit(stack, connection);
 
@@ -54,7 +53,7 @@ namespace DesktopFrontend.ViewModels
                                     continue;
 
                                 thread.Messages = chatMessages;
-                                if (ReferenceEquals(_currentThread, thread))
+                                if (ReferenceEquals(CurrentThread, thread))
                                 {
                                     SetMessages(chatMessages);
                                 }
@@ -90,6 +89,22 @@ namespace DesktopFrontend.ViewModels
         private ChatMessages _messagesModel;
         private ThreadItem? _currentThread;
 
+        public ThreadItem? CurrentThread
+        {
+            get => _currentThread;
+            set
+            {
+                if (_currentThread != value)
+                {
+                    _currentThread = value;
+                    this.RaisePropertyChanged();
+                    this.RaisePropertyChanged(nameof(CurrThreadNotNull));
+                }
+            }
+        }
+
+        public bool CurrThreadNotNull => CurrentThread != null;
+
         public ChatMessages MessagesModel
         {
             get => _messagesModel;
@@ -103,9 +118,10 @@ namespace DesktopFrontend.ViewModels
             MessagesModel = new ChatMessages();
             Messages = new ObservableCollection<ChatMessage>();
 
-            var isSendEnabled = this.WhenAnyValue(
+            var canSend = this.WhenAnyValue(
                 x => x.CurrentMessage,
-                x => !string.IsNullOrEmpty(x)
+                x => x.CurrentThread,
+                (msg, th) => !string.IsNullOrEmpty(msg) && th != null
             );
             SendMessage = ReactiveCommand.CreateFromTask(
                 async () =>
@@ -114,9 +130,9 @@ namespace DesktopFrontend.ViewModels
                         await _finish.Task;
 
                     Debug.Assert(_finished);
-                    await connection.SendMessage(CurrentMessage, _currentThread.Id);
+                    await connection.SendMessage(CurrentMessage, CurrentThread.Id);
                 },
-                isSendEnabled);
+                canSend);
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
             SendMessage.ThrownExceptions.Subscribe(
                 e => Log.Error(Log.Areas.Network, this, e.ToString()));
@@ -153,14 +169,14 @@ namespace DesktopFrontend.ViewModels
 
                 Debug.Assert(_finished);
                 await UpdateThreads(connection);
-                if (_currentThread != null)
+                if (CurrentThread != null)
                 {
-                    if (_currentThread.Messages == null)
+                    if (CurrentThread.Messages == null)
                     {
-                        _currentThread.Messages = await connection.RequestMessagesForThread(_currentThread);
+                        CurrentThread.Messages = await connection.RequestMessagesForThread(CurrentThread);
                     }
 
-                    SetMessages(_currentThread.Messages);
+                    SetMessages(CurrentThread.Messages);
                 }
             });
             UpdateThreadList.Execute();
@@ -197,7 +213,7 @@ namespace DesktopFrontend.ViewModels
                 }
 
                 SetMessages(thread.Messages);
-                _currentThread = thread;
+                CurrentThread = thread;
             });
             SelectThread.ThrownExceptions.Subscribe(
                 e => Log.Error(Log.Areas.Network, this, e.ToString()));
@@ -221,9 +237,9 @@ namespace DesktopFrontend.ViewModels
             {
                 Threads.Clear();
                 Threads.AddRange(threadSet.Threads);
-                if (_currentThread != null)
+                if (CurrentThread != null)
                 {
-                    _currentThread = Threads.First(t => t.Id == _currentThread.Id);
+                    CurrentThread = Threads.First(t => t.Id == CurrentThread.Id);
                 }
             }
         }

@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using System;
 using Avalonia.Logging;
+using Avalonia.Threading;
 using DesktopFrontend.Models;
 using ReactiveUI;
 
@@ -28,7 +29,7 @@ namespace DesktopFrontend.ViewModels
 
         public ReactiveCommand<Unit, Unit> Back { get; }
 
-        public ReactiveCommand<Unit, Unit> SignIn { get; }
+        public ReactiveCommand<Unit, bool> SignIn { get; }
 
         public LoginNewAccountViewModel(INavigationStack stack, IServerConnection connection)
         {
@@ -50,17 +51,17 @@ namespace DesktopFrontend.ViewModels
             {
                 if (await connection.LogInWithCredentials(login!, pass!))
                 {
-                    Logger.Sink.Log(LogEventLevel.Information, "Network", this,
+                    Log.Info(Log.Areas.Network, this,
                         $"Logged in successfully as {login}");
                     stack.Push(new ChatViewModel(stack, connection));
 
                     new CredentialsStorage().Store(login, pass);
+                    return true;
                 }
-                else
-                {
-                    Logger.Sink.Log(LogEventLevel.Warning, "Network", this,
-                        $"Could not log in as {login}");
-                }
+
+                Logger.Sink.Log(LogEventLevel.Warning, "Network", this,
+                    $"Could not log in as {login}");
+                return false;
             }, canExec);
         }
     }
