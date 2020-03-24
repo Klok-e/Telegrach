@@ -14,7 +14,7 @@ namespace DesktopFrontend.Models
         /// Returns new threads
         /// </summary>
         //IObservable<ThreadItem[]> NewThreadArrived { get; }
-        
+
         /// <summary>
         /// Returns new messages
         /// </summary>
