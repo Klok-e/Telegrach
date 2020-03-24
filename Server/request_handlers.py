@@ -11,7 +11,9 @@ from models import SuperAccount
 @request_handler(ClientMessage.login_request)
 async def login(message: UserCredentials, session: SessionData):
     print(f"Sign in request: {message}")
-    user = await session.db.get_user(message.login)
+    user = None
+    if 32 <= len(message.login) <= 36:
+        user = await session.db.get_user(message.login)
     ok = False
     if user is None:
         print(f"Sign in failed")

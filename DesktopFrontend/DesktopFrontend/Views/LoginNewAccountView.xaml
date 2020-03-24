@@ -9,7 +9,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DesktopFrontend.Views.LoginNewAccountView">
     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" HorizontalAlignment="Center"
-          VerticalAlignment="Center" Width="400" Height="300">
+          VerticalAlignment="Center" Width="600" Height="400">
         <ContentControl Content="{Binding Captcha}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" />
 
         <Button Command="{Binding SignIn}" Content="Sign In" Grid.Column="0"
