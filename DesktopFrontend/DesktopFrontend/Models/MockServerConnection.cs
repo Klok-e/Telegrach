@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;

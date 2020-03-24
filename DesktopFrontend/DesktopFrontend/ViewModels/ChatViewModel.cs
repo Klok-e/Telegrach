@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -18,60 +19,62 @@ namespace DesktopFrontend.ViewModels
     {
         private bool _finished = true;
         private TaskCompletionSource<Unit> _finish;
+        private CancellationTokenSource _cancelServerQuerying;
 
         public ChatViewModel(INavigationStack stack, IServerConnection connection)
         {
-            // run all this stuff on the UI thread because it doesn't work otherwise
-            Dispatcher.UIThread.Post(() =>
+            ChatInit(connection);
+            ThreadSearchInit(stack, connection);
+            _cancelServerQuerying = new CancellationTokenSource();
+            Task.Run(async () =>
             {
-                ChatInit(connection);
-                ThreadSearchInit(stack, connection);
-
-                DispatcherTimer.Run(() =>
+                while (true)
                 {
-                    Debug.Assert(Dispatcher.UIThread.CheckAccess());
-                    if (!_finished)
-                        return true;
-
-                    _finish = new TaskCompletionSource<Unit>();
-                    _finished = false;
-                    Dispatcher.UIThread.InvokeAsync(async () =>
+                    try
                     {
-                        try
+                        if (!_finished)
+                            return;
+
+                        _finish = new TaskCompletionSource<Unit>();
+                        _finished = false;
+
+                        await UpdateThreads(connection);
+
+                        // TODO: make this request only new messages instead of ALL the messages
+                        foreach (var (chatMessages, thread) in (await Task.WhenAll(
+                            Threads.Select(connection.RequestMessagesForThread))).Zip(Threads))
                         {
-                            Debug.Assert(Dispatcher.UIThread.CheckAccess());
+                            // if no changes then continue (if anyNew is null or false)
+                            var threadMessages = thread.Messages?.Messages;
+                            if (threadMessages != null && chatMessages.Messages.Count == threadMessages.Count)
+                                continue;
 
-                            await UpdateThreads(connection);
-
-                            // TODO: make this request only new messages instead of ALL the messages
-                            foreach (var (chatMessages, thread) in (await Task.WhenAll(
-                                Threads.Select(connection.RequestMessagesForThread))).Zip(Threads))
+                            thread.Messages = chatMessages;
+                            if (ReferenceEquals(CurrentThread, thread))
                             {
-                                // if no changes then continue (if anyNew is null or false)
-                                var threadMessages = thread.Messages?.Messages;
-                                if (threadMessages != null && chatMessages.Messages.Count == threadMessages.Count)
-                                    continue;
-
-                                thread.Messages = chatMessages;
-                                if (ReferenceEquals(CurrentThread, thread))
-                                {
-                                    SetMessages(chatMessages);
-                                }
+                                SetMessages(chatMessages);
                             }
-
-                            _finished = true;
-                            _finish.SetResult(default);
                         }
-                        catch (Exception e)
-                        {
-                            Log.Error(Log.Areas.Application, this, $"{e}");
-                            throw;
-                        }
-                    });
 
-                    return true;
-                }, TimeSpan.FromSeconds(0.4));
-            });
+                        _finished = true;
+                        _finish.SetResult(default);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(Log.Areas.Application, this, $"{e}");
+                        throw;
+                    }
+
+                    await Task.Delay(TimeSpan.FromSeconds(0.4), _cancelServerQuerying.Token);
+                    if (_cancelServerQuerying.Token.IsCancellationRequested)
+                        break;
+                }
+            }, _cancelServerQuerying.Token);
+        }
+
+        ~ChatViewModel()
+        {
+            _cancelServerQuerying.Cancel();
         }
 
         #region Chat
@@ -223,9 +226,13 @@ namespace DesktopFrontend.ViewModels
 
         private void SetMessages(ChatMessages messages)
         {
-            MessagesModel = messages;
-            Messages.Clear();
-            Messages.AddRange(MessagesModel.Messages);
+            // TODO: doesn't work without this, fix maybe
+            Dispatcher.UIThread.Post(() =>
+            {
+                MessagesModel = messages;
+                Messages.Clear();
+                Messages.AddRange(MessagesModel.Messages);
+            });
         }
 
         private async Task UpdateThreads(IServerConnection connection)
