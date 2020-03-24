@@ -10,6 +10,16 @@ namespace DesktopFrontend.Models
     {
         bool IsConnected { get; }
 
+        /// <summary>
+        /// Returns new threads
+        /// </summary>
+        //IObservable<ThreadItem[]> NewThreadArrived { get; }
+
+        /// <summary>
+        /// Returns new messages
+        /// </summary>
+        //IObservable<ChatMessage[]> NewMessageArrived { get; }
+
         Task<bool> Connect();
 
         Task<bool> LogInWithCredentials(string user, string pass);
