@@ -34,9 +34,9 @@
             <Carousel.PageTransition>
                 <PageSlide Duration="0.4" Orientation="Horizontal" />
             </Carousel.PageTransition>
-            <Image Source="/Assets/test.jpg" Stretch="UniformToFill" MaxWidth="400" MaxHeight="300" />
-            <Image Source="/Assets/avalonia-logo.ico" Stretch="UniformToFill" MaxWidth="400" MaxHeight="300" />
-            <Image Source="/Assets/science.jpg" Stretch="UniformToFill" MaxWidth="400" MaxHeight="300" />
+            <Image Source="/Assets/first.png" Stretch="UniformToFill" MaxWidth="400" MaxHeight="300" />
+            <Image Source="/Assets/anon.png" Stretch="UniformToFill" MaxWidth="400" MaxHeight="300" />
+            <Image Source="/Assets/free.png" Stretch="UniformToFill" MaxWidth="400" MaxHeight="300" />
         </Carousel>
     </Grid>
 </UserControl>
