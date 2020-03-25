@@ -17,8 +17,11 @@ namespace DesktopFrontend.ViewModels
 {
     public class ChatViewModel : ViewModelBase
     {
-        private bool _finished = true;
-        private TaskCompletionSource<Unit> _finish;
+        /// <summary>
+        /// A lock that doesn't allow to simultaneously execute async methods (buttons) and query server
+        /// </summary>
+        private SemaphoreSlim _semaphore;
+
         private CancellationTokenSource _cancelServerQuerying;
 
         public ChatViewModel(INavigationStack stack, IServerConnection connection)
@@ -26,23 +29,21 @@ namespace DesktopFrontend.ViewModels
             ChatInit(connection);
             ThreadSearchInit(stack, connection);
             _cancelServerQuerying = new CancellationTokenSource();
+            _semaphore = new SemaphoreSlim(1, 1);
             Task.Run(async () =>
             {
                 while (true)
                 {
+                    await _semaphore.WaitAsync();
                     try
                     {
-                        if (!_finished)
-                            return;
-
-                        _finish = new TaskCompletionSource<Unit>();
-                        _finished = false;
-
                         await UpdateThreads(connection);
 
                         // TODO: make this request only new messages instead of ALL the messages
+                        // copy because doesn't work otherwise
+                        var threads = new ObservableCollection<ThreadItem>(Threads);
                         foreach (var (chatMessages, thread) in (await Task.WhenAll(
-                            Threads.Select(connection.RequestMessagesForThread))).Zip(Threads))
+                            threads.Select(connection.RequestMessagesForThread))).Zip(threads))
                         {
                             // if no changes then continue (if anyNew is null or false)
                             var threadMessages = thread.Messages?.Messages;
@@ -55,14 +56,15 @@ namespace DesktopFrontend.ViewModels
                                 SetMessages(chatMessages);
                             }
                         }
-
-                        _finished = true;
-                        _finish.SetResult(default);
                     }
                     catch (Exception e)
                     {
                         Log.Error(Log.Areas.Application, this, $"{e}");
                         throw;
+                    }
+                    finally
+                    {
+                        _semaphore.Release();
                     }
 
                     await Task.Delay(TimeSpan.FromSeconds(0.4), _cancelServerQuerying.Token);
@@ -126,14 +128,17 @@ namespace DesktopFrontend.ViewModels
                 x => x.CurrentThread,
                 (msg, th) => !string.IsNullOrEmpty(msg) && th != null
             );
-            SendMessage = ReactiveCommand.CreateFromTask(
-                async () =>
+            SendMessage = ReactiveCommand.CreateFromTask(async () =>
                 {
-                    if (!_finished)
-                        await _finish.Task;
-
-                    Debug.Assert(_finished);
-                    await connection.SendMessage(CurrentMessage, CurrentThread.Id);
+                    await _semaphore.WaitAsync();
+                    try
+                    {
+                        await connection.SendMessage(CurrentMessage, CurrentThread.Id);
+                    }
+                    finally
+                    {
+                        _semaphore.Release();
+                    }
                 },
                 canSend);
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
@@ -167,19 +172,23 @@ namespace DesktopFrontend.ViewModels
             _threadSet = new ThreadSet();
             UpdateThreadList = ReactiveCommand.CreateFromTask(async () =>
             {
-                if (!_finished)
-                    await _finish.Task;
-
-                Debug.Assert(_finished);
-                await UpdateThreads(connection);
-                if (CurrentThread != null)
+                await _semaphore.WaitAsync();
+                try
                 {
-                    if (CurrentThread.Messages == null)
+                    await UpdateThreads(connection);
+                    if (CurrentThread != null)
                     {
-                        CurrentThread.Messages = await connection.RequestMessagesForThread(CurrentThread);
-                    }
+                        if (CurrentThread.Messages == null)
+                        {
+                            CurrentThread.Messages = await connection.RequestMessagesForThread(CurrentThread);
+                        }
 
-                    SetMessages(CurrentThread.Messages);
+                        SetMessages(CurrentThread.Messages);
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
                 }
             });
             UpdateThreadList.Execute();
@@ -188,7 +197,7 @@ namespace DesktopFrontend.ViewModels
 
             CreateNewThread = ReactiveCommand.Create(() =>
             {
-                var createThread = new CreateNewThreadViewModel(connection);
+                var createThread = new CreateNewThreadViewModel(connection, _semaphore);
                 stack.Push(createThread);
 
                 createThread.Create
@@ -204,19 +213,22 @@ namespace DesktopFrontend.ViewModels
 
             SelectThread = ReactiveCommand.CreateFromTask<ThreadItem>(async thread =>
             {
-                if (!_finished)
-                    await _finish.Task;
-
-                Debug.Assert(_finished);
-
-                Log.Info(Log.Areas.Application, this, $"Selected thread with name {thread.Name}");
-                if (thread.Messages == null)
+                await _semaphore.WaitAsync();
+                try
                 {
-                    thread.Messages = await connection.RequestMessagesForThread(thread);
-                }
+                    Log.Info(Log.Areas.Application, this, $"Selected thread with name {thread.Name}");
+                    if (thread.Messages == null)
+                    {
+                        thread.Messages = await connection.RequestMessagesForThread(thread);
+                    }
 
-                SetMessages(thread.Messages);
-                CurrentThread = thread;
+                    SetMessages(thread.Messages);
+                    CurrentThread = thread;
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
             });
             SelectThread.ThrownExceptions.Subscribe(
                 e => Log.Error(Log.Areas.Network, this, e.ToString()));
@@ -239,16 +251,19 @@ namespace DesktopFrontend.ViewModels
         {
             var threadSet = await connection.RequestThreadSet();
 
-            // if any changes
-            if (threadSet.Threads.Count != Threads.Count)
+            Dispatcher.UIThread.Post(() =>
             {
-                Threads.Clear();
-                Threads.AddRange(threadSet.Threads);
-                if (CurrentThread != null)
+                // if any changes
+                if (threadSet.Threads.Count != Threads.Count)
                 {
-                    CurrentThread = Threads.First(t => t.Id == CurrentThread.Id);
+                    Threads.Clear();
+                    Threads.AddRange(threadSet.Threads);
+                    if (CurrentThread != null)
+                    {
+                        CurrentThread = Threads.First(t => t.Id == CurrentThread.Id);
+                    }
                 }
-            }
+            });
         }
     }
 }
