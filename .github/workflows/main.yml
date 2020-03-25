@@ -15,7 +15,7 @@ jobs:
       - name: Setup protoc
         uses: arduino/setup-protoc@v1.1.0
         with:
-          varsion: 1.x
+          version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compile protobuffers
@@ -36,7 +36,7 @@ jobs:
           dotnet-version: "3.1.102"
       - uses: actions/setup-python@v1
         with:
-          python-version: '3.8.x'
+          python-version: "3.8.x"
 
       - name: Restore local tools
         run: |
