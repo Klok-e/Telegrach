@@ -1,5 +1,6 @@
 using System;
 using System.Reactive;
+using System.Threading;
 using Avalonia.Logging;
 using DesktopFrontend.Models;
 using ReactiveUI;
@@ -27,12 +28,24 @@ namespace DesktopFrontend.ViewModels
         private string _head = string.Empty;
         private string _body = string.Empty;
 
-        public CreateNewThreadViewModel(IServerConnection connection)
+        // TODO: fix this sema shit
+        public CreateNewThreadViewModel(IServerConnection connection, SemaphoreSlim sema)
         {
             var canOk = this.WhenAny(a => a.Head,
                 h => !string.IsNullOrEmpty(h.GetValue()));
 
-            Create = ReactiveCommand.CreateFromTask(async () => { await connection.CreateThread(Head, Body); },
+            Create = ReactiveCommand.CreateFromTask(async () =>
+                {
+                    await sema.WaitAsync();
+                    try
+                    {
+                        await connection.CreateThread(Head, Body);
+                    }
+                    finally
+                    {
+                        sema.Release();
+                    }
+                },
                 canOk);
             // Create thread throws if the thread wasn't created successfully
             Create.ThrownExceptions.Subscribe(e =>
