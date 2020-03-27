@@ -70,7 +70,7 @@ async def get_new_messages(message: ClientMessage.ThreadDataRequest, session: Se
         appendable.id = msg.message_id
         appendable.thread_id = msg.tred_id
         appendable.body = msg.body
-        appendable.time.FromDatetime(msg.timestamp.time())
+        appendable.time.FromDatetime(msg.timestamp)
 
     return response
 
@@ -83,7 +83,7 @@ async def get_new_threads(message: ClientMessage.GetAllJoinedThreadsRequest, ses
     new_threads = list(await session.db.threads_with_id_above(session.last_thread_id))
     if len(new_threads) > 0:
         session.last_thread_id = new_threads[-1].tred_id
-        
+
     response = ServerMessage()
     response.all_the_threads.threads.extend([])
     for thread in new_threads:
