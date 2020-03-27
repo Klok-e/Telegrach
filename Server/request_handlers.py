@@ -55,7 +55,8 @@ async def create_user(message: ClientMessage.UserCreationRequest, session: Sessi
 
 # TODO: handle the case where there's already a lot of messages and they all can't be sent in one protobuf message
 # (maybe send fetch only a portion on get_new_messages_from_tred request that fits in one protobuf
-# message and wait till client sends another get_new_messages_from_tred request)
+# message and wait till client sends another get_new_messages_from_tred
+# request)
 @request_handler(ClientMessage.thread_data_request)
 async def get_new_messages_from_tred(message: ClientMessage.ThreadDataRequest, session: SessionData):
     new_messages = list(

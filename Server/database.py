@@ -118,7 +118,7 @@ class DataBase:
         result = await self.fetch_one(query=query, super_id=super_id)
         return SuperAccount(super_id=result['super_id'])
 
-    async def threads_with_id_above(self, thread_id: int)->Iterable[Tred]:
+    async def threads_with_id_above(self, thread_id: int) -> Iterable[Tred]:
         query = (
             "select tred_id, creator_id, header, body, timestamp "
             "from tred t "
