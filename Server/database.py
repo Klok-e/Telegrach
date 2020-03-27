@@ -12,8 +12,8 @@ from databases import Database
 from sqlalchemy.sql import select, text
 # from asyncpg.pgproto.pgproto import UUID
 # from sqlalchemy.dialects.postgresql import UUID
-from typing import List, Generator, Dict, Optional
-import typing
+from typing import List, Generator, Dict, Optional, Iterable
+from types import SimpleNamespace
 from config import *
 import models
 from models import Message, UserAccount, SuperAccount, Tred
@@ -118,12 +118,14 @@ class DataBase:
         result = await self.fetch_one(query=query, super_id=super_id)
         return SuperAccount(super_id=result['super_id'])
 
-    async def get_all_threads(self):
+    async def threads_with_id_above(self, thread_id: int)->Iterable[Tred]:
         query = (
             "select tred_id, creator_id, header, body, timestamp "
-            "from tred"
+            "from tred t "
+            "where t.tred_id > :id "
+            "order by t.tred_id"
         )
-        threads = await self.fetch_all(query)
+        threads = await self.fetch_all(query, id=thread_id)
         return map(
             lambda d: Tred(
                 tred_id=d["tred_id"],
@@ -133,18 +135,15 @@ class DataBase:
                 timestamp=d["timestamp"]),
             threads)
 
-    async def all_messages_in_tred(self, tred_id: int):
+    async def messages_from_thread_with_id_above(self, thread_id: int, message_id: int) -> Iterable[Message]:
         query = (
-            "select author_login, m.timestamp as message_time, m.body as message_body, header as head_tred, "
-            "t.body as tred_body, t.timestamp as tred_time, creator_id, m.tred_id "
+            "select m.message_id, m.author_login, m.tred_id, m.timestamp, m.body, m.is_deleted "
             "from message m "
-            "inner join tred t "
-            "on m.tred_id  = t.tred_id "
-            "where m.is_deleted is false "
-            "and t.tred_id = :tred_id "
-            "order by m.timestamp; ")
-        result = await self.fetch_all(query, tred_id=tred_id)
-        return result
+            "inner join tred t on m.tred_id = t.tred_id "
+            "where t.tred_id = :tred_id and m.message_id > :message_id "
+            "order by m.message_id ")
+        result = await self.fetch_all(query, tred_id=thread_id, message_id=message_id)
+        return map(lambda d: Message(**d), result)
 
     async def all_people_in_personal_list(self, list_id: int):
         query = ("select * from personal_lists pl "

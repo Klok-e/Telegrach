@@ -53,36 +53,40 @@ async def create_user(message: ClientMessage.UserCreationRequest, session: Sessi
     return response
 
 
-# TODO: fix me
+# TODO: handle the case where there's already a lot of messages and they all can't be sent in one protobuf message
+# (maybe send fetch only a portion on get_new_messages_from_tred request that fits in one protobuf
+# message and wait till client sends another get_new_messages_from_tred request)
 @request_handler(ClientMessage.thread_data_request)
-async def get_all_messages_from_tred(message: ClientMessage.ThreadDataRequest, session: SessionData):
-    """Function returns all message in tred by one query."""
-    result = await session.db.all_messages_in_tred(message.tred_id)
-    result = [dict(i.items()) for i in result]
+async def get_new_messages_from_tred(message: ClientMessage.ThreadDataRequest, session: SessionData):
+    new_messages = list(
+        await session.db.messages_from_thread_with_id_above(message.tred_id,
+                                                            session.last_message_in_thread.get(message.tred_id, 0)))
+    if len(new_messages) > 0:
+        session.last_message_in_thread[message.tred_id] = new_messages[-1].message_id
 
     response = ServerMessage()
-
     response.new_messages_appeared.messages.extend([])
-    for mess in result:
+    for msg in new_messages:
         appendable = response.new_messages_appeared.messages.add()
-
-        # todo: fix this dictionary mess
-        appendable.id = mess["creator_id"]
-        appendable.thread_id = mess["tred_id"]
-        appendable.body = mess["message_body"]
-        time = mess["message_time"].timestamp()
-        appendable.time.seconds = int(time)
-        appendable.time.nanos = 0  # actually i dont think we need to send fractions of second
+        appendable.id = msg.message_id
+        appendable.thread_id = msg.tred_id
+        appendable.body = msg.body
+        appendable.time.FromDatetime(msg.timestamp.time())
 
     return response
 
 
+# TODO: handle the case where there's already a lot of threads and they all can't be sent in one protobuf message
+# (maybe fetch only a portion on get_new_threads request that fits in one protobuf
+# message and wait till client sends another get_new_threads request)
 @request_handler(ClientMessage.get_all_joined_threads_request)
-async def get_all_threads(message: ClientMessage.GetAllJoinedThreadsRequest, session: SessionData):
-    all_threads = await session.db.get_all_threads()
+async def get_new_threads(message: ClientMessage.GetAllJoinedThreadsRequest, session: SessionData):
+    new_threads = list(await session.db.threads_with_id_above(session.last_thread_id))
+    if len(new_threads) > 0:
+        session.last_thread_id = new_threads[-1].tred_id
     response = ServerMessage()
     response.all_the_threads.threads.extend([])
-    for thread in all_threads:
+    for thread in new_threads:
         r_th = response.all_the_threads.threads.add()
         r_th.id = thread.tred_id
         r_th.head = thread.header

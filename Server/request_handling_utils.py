@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Callable, Awaitable, Any, Optional
+from dataclasses import dataclass, field
+from typing import Callable, Awaitable, Any, Optional, Dict
 from database import DataBase
 from proto.client_pb2 import ClientMessage
 from proto.server_pb2 import ServerMessage
@@ -13,6 +13,12 @@ class SessionData:
     db: DataBase
     logged_in: bool = False
     login: Optional[str] = None
+    last_thread_id: int = 0
+
+    # key is thread_id and value is the last message_id
+    # field(default_factory={}) explained here
+    # https://stackoverflow.com/questions/53632152/why-cant-dataclasses-have-mutable-defaults-in-their-class-attributes-declaratio
+    last_message_in_thread: Dict[int, int] = field(default_factory={})
 
 
 async def handle_request(message: ClientMessage, session_data: SessionData) -> Any:
