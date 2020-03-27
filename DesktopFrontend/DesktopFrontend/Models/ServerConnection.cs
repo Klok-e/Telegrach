@@ -40,7 +40,7 @@ namespace DesktopFrontend.Models
         /// </summary>
         private SemaphoreSlim _querySema;
 
-        private Task _queryTask;
+        private Task? _queryTask;
         private CancellationTokenSource _cancelServerQuerying;
 
 
@@ -65,7 +65,7 @@ namespace DesktopFrontend.Models
                     _client.Close();
                 }
 
-                if (_queryTask.Exception != null)
+                if (_queryTask?.Exception != null)
                 {
                     Log.Error(Log.Areas.Network, this, $"Query task threw an exception: {_queryTask.Exception}");
                 }
