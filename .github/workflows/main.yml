@@ -16,7 +16,7 @@ jobs:
         id: check
         if: github.event_name == 'issue_comment'
         with:
-          trigger: "#check"
+          trigger: "/check"
           reaction: rocket
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
@@ -48,14 +48,15 @@ jobs:
   format-commit:
     runs-on: ubuntu-latest
     # Check if the PR is not raised by this workflow and is not from a fork
-    if: github.event_name == 'issue_comment' || startsWith(github.head_ref, 'format-patches') == false && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'issue_comment' || 
+      startsWith(github.head_ref, 'format-patches') == false && github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - if: github.event_name == 'issue_comment'
         name: Pull Request Comment Trigger
         uses: Khan/pull-request-comment-trigger@1.0.0
         id: check
         with:
-          trigger: "#check"
+          trigger: "/check"
           reaction: rocket
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
