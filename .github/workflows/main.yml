@@ -47,6 +47,8 @@ jobs:
 
   format-commit:
     runs-on: ubuntu-latest
+    # Check if the PR is not raised by this workflow and is not from a fork
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'format-patches') == false && github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - if: github.event_name == 'issue_comment'
         name: Pull Request Comment Trigger
@@ -83,6 +85,7 @@ jobs:
           cd DesktopFrontend/
           CHANGED=0
           dotnet format --check || CHANGED=$?
+          # 0 - not changed, anything else - changed
           echo "::set-output name=changed-files::$CHANGED"
 
       - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
@@ -104,9 +107,16 @@ jobs:
       - if:
           (steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request') &&
           (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
-        name: Commit changes
-        run: |
-          git config --global user.name "Code Formatter"
-          git config --global user.email code@formatter.com
-          git commit -am "Format code"
-          git push
+        name: Create pull request
+        uses: peter-evans/create-pull-request@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: formatting fixes
+          committer: Auto Formatting Bot <26795215+LokiVKlokeNaAndoke@users.noreply.github.com>
+          title: Fixes by Auto Formatting Bot
+          body: This is an auto-generated PR with fixes by Auto Formatting Bot.
+          branch: format-patches/${{ github.head_ref }}
+
+      - name: Fail if there are changes so that a pull request merge is required
+        if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
+        run: exit 1
