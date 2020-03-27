@@ -81,12 +81,9 @@ jobs:
         id: csharp
         run: |
           cd DesktopFrontend/
-          dotnet format --check || CHANGED=1
-          if [ "$CHANGED" != "1" ]; then
-            echo "::set-output name=changed-files::0"
-          else
-            echo "::set-output name=changed-files::1"
-          fi
+          CHANGED=0
+          dotnet format --check || CHANGED=$?
+          echo "::set-output name=changed-files::$CHANGED"
 
       - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
         name: Format python code
@@ -106,7 +103,7 @@ jobs:
 
       - if:
           (steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request') &&
-          (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files == 1)
+          (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
         name: Commit changes
         run: |
           git config --global user.name "Code Formatter"
