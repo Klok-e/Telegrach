@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    types: [opened,reopened]
+    types: [opened, reopened, edited]
   issue_comment:
-    types: [created]
+    types: [created, edited]
 
 jobs:
   build:
