@@ -1,49 +1,83 @@
 name: CI
 
-on: [push]
+on:
+  pull_request:
+    types: [opened]
+  issue_comment:
+    types: [created]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup dotnet
+      - name: Pull Request Comment Trigger
+        uses: Khan/pull-request-comment-trigger@1.0.0
+        id: check
+        if: github.event_name == 'issue_comment'
+        with:
+          trigger: "@check"
+          reaction: rocket
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+        uses: actions/checkout@v2
+
+      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "3.1.102"
-      - name: Setup protoc
+
+      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
         uses: arduino/setup-protoc@v1.1.0
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compile protobuffers
+      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+        name: Compile protobuffers
         run: bash ./protobuffers/compile.sh
 
-      - name: Build the executable
+      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+        name: Build the executable
         run: |
           cd DesktopFrontend/DesktopFrontend
           dotnet build
 
   format-commit:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
+      - if: github.event_name == 'issue_comment'
+        name: Pull Request Comment Trigger
+        uses: Khan/pull-request-comment-trigger@1.0.0
+        id: check
+        with:
+          trigger: "@check"
+          reaction: rocket
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+        uses: actions/checkout@v2
+
+      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+        uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "3.1.102"
-      - uses: actions/setup-python@v1
+      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+        uses: actions/setup-python@v1
         with:
           python-version: "3.8.x"
 
-      - name: Restore local tools
+      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+        name: Restore local tools
         run: |
           cd DesktopFrontend/
           dotnet tool restore
 
-      - name: Run dotnet format
+      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+        name: Run dotnet format
         id: csharp
         run: |
           cd DesktopFrontend/
@@ -54,7 +88,8 @@ jobs:
             echo "::set-output name=changed-files::1"
           fi
 
-      - name: Format python code
+      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+        name: Format python code
         id: autopep8
         run: |
           pip install autopep8
@@ -63,13 +98,16 @@ jobs:
           autopep8 --exit-code --recursive --in-place --aggressive --aggressive ./Server || EXIT=$?
           echo ::set-output name=exit-code::$EXIT
 
-      - name: Print changed files debug
+      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+        name: Print changed files debug
         run: |
           echo "python exit ${{ steps.autopep8.outputs.exit-code }}"
           echo "csharp changed-files ${{ steps.csharp.outputs.changed-files }}"
 
-      - name: Commit changes
-        if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files == 1
+      - if:
+          (steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request') &&
+          (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files == 1)
+        name: Commit changes
         run: |
           git config --global user.name "Code Formatter"
           git config --global user.email code@formatter.com
