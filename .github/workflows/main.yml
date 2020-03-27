@@ -62,6 +62,8 @@ jobs:
 
       - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
 
       - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
         uses: actions/setup-dotnet@v1
