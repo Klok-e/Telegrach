@@ -107,7 +107,9 @@ namespace DesktopFrontend.ViewModels
         private void ThreadSearchInit(INavigationStack stack, IServerConnection connection)
         {
             _threadSet = new ThreadSet();
+
             connection.NewThreadArrived
+                // observe on the UI thread
                 .ObserveOn(AvaloniaScheduler.Instance)
                 .Subscribe(newThread =>
                 {
@@ -116,6 +118,17 @@ namespace DesktopFrontend.ViewModels
                         Thread = newThread,
                         Messages = new ChatMessages()
                     });
+                });
+
+            connection.NewMessageArrived
+                .ObserveOn(AvaloniaScheduler.Instance)
+                .Subscribe(newMessage =>
+                {
+                    Threads
+                        .First(msg => msg.Thread.Id == newMessage.ThreadId).Messages.Messages
+                        .Add(newMessage.Message);
+                    if (CurrentThread != null && newMessage.ThreadId == CurrentThread.Thread.Id)
+                        Messages.Add(newMessage.Message);
                 });
 
             CreateNewThread = ReactiveCommand.Create(() =>
