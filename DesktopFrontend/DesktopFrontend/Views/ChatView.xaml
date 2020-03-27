@@ -16,8 +16,8 @@
                 <TextBlock Margin="5,5,5,5" Grid.Row="1" Grid.Column="0" Text="{Binding Body}" />
             </Grid>
         </DataTemplate>
-        <DataTemplate DataType="m:ThreadItem">
-            <Button Content="{Binding Name}">
+        <DataTemplate DataType="m:ThreadMessages">
+            <Button Content="{Binding Thread.Name}">
                 <Button.Command>
                     <Binding Path="$parent[UserControl].DataContext.SelectThread" />
                 </Button.Command>
@@ -42,12 +42,12 @@
                     <Grid ColumnDefinitions="Auto,Auto,*" RowDefinitions="Auto,Auto" HorizontalAlignment="Stretch">
                         <TextBlock Margin="5,10,0,0" Grid.Row="0" Grid.Column="0" Text="#"
                                    IsVisible="{Binding CurrThreadNotNull}" />
-                        <TextBlock Margin="0,10,5,0" Grid.Row="0" Grid.Column="1" Text="{Binding CurrentThread.Id}" />
-                        <TextBlock Margin="5,10,5,0" Grid.Row="0" Grid.Column="2" Text="{Binding CurrentThread.Head}"
+                        <TextBlock Margin="0,10,5,0" Grid.Row="0" Grid.Column="1" Text="{Binding CurrentThread.Thread.Id}" />
+                        <TextBlock Margin="5,10,5,0" Grid.Row="0" Grid.Column="2" Text="{Binding CurrentThread.Thread.Head}"
                                    TextWrapping="Wrap" />
 
                         <TextBlock Margin="20,5,5,5" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
-                                   Text="{Binding CurrentThread.Body}" TextWrapping="Wrap" />
+                                   Text="{Binding CurrentThreadThread.Thread.Body}" TextWrapping="Wrap" />
                     </Grid>
                     <ListBox Name="MessageList" Items="{Binding Messages}" BorderThickness="0" />
                 </StackPanel>

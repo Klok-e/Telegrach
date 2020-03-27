@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,11 +31,13 @@ namespace DesktopFrontend.Models
 
         public bool IsConnected => _client.Connected;
 
-        private readonly Subject<ThreadItem> _newThreadArrived = new Subject<ThreadItem>();
-        private readonly Subject<ChatMessageInThread> _newMessageArrived = new Subject<ChatMessageInThread>();
-        public IObservable<ThreadItem> NewThreadArrived => _newThreadArrived;
+        private readonly ReplaySubject<ThreadItem> _newThreadArrived = new ReplaySubject<ThreadItem>();
 
-        public IObservable<ChatMessageInThread> NewMessageArrived => _newMessageArrived;
+        private readonly ReplaySubject<ChatMessageInThread> _newMessageArrived =
+            new ReplaySubject<ChatMessageInThread>();
+
+        public IObservable<ThreadItem> NewThreadArrived => _newThreadArrived.AsObservable();
+        public IObservable<ChatMessageInThread> NewMessageArrived => _newMessageArrived.AsObservable();
 
         /// <summary>
         /// A lock that doesn't allow to simultaneously execute async methods (buttons) and query server
@@ -60,6 +64,7 @@ namespace DesktopFrontend.Models
             _querySema.Wait();
             try
             {
+                _cancelServerQuerying.Cancel();
                 if (IsConnected)
                 {
                     _client.Close();
@@ -102,24 +107,11 @@ namespace DesktopFrontend.Models
                     await _querySema.WaitAsync();
                     try
                     {
-                        // execute OnNext on the UI thread so that subscribers can call UI commands
-                        var threads = await RequestNewThreads();
-                        Dispatcher.UIThread.Post(() =>
-                        {
-                            foreach (var thread in threads)
-                            {
-                                _newThreadArrived.OnNext(thread);
-                            }
-                        });
+                        foreach (var thread in await RequestNewThreads())
+                            _newThreadArrived.OnNext(thread);
 
-                        var messages = await RequestNewMessages();
-                        Dispatcher.UIThread.Post(() =>
-                        {
-                            foreach (var message in messages)
-                            {
-                                _newMessageArrived.OnNext(message);
-                            }
-                        });
+                        foreach (var message in await RequestNewMessages())
+                            _newMessageArrived.OnNext(message);
                     }
                     catch (Exception e)
                     {

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
@@ -106,14 +107,16 @@ namespace DesktopFrontend.ViewModels
         private void ThreadSearchInit(INavigationStack stack, IServerConnection connection)
         {
             _threadSet = new ThreadSet();
-            connection.NewThreadArrived.Subscribe(newThread =>
-            {
-                Threads.Add(new ThreadMessages
+            connection.NewThreadArrived
+                .ObserveOn(AvaloniaScheduler.Instance)
+                .Subscribe(newThread =>
                 {
-                    Thread = newThread,
-                    Messages = new ChatMessages()
+                    Threads.Add(new ThreadMessages
+                    {
+                        Thread = newThread,
+                        Messages = new ChatMessages()
+                    });
                 });
-            });
 
             CreateNewThread = ReactiveCommand.Create(() =>
             {
