@@ -6,19 +6,19 @@ using Avalonia.Platform;
 
 namespace DesktopFrontend.Models
 {
-    public interface IServerConnection
+    public interface IServerConnection : IDisposable
     {
         bool IsConnected { get; }
 
         /// <summary>
-        /// Returns new threads
+        /// New threads
         /// </summary>
-        //IObservable<ThreadItem[]> NewThreadArrived { get; }
+        IObservable<ThreadItem> NewThreadArrived { get; }
 
         /// <summary>
-        /// Returns new messages
+        /// New messages
         /// </summary>
-        //IObservable<ChatMessage[]> NewMessageArrived { get; }
+        IObservable<ChatMessageInThread> NewMessageArrived { get; }
 
         Task<bool> Connect();
 
@@ -28,7 +28,7 @@ namespace DesktopFrontend.Models
 
         Task<(string login, string pass)?> TryRequestAccount(string tryText);
 
-        Task<ThreadSet> RequestThreadSet();
+        //Task<ThreadSet> RequestThreadSet();
 
         /// <summary>
         /// Creates a thread on the server. Throws an exception if unsuccessful.
@@ -40,6 +40,6 @@ namespace DesktopFrontend.Models
 
         Task SendMessage(string body, ulong threadId);
 
-        Task<ChatMessages> RequestMessagesForThread(ThreadItem thread);
+        //Task<ChatMessages> RequestMessagesForThread(ThreadItem thread);
     }
 }

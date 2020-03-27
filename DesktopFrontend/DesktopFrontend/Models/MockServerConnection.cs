@@ -17,6 +17,9 @@ namespace DesktopFrontend.Models
         public bool IsConnected { get; private set; }
         private bool _loggedIn;
 
+        public IObservable<ThreadItem> NewThreadArrived { get; }
+        public IObservable<ChatMessageInThread> NewMessageArrived { get; }
+
         public async Task<bool> Connect()
         {
             await Task.Delay(TimeSpan.FromSeconds(0.4));
@@ -46,44 +49,50 @@ namespace DesktopFrontend.Models
         {
             new[]
             {
-                new ThreadItem("мозкоподібні структури", "fuck you", 1)
+                new ThreadItem
                 {
-                    Messages = new ChatMessages()
-                    {
-                        Messages = new ObservableCollection<ChatMessage>
-                        {
-                            new[]
-                            {
-                                new ChatMessage
-                                {
-                                    Body = "i like potatoes",
-                                    Time = DateTime.Now,
-                                },
-                                new ChatMessage
-                                {
-                                    Body = "me too",
-                                    Time = DateTime.Now,
-                                },
-                            }
-                        }
-                    }
+                    Head = "мозкоподібні структури",
+                    Body = "fuck you",
+                    Id = 1,
+                    //Messages = new ChatMessages()
+                    //{
+                    //    Messages = new ObservableCollection<ChatMessage>
+                    //    {
+                    //        new[]
+                    //        {
+                    //            new ChatMessage
+                    //            {
+                    //                Body = "i like potatoes",
+                    //                Time = DateTime.Now,
+                    //            },
+                    //            new ChatMessage
+                    //            {
+                    //                Body = "me too",
+                    //                Time = DateTime.Now,
+                    //            },
+                    //        }
+                    //    }
+                    //}
                 },
-                new ThreadItem("блаблабла", "fuck me", 2)
+                new ThreadItem
                 {
-                    Messages = new ChatMessages
-                    {
-                        Messages = new ObservableCollection<ChatMessage>
-                        {
-                            new[]
-                            {
-                                new ChatMessage
-                                {
-                                    Body = "anyone here",
-                                    Time = DateTime.Now,
-                                },
-                            }
-                        }
-                    },
+                    Head = "блаблабла",
+                    Body = "fuck me",
+                    Id = 2,
+                    //Messages = new ChatMessages
+                    //{
+                    //    Messages = new ObservableCollection<ChatMessage>
+                    //    {
+                    //        new[]
+                    //        {
+                    //            new ChatMessage
+                    //            {
+                    //                Body = "anyone here",
+                    //                Time = DateTime.Now,
+                    //            },
+                    //        }
+                    //    }
+                    //},
                 },
             }
         };
@@ -93,7 +102,12 @@ namespace DesktopFrontend.Models
             if (!_loggedIn)
                 throw new Exception();
             var threadSet = new ThreadSet();
-            threadSet.Threads.AddRange(threads.Select(t => new ThreadItem(t.Head, t.Body, t.Id)));
+            //threadSet.Threads.AddRange(threads.Select(t => new ThreadItem
+            //{
+            //    Head = t.Head,
+            //    Body = t.Body,
+            //    Id = t.Id,
+            //}));
             return threadSet;
         }
 
@@ -104,7 +118,12 @@ namespace DesktopFrontend.Models
             // uncomment to test throwing
             // throw new Exception();
 
-            threads.Add(new ThreadItem(head, body, (ulong)threads.Count + 1));
+            threads.Add(new ThreadItem
+            {
+                Head = head,
+                Body = body,
+                Id = (ulong)threads.Count + 1,
+            });
         }
 
         public async Task SendMessage(string body, ulong threadId)
@@ -112,28 +131,32 @@ namespace DesktopFrontend.Models
             if (!_loggedIn)
                 throw new Exception();
             var thread = threads.Find(t => t.Id == threadId) ?? throw new Exception();
-            thread.Messages ??= new ChatMessages();
-            thread.Messages.Messages.Add(new ChatMessage
-            {
-                Body = body,
-                Time = DateTime.Now,
-            });
+            //thread.Messages ??= new ChatMessages();
+            //thread.Messages.Messages.Add(new ChatMessage
+            //{
+            //    Body = body,
+            //    Time = DateTime.Now,
+            //});
         }
 
         public async Task<ChatMessages> RequestMessagesForThread(ThreadItem thread)
         {
             if (!_loggedIn)
                 throw new Exception();
-            var xxx = threads.Find(t => t.Id == thread.Id)?.Messages;
-            if (xxx != null)
-            {
-                return new ChatMessages
-                {
-                    Messages = new ObservableCollection<ChatMessage>(xxx.Messages)
-                };
-            }
+            //var xxx = threads.Find(t => t.Id == thread.Id)?.Messages;
+            //if (xxx != null)
+            //{
+            //    return new ChatMessages
+            //    {
+            //        Messages = new ObservableCollection<ChatMessage>(xxx.Messages)
+            //    };
+            //}
 
             return new ChatMessages();
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

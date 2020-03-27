@@ -135,14 +135,13 @@ class DataBase:
                 timestamp=d["timestamp"]),
             threads)
 
-    async def messages_from_thread_with_id_above(self, thread_id: int, message_id: int) -> Iterable[Message]:
+    async def messages_with_id_above(self, message_id: int) -> Iterable[Message]:
         query = (
             "select m.message_id, m.author_login, m.tred_id, m.timestamp, m.body, m.is_deleted "
             "from message m "
-            "inner join tred t on m.tred_id = t.tred_id "
-            "where t.tred_id = :tred_id and m.message_id > :message_id "
+            "where m.message_id > :message_id "
             "order by m.message_id ")
-        result = await self.fetch_all(query, tred_id=thread_id, message_id=message_id)
+        result = await self.fetch_all(query, message_id=message_id)
         return map(lambda d: Message(**d), result)
 
     async def all_people_in_personal_list(self, list_id: int):

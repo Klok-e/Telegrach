@@ -58,12 +58,10 @@ async def create_user(message: ClientMessage.UserCreationRequest, session: Sessi
 # message and wait till client sends another get_new_messages_from_tred
 # request)
 @request_handler(ClientMessage.thread_data_request)
-async def get_new_messages_from_tred(message: ClientMessage.ThreadDataRequest, session: SessionData):
-    new_messages = list(
-        await session.db.messages_from_thread_with_id_above(message.tred_id,
-                                                            session.last_message_in_thread.get(message.tred_id, 0)))
+async def get_new_messages(message: ClientMessage.ThreadDataRequest, session: SessionData):
+    new_messages = list(await session.db.messages_with_id_above(session.last_message_id))
     if len(new_messages) > 0:
-        session.last_message_in_thread[message.tred_id] = new_messages[-1].message_id
+        session.last_message_id = new_messages[-1].message_id
 
     response = ServerMessage()
     response.new_messages_appeared.messages.extend([])
@@ -85,6 +83,7 @@ async def get_new_threads(message: ClientMessage.GetAllJoinedThreadsRequest, ses
     new_threads = list(await session.db.threads_with_id_above(session.last_thread_id))
     if len(new_threads) > 0:
         session.last_thread_id = new_threads[-1].tred_id
+        
     response = ServerMessage()
     response.all_the_threads.threads.extend([])
     for thread in new_threads:

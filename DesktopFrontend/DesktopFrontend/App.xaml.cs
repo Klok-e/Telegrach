@@ -19,10 +19,12 @@ namespace DesktopFrontend
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
+                var connection = GetConnection();
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(GetConnection()),
+                    DataContext = new MainWindowViewModel(connection),
                 };
+                desktop.Exit += (o, a) => { connection.Dispose(); };
             }
 
             base.OnFrameworkInitializationCompleted();

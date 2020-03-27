@@ -14,11 +14,7 @@ class SessionData:
     logged_in: bool = False
     login: Optional[str] = None
     last_thread_id: int = 0
-
-    # key is thread_id and value is the last message_id
-    # field(default_factory={}) explained here
-    # https://stackoverflow.com/questions/53632152/why-cant-dataclasses-have-mutable-defaults-in-their-class-attributes-declaratio
-    last_message_in_thread: Dict[int, int] = field(default_factory={})
+    last_message_id: int = 0
 
 
 async def handle_request(message: ClientMessage, session_data: SessionData) -> Any:

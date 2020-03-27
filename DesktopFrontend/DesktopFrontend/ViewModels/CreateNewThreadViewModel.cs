@@ -29,23 +29,12 @@ namespace DesktopFrontend.ViewModels
         private string _body = string.Empty;
 
         // TODO: fix this sema shit
-        public CreateNewThreadViewModel(IServerConnection connection, SemaphoreSlim sema)
+        public CreateNewThreadViewModel(IServerConnection connection)
         {
             var canOk = this.WhenAny(a => a.Head,
                 h => !string.IsNullOrEmpty(h.GetValue()));
 
-            Create = ReactiveCommand.CreateFromTask(async () =>
-                {
-                    await sema.WaitAsync();
-                    try
-                    {
-                        await connection.CreateThread(Head, Body);
-                    }
-                    finally
-                    {
-                        sema.Release();
-                    }
-                },
+            Create = ReactiveCommand.CreateFromTask(async () => { await connection.CreateThread(Head, Body); },
                 canOk);
             // Create thread throws if the thread wasn't created successfully
             Create.ThrownExceptions.Subscribe(e =>

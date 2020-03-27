@@ -35,7 +35,7 @@ message ServerMessage {
     ServerResponse server_response = 2;
     ThreadMessagePack new_messages_appeared = 3;
 
-    // server sends all the threads to the client on any change (TODO)
+    // server sends only new (those the client hasn't seen that is) threads to the client
     ThreadPack all_the_threads = 4;
   }
 }
