@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    types: [opened, reopened, edited]
+    types: [opened, reopened]
   issue_comment:
     types: [created, edited]
 
@@ -16,7 +16,7 @@ jobs:
         id: check
         if: github.event_name == 'issue_comment'
         with:
-          trigger: "/check"
+          trigger: "#check"
           reaction: rocket
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
@@ -55,7 +55,7 @@ jobs:
         uses: Khan/pull-request-comment-trigger@1.0.0
         id: check
         with:
-          trigger: "/check"
+          trigger: "#check"
           reaction: rocket
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
