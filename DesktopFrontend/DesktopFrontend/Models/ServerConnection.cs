@@ -29,8 +29,8 @@ namespace DesktopFrontend.Models
 
         public bool IsConnected => _client.Connected;
 
-        private readonly Subject<ThreadItem> _newThreadArrived;
-        private readonly Subject<ChatMessageInThread> _newMessageArrived;
+        private readonly Subject<ThreadItem> _newThreadArrived = new Subject<ThreadItem>();
+        private readonly Subject<ChatMessageInThread> _newMessageArrived = new Subject<ChatMessageInThread>();
         public IObservable<ThreadItem> NewThreadArrived => _newThreadArrived;
 
         public IObservable<ChatMessageInThread> NewMessageArrived => _newMessageArrived;
