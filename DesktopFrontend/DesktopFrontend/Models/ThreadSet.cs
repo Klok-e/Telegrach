@@ -12,28 +12,25 @@ namespace DesktopFrontend.Models
     {
         public const int NameCharCount = 15;
 
-        public string Head { get; }
-        public string Body { get; }
+        public string Head { get; set; }
+        public string Body { get; set; }
         public string Name => Head.PadRight(NameCharCount)[..NameCharCount].Trim();
-        public ulong Id { get; }
+        public ulong Id { get; set; }
+    }
 
-        public ChatMessages? Messages { get; set; }
-
-        public ThreadItem(string head, string body, ulong id)
-        {
-            Head = head;
-            Body = body;
-            Id = id;
-        }
+    public class ThreadMessages
+    {
+        public ThreadItem Thread { get; set; }
+        public ChatMessages Messages { get; set; }
     }
 
     public class ThreadSet
     {
         public ThreadSet()
         {
-            Threads = new ObservableCollection<ThreadItem>();
+            Threads = new ObservableCollection<ThreadMessages>();
         }
 
-        public ObservableCollection<ThreadItem> Threads { get; }
+        public ObservableCollection<ThreadMessages> Threads { get; }
     }
 }

@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Callable, Awaitable, Any, Optional
+from dataclasses import dataclass, field
+from typing import Callable, Awaitable, Any, Optional, Dict
 from database import DataBase
 from proto.client_pb2 import ClientMessage
 from proto.server_pb2 import ServerMessage
@@ -13,6 +13,8 @@ class SessionData:
     db: DataBase
     logged_in: bool = False
     login: Optional[str] = None
+    last_thread_id: int = 0
+    last_message_id: int = 0
 
 
 async def handle_request(message: ClientMessage, session_data: SessionData) -> Any:

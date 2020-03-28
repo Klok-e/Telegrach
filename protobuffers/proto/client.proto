@@ -7,7 +7,7 @@ import "proto/common.proto";
 
 // messages the client sends to the server
 message ClientMessage {
-  message ThreadDataRequest { uint64 tred_id = 1; }
+  message ThreadDataRequest {}
 
   message GetAllJoinedThreadsRequest {}
 
@@ -39,6 +39,8 @@ message ClientMessage {
     ThreadCreateRequest create_thread_request = 5;
     JoinThreadRequest join_thread_request = 6;
     UnionAnotherAccountRequest union_another_request = 7;
+
+    // TODO: rename this to get_new_threads_request
     GetAllJoinedThreadsRequest get_all_joined_threads_request = 8;
   }
 }

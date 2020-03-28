@@ -12,6 +12,12 @@ namespace DesktopFrontend.Models
         public string Body { get; set; }
     }
 
+    public class ChatMessageInThread
+    {
+        public ulong ThreadId { get; set; }
+        public ChatMessage Message { get; set; }
+    }
+
     public class ChatMessages
     {
         //public float Interval { get; set; } = 0.5f;
