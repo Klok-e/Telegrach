@@ -21,6 +21,7 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+      # if comment get pr branch ref
       - name: Fetch issue info
         if: steps.check.outputs.triggered == 'true'
         uses: octokit/request-action@v2.x
@@ -51,6 +52,7 @@ jobs:
         with:
           json: ${{ steps.get_pr_ref.outputs.data }}
           ref: "head.ref"
+      # endif
       - name: Checkout if comment
         if: steps.check.outputs.triggered == 'true'
         uses: actions/checkout@v2
@@ -97,6 +99,7 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+      # if comment get pr branch ref
       - name: Fetch issue info
         if: steps.check.outputs.triggered == 'true'
         uses: octokit/request-action@v2.x
@@ -127,6 +130,7 @@ jobs:
         with:
           json: ${{ steps.get_pr_ref.outputs.data }}
           ref: "head.ref"
+      # endif
       - name: Checkout if comment
         if: steps.check.outputs.triggered == 'true'
         uses: actions/checkout@v2
@@ -182,12 +186,21 @@ jobs:
           (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
         name: Create pull request
         uses: peter-evans/create-pull-request@v2
+        id: pull_request
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: formatting fixes
           title: Fixes by Auto Formatting Bot
           body: This is an auto-generated PR with fixes by Auto Formatting Bot.
           branch: format-patches/${{ github.head_ref }}
+
+      - name: comment PR
+        if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
+        uses: unsplash/comment-on-pr@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: "Formatting pull request created ${{ steps.pull_request.outputs.pr_number }}"
 
       - name: Fail if there are changes so that a pull request merge is required
         if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
