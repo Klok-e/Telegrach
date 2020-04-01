@@ -185,7 +185,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: formatting fixes
-          committer: Auto Formatting Bot <26795215+LokiVKlokeNaAndoke@users.noreply.github.com>
           title: Fixes by Auto Formatting Bot
           body: This is an auto-generated PR with fixes by Auto Formatting Bot.
           branch: format-patches/${{ github.head_ref }}
