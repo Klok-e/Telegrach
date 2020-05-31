@@ -4,7 +4,7 @@ import os
 __DB = 'postgresql'
 __DB_USER = ''
 __DB_PW = ''
-__DB_HOST = 'localhost'
+__DB_HOST =       'localhost'
 __DB_PORT = 5432  # Default port for PostgreSQL
 __DB_NAME = ''
 
