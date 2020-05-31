@@ -59,7 +59,7 @@ async def server_handler(handlers, db, reader: asyncio.StreamReader, writer: asy
         if request is None:
             print(f"connection {sockname} ended communications")
             break
-    
+
         # calculate response
         response = await handlers.handle_request(request, session_data)
 
@@ -72,8 +72,14 @@ async def server_handler(handlers, db, reader: asyncio.StreamReader, writer: asy
 
 
 def main():
-    handlers = Handlers(login, create_user, get_new_messages, get_new_threads, thread_creation, create_message,
-                        create_union_request)
+    handlers = Handlers(
+        login,
+        create_user,
+        get_new_messages,
+        get_new_threads,
+        thread_creation,
+        create_message,
+        create_union_request)
     db = DataBase(connect_string())
     with db as db:
         loop = asyncio.get_event_loop()
