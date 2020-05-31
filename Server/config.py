@@ -1,7 +1,6 @@
 import os
 
 # constants to connect to the db *to edit*
-__DB = 'postgresql'
 __DB_USER = ''
 __DB_PW = ''
 __DB_HOST = 'localhost'
@@ -34,20 +33,6 @@ MESSAGE_PREFIX_SIZE = 4
 LOG_FILE_SERVER = "logs/server.log"
 LOG_LEVEL_SERVER = 10
 LOG_FORMAT_SERVER = "%(asctime)s In %(filename)s | %(levelname)s | %(message)s"
-
-# Optionally you can declare pseudonims for the tables in your app
-# If you decided to not then set it to Falsy-value
-# Вообще вот сейчас пишу этот коммент и у меня сомнения по этому поводу
-VOCAB = {
-    'tr': 'tred',
-    's_acc': 'super_account',
-    'u_req': 'union_requests',
-    'p_list': 'personal_lists',
-    'p_inlist': 'people_inlist',
-    't_ptp': 'tred_participation',
-    'ms': 'message',
-    'u_acc': 'user_account',
-}
 
 
 def schema_name():
@@ -84,4 +69,4 @@ def connect_string():
                   "TELEGRACH_DB_NAME"))] if x[0]]:
             msg += f"Error: {v} not specified\n"
         raise RuntimeError(msg)
-    return f'{__DB}://{user}{":" if password else ""}{password}@{hostname}:{port}/{db_name}'
+    return f'postgresql://{user}{":" if password else ""}{password}@{hostname}:{port}/{db_name}'
