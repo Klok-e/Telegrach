@@ -15,12 +15,14 @@ using ReactiveUI;
 
 namespace DesktopFrontend.ViewModels
 {
-    class MainWindowViewModel : ViewModelBase, INavigationStack
+    internal class MainWindowViewModel : ViewModelBase, INavigationStack
     {
-        private ViewModelBase _currentContent;
+        private ViewModelBase? _currentContent;
 
-        public ViewModelBase CurrentContent
+        // ReSharper disable once MemberCanBePrivate.Global
+        public ViewModelBase? CurrentContent
         {
+            // ReSharper disable once UnusedMember.Global
             get => _currentContent;
             private set => this.RaiseAndSetIfChanged(ref _currentContent, value);
         }
@@ -33,9 +35,6 @@ namespace DesktopFrontend.ViewModels
                 {
                     if (connected)
                     {
-                        Logger.Sink.Log(LogEventLevel.Information, "Network", this,
-                            "Connected to the server");
-
                         var storage = new CredentialsStorage();
                         var cred = storage.Retrieve();
                         if (cred != null)
@@ -56,13 +55,15 @@ namespace DesktopFrontend.ViewModels
                     {
                         Logger.Sink.Log(LogEventLevel.Error, "Network", this,
                             "Could not connect to the server");
+
+                        Push(new RetryConnectViewModel());
                     }
                 });
         }
 
         #region INavigationStack
 
-        private Stack<ViewModelBase> _navigation = new Stack<ViewModelBase>();
+        private readonly Stack<ViewModelBase> _navigation = new Stack<ViewModelBase>();
 
         public ViewModelBase Pop()
         {

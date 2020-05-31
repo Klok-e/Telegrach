@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DesktopFrontend.ViewModels"
+             xmlns:v="clr-namespace:DesktopFrontend.Views"
+             xmlns:vc="clr-namespace:DesktopFrontend.Views.Controls"
+             xmlns:m="clr-namespace:DesktopFrontend.Models"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="DesktopFrontend.Views.RetryConnectView">
+    <UserControl.Styles>
+        <Style Selector="Path.RotatingShit">
+            <Style.Animations>
+                <Animation Duration="0:0:1" IterationCount="INFINITE">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="RotateTransform.Angle" Value="0" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="RotateTransform.Angle" Value="360" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <TextBlock Text="Connection failed. Retrying..." Grid.Column="0" Grid.Row="0" Classes="reg2" />
+        <Path Fill="#ff6600" RenderTransformOrigin="20,20" Width="40" Height="40" Stretch="Uniform" Margin="0,20,0,0"
+              Data="M 47.627168,0 A 50.002277,50.028391 0 0 0 0,49.971562 50.002277,50.028391 0 0 0 50.002325,99.999996 
+              50.002277,50.028391 0 0 0 100,50.620469 H 89.999121 A 40.001821,40.022711 0 0 1 50.002325,89.994416 
+              40.001821,40.022711 0 0 1 10.000362,49.971562 40.001821,40.022711 0 0 1 47.627168,10.019028 Z"
+              Grid.Column="0" Grid.Row="1" Classes="RotatingShit" />
+    </Grid>
+</UserControl>
