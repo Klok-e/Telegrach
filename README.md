@@ -8,7 +8,7 @@
 ### Manjaro
 Run this:
 
-`pacman -Su ttf-croscore ttf-dejavu ttf-ubuntu-font-family ttf-inconsolata ttf-liberation`
+`pacman -Syu ttf-croscore ttf-dejavu ttf-ubuntu-font-family ttf-inconsolata ttf-liberation`
 
 ## Server deployment
 ### Prerequisites
