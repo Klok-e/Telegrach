@@ -15,7 +15,7 @@ using ReactiveUI;
 
 namespace DesktopFrontend.ViewModels
 {
-    internal class MainWindowViewModel : ViewModelBase, INavigationStack
+    public class MainWindowViewModel : ViewModelBase, INavigationStack
     {
         private ViewModelBase? _currentContent;
 
