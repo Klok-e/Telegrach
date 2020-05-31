@@ -6,7 +6,7 @@ from sqlalchemy.sql import func
 from typing import Tuple, Dict
 from config import *
 from helpers import *
-from crypto import *
+from crypto import *           
 
 
 def create_user(super_id: int) -> Tuple[Tuple[str, str], Dict]:
