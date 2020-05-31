@@ -12,6 +12,8 @@ namespace DesktopFrontend.Models
 
         public string StorageFilePath { get; }
 
+        private (string login, string password)? _credsCache;
+
         public CredentialsStorage()
         {
             StorageFilePath = Path.Join(ConfigFolderPath, "config");
@@ -21,6 +23,8 @@ namespace DesktopFrontend.Models
         public void Store(string login, string password)
         {
             Contract.Requires<ArgumentNullException>(login != null && password != null);
+
+            _credsCache = null;
             try
             {
                 // store in a totally secure way
@@ -36,6 +40,8 @@ namespace DesktopFrontend.Models
 
         public (string login, string password)? Retrieve()
         {
+            if (_credsCache != null)
+                return _credsCache;
             try
             {
                 if (File.Exists(StorageFilePath))
@@ -59,6 +65,7 @@ namespace DesktopFrontend.Models
 
         public void ResetConfig()
         {
+            _credsCache = null;
             if (File.Exists(StorageFilePath))
                 File.Delete(StorageFilePath);
         }
