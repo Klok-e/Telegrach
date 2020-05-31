@@ -76,7 +76,15 @@ jobs:
           echo "python exit ${{ steps.autopep8.outputs.exit-code }}"
           echo "csharp changed-files ${{ steps.csharp.outputs.changed-files }}"
 
-      - if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
+      - name: Find Current Pull Request
+        uses: jwalton/gh-find-current-pr@v1.0.2
+        id: findPR
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # if this branch has a PR to master and code was changed by formatters
+      - if: steps.findPR.outputs.pr != '' &&
+          (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
         name: Create pull request with proper formatting
         uses: peter-evans/create-pull-request@v2
         id: pull_request
@@ -88,7 +96,9 @@ jobs:
           branch: format-patches
           branch-suffix: timestamp
 
-      - if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
+      # if this branch has a PR to master and code was changed by formatters
+      - if: steps.findPR.outputs.pr != '' &&
+          (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
         name: Comment on the PR with the formatting pull request number
         uses: unsplash/comment-on-pr@master
         env:
@@ -96,6 +106,8 @@ jobs:
         with:
           msg: "Formatting pull request created #${{ steps.pull_request.outputs.pr_number }}"
 
-      - if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
+      # if this branch has a PR to master and code was changed by formatters
+      - if: steps.findPR.outputs.pr != '' &&
+          (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
         name: Fail if there are changes so that a job fails
         run: exit 1
