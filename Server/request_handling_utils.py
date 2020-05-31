@@ -5,8 +5,6 @@ from proto.client_pb2 import ClientMessage
 from proto.server_pb2 import ServerMessage
 from proto.common_pb2 import UserCredentials
 
-REQUEST_HANDLERS = {}
-
 
 @dataclass
 class SessionData:

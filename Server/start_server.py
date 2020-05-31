@@ -22,30 +22,6 @@ TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
 #                     format=LOG_FORMAT_SERVER)
 
 
-# TODO: obsolete?
-async def make_output(db, data: Tuple[int, bytes]):
-    code = data[0]
-    response = data[1]
-    result = await REQUEST_HANDLERS[code](response)
-    return result
-
-
-# TODO: obsolete?
-async def handle_write(db, writer: asyncio.StreamWriter, sockname: Tuple[str, int], message: Tuple[int, bytes]):
-    response = await make_output(db, message)
-    writer.write(response)
-    await writer.drain()
-
-
-# TODO: obsolete?
-async def parse_input(db, data):
-    commands, message = data.strip().split(b"\n\n")
-    commands = commands.split(b"\n")
-    commands = dict(i.split(b"=") for i in commands)
-    code = int(commands[b"CODE"])
-    return await REQUEST_HANDLERS[code](db, message)
-
-
 async def server_handler(handlers, db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     sockname = writer.get_extra_info('peername')
     print(f"new connection! {sockname}")
@@ -59,7 +35,7 @@ async def server_handler(handlers, db, reader: asyncio.StreamReader, writer: asy
         if request is None:
             print(f"connection {sockname} ended communications")
             break
-    
+
         # calculate response
         response = await handlers.handle_request(request, session_data)
 
