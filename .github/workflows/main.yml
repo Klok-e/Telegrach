@@ -27,7 +27,7 @@ jobs:
 
       - name: Build the executable
         run: |
-          cd DesktopFrontend/DesktopFrontend
+          cd DesktopFrontend
           dotnet build
 
   format-commit:
