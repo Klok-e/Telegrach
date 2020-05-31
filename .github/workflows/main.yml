@@ -1,84 +1,31 @@
 name: CI
 
-on:
-  pull_request:
-    types: [opened, reopened]
-  issue_comment:
-    types: [created, edited]
+on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pull Request Comment Trigger
-        uses: Khan/pull-request-comment-trigger@1.0.0
-        id: check
-        if: github.event_name == 'issue_comment'
-        with:
-          trigger: "/check"
-          reaction: rocket
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-      # if comment get pr branch ref
-      - name: Fetch issue info
-        if: steps.check.outputs.triggered == 'true'
-        uses: octokit/request-action@v2.x
-        id: get_issue_info
-        with:
-          route: GET ${{ github.event.issue.url }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Parse issue info
-        if: steps.check.outputs.triggered == 'true'
-        id: parse_issue_info
-        uses: gr2m/get-json-paths-action@v1.x
-        with:
-          json: ${{ steps.get_issue_info.outputs.data }}
-          pull_request_url: "pull_request.url"
-      - name: Fetch PR info
-        if: steps.check.outputs.triggered == 'true'
-        uses: octokit/request-action@v2.x
-        id: get_pr_ref
-        with:
-          route: GET ${{ steps.parse_issue_info.outputs.pull_request_url }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Parse PR info
-        if: steps.check.outputs.triggered == 'true'
-        id: parse_pr_info
-        uses: gr2m/get-json-paths-action@v1.x
-        with:
-          json: ${{ steps.get_pr_ref.outputs.data }}
-          ref: "head.ref"
-      # endif
-      - name: Checkout if comment
-        if: steps.check.outputs.triggered == 'true'
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ steps.parse_pr_info.outputs.ref }}
-      - name: Checkout if pull request
-        if: github.event_name == 'pull_request'
+      - name: Checkout
         uses: actions/checkout@v2
 
-      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+      - name: Setup dotnet
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "3.1.102"
 
-      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+      - name: Setup protoc
         uses: arduino/setup-protoc@v1.1.0
         with:
           version: 3.x
+          # to avoid rate limits
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
-        name: Compile protobuffers
+      - name: Compile protobuffers
         run: bash ./protobuffers/compile.sh
 
-      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
-        name: Build the executable
+      - name: Build the executable
         run: |
           cd DesktopFrontend/DesktopFrontend
           dotnet build
@@ -86,77 +33,26 @@ jobs:
   format-commit:
     runs-on: ubuntu-latest
     # Check if the PR is not raised by this workflow and is not from a fork
-    if: github.event_name == 'issue_comment' ||
-      startsWith(github.head_ref, 'format-patches') == false && github.event.pull_request.head.repo.full_name == github.repository
     steps:
-      - if: github.event_name == 'issue_comment'
-        name: Pull Request Comment Trigger
-        uses: Khan/pull-request-comment-trigger@1.0.0
-        id: check
-        with:
-          trigger: "/check"
-          reaction: rocket
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-      # if comment get pr branch ref
-      - name: Fetch issue info
-        if: steps.check.outputs.triggered == 'true'
-        uses: octokit/request-action@v2.x
-        id: get_issue_info
-        with:
-          route: GET ${{ github.event.issue.url }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Parse issue info
-        if: steps.check.outputs.triggered == 'true'
-        id: parse_issue_info
-        uses: gr2m/get-json-paths-action@v1.x
-        with:
-          json: ${{ steps.get_issue_info.outputs.data }}
-          pull_request_url: "pull_request.url"
-      - name: Fetch PR info
-        if: steps.check.outputs.triggered == 'true'
-        uses: octokit/request-action@v2.x
-        id: get_pr_ref
-        with:
-          route: GET ${{ steps.parse_issue_info.outputs.pull_request_url }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Parse PR info
-        if: steps.check.outputs.triggered == 'true'
-        id: parse_pr_info
-        uses: gr2m/get-json-paths-action@v1.x
-        with:
-          json: ${{ steps.get_pr_ref.outputs.data }}
-          ref: "head.ref"
-      # endif
-      - name: Checkout if comment
-        if: steps.check.outputs.triggered == 'true'
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ steps.parse_pr_info.outputs.ref }}
-      - name: Checkout if pull request
-        if: github.event_name == 'pull_request'
+      - name: Checkout
         uses: actions/checkout@v2
 
-      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+      - name: Setup dotnet
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "3.1.102"
-      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
+
+      - name: Setup python
         uses: actions/setup-python@v1
         with:
           python-version: "3.8.x"
 
-      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
-        name: Restore local tools
+      - name: Restore local tools (dotnet format specifically)
         run: |
           cd DesktopFrontend/
           dotnet tool restore
 
-      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
-        name: Run dotnet format
+      - name: Run dotnet format
         id: csharp
         run: |
           cd DesktopFrontend/
@@ -165,26 +61,23 @@ jobs:
           # 0 - not changed, anything else - changed
           echo "::set-output name=changed-files::$CHANGED"
 
-      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
-        name: Format python code
+      - name: Format python code
         id: autopep8
         run: |
           pip install autopep8
+          # hack, remove when pycodestyle supports python3.8 in the stable version
           pip install --upgrade git+https://github.com/PyCQA/pycodestyle.git@master
           EXIT=0
           autopep8 --exit-code --recursive --in-place --aggressive --aggressive ./Server || EXIT=$?
           echo ::set-output name=exit-code::$EXIT
 
-      - if: steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request'
-        name: Print changed files debug
+      - name: Print changed files debug
         run: |
           echo "python exit ${{ steps.autopep8.outputs.exit-code }}"
           echo "csharp changed-files ${{ steps.csharp.outputs.changed-files }}"
 
-      - if:
-          (steps.check.outputs.triggered == 'true' || github.event_name == 'pull_request') &&
-          (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
-        name: Create pull request
+      - if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
+        name: Create pull request with proper formatting
         uses: peter-evans/create-pull-request@v2
         id: pull_request
         with:
@@ -194,14 +87,14 @@ jobs:
           body: This is an auto-generated PR with fixes by Auto Formatting Bot.
           branch: format-patches/${{ github.head_ref }}
 
-      - name: comment PR
-        if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
+      - if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
+        name: comment PR
         uses: unsplash/comment-on-pr@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           msg: "Formatting pull request created ${{ steps.pull_request.outputs.pr_number }}"
 
-      - name: Fail if there are changes so that a pull request merge is required
-        if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
+      - if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
+        name: Fail if there are changes so that a job fails
         run: exit 1
