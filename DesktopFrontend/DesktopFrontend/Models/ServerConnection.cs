@@ -100,7 +100,7 @@ namespace DesktopFrontend.Models
             }
             catch (SocketException e)
             {
-                Log.Error(Log.Areas.Network, this, $"Error while trying to connect to the server: {e.Message}");
+                Log.Warn(Log.Areas.Network, this, $"Error while trying to connect to the server: {e.Message}");
             }
 
             return IsConnected;
