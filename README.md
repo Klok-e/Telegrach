@@ -34,7 +34,7 @@ The values of these variables are combined into a connection string which is use
 
 ## Building client manually
 1. Execute the `compile.sh` bash script in the `protobuffers` directory
-2. Build the application like a dotnet core project (dotnet CLI must be installed): 
+2. Build the application like a dotnet core project (dotnet CLI is required): 
 ```bash
 cd DesktopFrontend
 dotnet build --configuration Release
