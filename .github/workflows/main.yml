@@ -85,7 +85,7 @@ jobs:
           commit-message: formatting fixes
           title: Fixes by Auto Formatting Bot
           body: This is an auto-generated PR with fixes by Auto Formatting Bot.
-          branch: format_patches/${{ github.head_ref }}
+          branch: format-patches/${{ github.head_ref }}
 
       - if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
         name: comment PR
