@@ -9,7 +9,8 @@ from typing import Tuple, Callable, Awaitable, Any, Dict
 from config import *
 from database import DataBase
 import utils
-from request_handling_utils import SessionData, request_handler, handle_request
+from request_handling_utils import SessionData, request_handler, Handlers
+from request_handlers import *
 
 # TODO LOG ALL EXCEPTIONS WITH sys.exc_info
 
@@ -21,31 +22,7 @@ TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
 #                     format=LOG_FORMAT_SERVER)
 
 
-# TODO: obsolete?
-async def make_output(db, data: Tuple[int, bytes]):
-    code = data[0]
-    response = data[1]
-    result = await REQUEST_HANDLERS[code](response)
-    return result
-
-
-# TODO: obsolete?
-async def handle_write(db, writer: asyncio.StreamWriter, sockname: Tuple[str, int], message: Tuple[int, bytes]):
-    response = await make_output(db, message)
-    writer.write(response)
-    await writer.drain()
-
-
-# TODO: obsolete?
-async def parse_input(db, data):
-    commands, message = data.strip().split(b"\n\n")
-    commands = commands.split(b"\n")
-    commands = dict(i.split(b"=") for i in commands)
-    code = int(commands[b"CODE"])
-    return await REQUEST_HANDLERS[code](db, message)
-
-
-async def server_handler(db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+async def server_handler(handlers, db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     sockname = writer.get_extra_info('peername')
     print(f"new connection! {sockname}")
 
@@ -60,7 +37,7 @@ async def server_handler(db, reader: asyncio.StreamReader, writer: asyncio.Strea
             break
 
         # calculate response
-        response = await handle_request(request, session_data)
+        response = await handlers.handle_request(request, session_data)
 
         # send response
         await utils.write_proto_message(writer, response)
@@ -71,12 +48,20 @@ async def server_handler(db, reader: asyncio.StreamReader, writer: asyncio.Strea
 
 
 def main():
+    handlers = Handlers(
+        login,
+        create_user,
+        get_new_messages,
+        get_new_threads,
+        thread_creation,
+        create_message,
+        create_union_request)
     db = DataBase(connect_string())
     with db as db:
         loop = asyncio.get_event_loop()
         server = asyncio.start_server(
-            lambda r, w: server_handler(
-                db, r, w), *ADDRESS)
+            lambda r, w: server_handler(handlers,
+                                        db, r, w), *ADDRESS)
         server = loop.run_until_complete(server)
 
         # serve until CTRL + C

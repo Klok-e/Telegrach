@@ -1,7 +1,7 @@
 from proto.client_pb2 import ClientMessage
 from proto.server_pb2 import ServerMessage
 from proto.common_pb2 import UserCredentials
-from request_handling_utils import SessionData, request_handler, handle_request
+from request_handling_utils import SessionData, request_handler
 from typing import Tuple, Callable, Awaitable, Any, Dict
 import controllers as ctrl
 from crypto import validate_password

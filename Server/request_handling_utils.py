@@ -5,8 +5,6 @@ from proto.client_pb2 import ClientMessage
 from proto.server_pb2 import ServerMessage
 from proto.common_pb2 import UserCredentials
 
-REQUEST_HANDLERS = {}
-
 
 @dataclass
 class SessionData:
@@ -17,19 +15,20 @@ class SessionData:
     last_message_id: int = 0
 
 
-async def handle_request(message: ClientMessage, session_data: SessionData) -> Any:
-    # to initialize all handlers before this function is run
-    import request_handlers
+class Handlers:
+    def __init__(self, *handlers):
+        self._handlers = {h.accept_variant: h for h in handlers}
 
-    msg_type_str: str = message.WhichOneof('inner')
-    msg_type: Any = getattr(ClientMessage, msg_type_str)
-    if msg_type not in REQUEST_HANDLERS:
-        raise RuntimeError
-    handler = REQUEST_HANDLERS[msg_type]
+    async def handle_request(self, message: ClientMessage, session_data: SessionData) -> Any:
+        msg_type_str: str = message.WhichOneof('inner')
+        msg_type: Any = getattr(ClientMessage, msg_type_str)
+        if msg_type not in self._handlers:
+            raise RuntimeError
+        handler = self._handlers[msg_type]
 
-    # invoke handler with a given variant
-    variant = getattr(message, msg_type_str)
-    return await handler(variant, session_data)
+        # invoke handler with a given variant
+        variant = getattr(message, msg_type_str)
+        return await handler(variant, session_data)
 
 
 def request_handler(accept_variant):
@@ -38,9 +37,7 @@ def request_handler(accept_variant):
     """
 
     def inner(func: Callable[[Any, SessionData], Awaitable[Any]]):
-        if accept_variant in REQUEST_HANDLERS:
-            raise RuntimeError
-        REQUEST_HANDLERS[accept_variant] = func
+        func.accept_variant = accept_variant
         return func
 
     return inner
