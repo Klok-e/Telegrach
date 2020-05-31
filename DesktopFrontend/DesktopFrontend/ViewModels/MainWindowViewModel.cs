@@ -41,7 +41,7 @@ namespace DesktopFrontend.ViewModels
                     }
                     else
                     {
-                        Log.Warn(Log.Areas.Network, this,      
+                        Log.Warn(Log.Areas.Network, this,
                             "Could not connect to the server");
                         var retry = new RetryConnectViewModel();
                         Push(retry);
