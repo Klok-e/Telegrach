@@ -5,7 +5,7 @@ __DB_USER = ''
 __DB_PW = ''
 __DB_HOST = 'localhost'
 __DB_PORT = 5432  # Default port for PostgreSQL
-__DB_NAME = ''
+__DB_NAME = ''      
 
 # Schema name in dbsm. Change if you have prefer another.
 # It also assumes that you have created schema via schema_creation.sql
