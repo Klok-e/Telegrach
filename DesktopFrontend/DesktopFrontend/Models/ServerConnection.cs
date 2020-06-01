@@ -27,7 +27,7 @@ namespace DesktopFrontend.Models
 
         private readonly string _connectString;
         private readonly int _port;
-        private TcpClient _client;
+        private readonly TcpClient _client;
 
         public bool IsConnected => _client.Connected;
 
@@ -85,21 +85,30 @@ namespace DesktopFrontend.Models
         {
             try
             {
-                await _client.ConnectAsync(_connectString, _port);
+                var connectTask = _client.ConnectAsync(_connectString, _port);
+                if (await Task.WhenAny(connectTask,
+                        Task.Delay(TimeSpan.FromSeconds(0.5))) == connectTask)
+                // connected successfully
+                {
+                    // propagate exceptions
+                    await connectTask;
+                    Logger.Sink.Log(LogEventLevel.Information, "Network", this,
+                        "Connected to the server");
+
+                    StartQuerying();
+                }
             }
             catch (SocketException e)
             {
-                Logger.Sink.Log(LogEventLevel.Error, "Network", this, e.Message);
-                return false;
+                Log.Warn(Log.Areas.Network, this, $"Error while trying to connect to the server: {e.Message}");
             }
-
-            StartQuerying();
 
             return IsConnected;
         }
 
         private void StartQuerying()
         {
+            Log.Info(Log.Areas.Network, this, "Started querying the server");
             _queryTask = Task.Run(async () =>
             {
                 while (true)
@@ -149,14 +158,14 @@ namespace DesktopFrontend.Models
                 var responseUnion = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
                 if (responseUnion.InnerCase != ServerMessage.InnerOneofCase.ServerResponse)
                 {
-                    Logger.Sink.Log(LogEventLevel.Error, "Network", this,
+                    Log.Error(Log.Areas.Network, this,
                         $"Response to the login request was given an unexpected answer: {responseUnion}");
                     return false;
                 }
 
                 var response = responseUnion.ServerResponse;
 
-                Logger.Sink.Log(LogEventLevel.Information, "Network", this,
+                Log.Info(Log.Areas.Network, this,
                     $"Response to the login request is {response}");
                 return response.IsOk;
             }
@@ -172,10 +181,8 @@ namespace DesktopFrontend.Models
             try
             {
                 var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-                Bitmap b;
-                await using (var s = assets.Open(new Uri("avares://DesktopFrontend/Assets/mock-captcha.jpg")))
-                    b = new Bitmap(s);
-                return b;
+                await using var s = assets.Open(new Uri("avares://DesktopFrontend/Assets/mock-captcha.jpg"));
+                return new Bitmap(s);
             }
             finally
             {
@@ -198,7 +205,7 @@ namespace DesktopFrontend.Models
                 var response = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
                 if (response.InnerCase != ServerMessage.InnerOneofCase.NewAccountData)
                 {
-                    Logger.Sink.Log(LogEventLevel.Information, "Network", this,
+                    Log.Info(Log.Areas.Network, this,
                         $"Response to the account creation request was unexpected: {response}");
                     return null;
                 }
