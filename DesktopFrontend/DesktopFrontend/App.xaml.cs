@@ -34,12 +34,7 @@ namespace DesktopFrontend
         {
             // get environment variable
             IServerConnection connection;
-#if DEBUG
-            if (bool.TryParse(Environment.GetEnvironmentVariable("MOCK_CONNECTION"), out var mockOrNot) && mockOrNot)
-                connection = new MockServerConnection();
-            else
-#endif
-                connection = new ServerConnection("127.0.0.1", 9999);
+            connection = new ServerConnection("127.0.0.1", 9999);
 
             return connection;
         }
