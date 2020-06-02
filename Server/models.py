@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, MetaData, Table, ForeignKey, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, MetaData, \
+                       Table, ForeignKey, DateTime, Boolean, \
+                       Binary 
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.types import BigInteger
+from sqlalchemy.types import BigInteger, LargeBinary
 from sqlalchemy.sql import func, expression
 from helpers import generate_uuid4
 import config
@@ -64,10 +66,18 @@ class Message(Base):
     tred_id = Column(BigInteger, ForeignKey("tred.tred_id"))
     timestamp = Column(DateTime, nullable=False, server_default=func.now())
     body = Column(String(256))
+    file_id = Column(BigInteger, ForeignKey("files.file_id"), nullable=True)
     is_deleted = Column(
         Boolean,
         nullable=False,
         server_default=expression.false())
+
+
+class File(Base):
+    __tablename__ = "files"
+    file_id = Column(BigInteger, primary_key=True)
+    extension = Column(String(10))
+    data = Column(LargeBinary, nullable=False)
 
 
 class PersonalLists(Base):
