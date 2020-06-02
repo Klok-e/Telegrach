@@ -28,6 +28,7 @@ namespace DesktopFrontend.Models
         private readonly string _connectString;
         private readonly int _port;
         private readonly TcpClient _client;
+        private bool _isLoggedIn = false;
 
         public bool IsConnected => _client.Connected;
 
@@ -88,7 +89,7 @@ namespace DesktopFrontend.Models
                 var connectTask = _client.ConnectAsync(_connectString, _port);
                 if (await Task.WhenAny(connectTask,
                         Task.Delay(TimeSpan.FromSeconds(0.5))) == connectTask)
-                // connected successfully
+                    // connected successfully
                 {
                     // propagate exceptions
                     await connectTask;
@@ -113,6 +114,13 @@ namespace DesktopFrontend.Models
             {
                 while (true)
                 {
+                    await Task.Delay(TimeSpan.FromSeconds(0.1), _cancelServerQuerying.Token);
+                    if (_cancelServerQuerying.Token.IsCancellationRequested)
+                        break;
+
+                    if (!_isLoggedIn)
+                        continue;
+
                     await _querySema.WaitAsync();
                     try
                     {
@@ -131,10 +139,6 @@ namespace DesktopFrontend.Models
                     {
                         _querySema.Release();
                     }
-
-                    await Task.Delay(TimeSpan.FromSeconds(0.1), _cancelServerQuerying.Token);
-                    if (_cancelServerQuerying.Token.IsCancellationRequested)
-                        break;
                 }
             }, _cancelServerQuerying.Token);
         }
@@ -167,7 +171,7 @@ namespace DesktopFrontend.Models
 
                 Log.Info(Log.Areas.Network, this,
                     $"Response to the login request is {response}");
-                return response.IsOk;
+                return _isLoggedIn = response.IsOk;
             }
             finally
             {
@@ -198,7 +202,7 @@ namespace DesktopFrontend.Models
                 var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
 
                 var msg = new ClientMessage
-                { UserCreateRequest = new ClientMessage.Types.UserCreationRequest { Link = false } };
+                    {UserCreateRequest = new ClientMessage.Types.UserCreationRequest {Link = false}};
 
                 await stream.WriteProtoMessageAsync(msg);
 
