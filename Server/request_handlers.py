@@ -107,7 +107,13 @@ async def thread_creation(message: ClientMessage.ThreadCreateRequest, session: S
 
 @request_handler(ClientMessage.send_msg_to_thread_request)
 async def create_message(message: ClientMessage.ThreadSendMessageRequest, session: SessionData):
-    await session.db.create_new_message(session.login, message.thread_id, message.body)
+    file: UserCredentials.File = message.file
+    file_id = None
+    if not file.IsInitialized():
+        filename, _, extension = file.filename.rpartition('.')
+        file_id = await session.db.create_new_file(extension, filename, file.filedata)
+
+    await session.db.create_new_message(session.login, message.thread_id, message.body, file_id)
 
     response = ServerMessage()
     response.server_response.is_ok = True
