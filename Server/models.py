@@ -78,6 +78,7 @@ class File(Base):
     __tablename__ = "files"
     file_id = Column(BigInteger, primary_key=True)
     extension = Column(String(10))
+    filename = Column(String(100), nullable=False)
     data = Column(LargeBinary, nullable=False)
 
 
