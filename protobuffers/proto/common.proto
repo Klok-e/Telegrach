@@ -16,6 +16,11 @@ message PersonalListToCreate {
   int64 owner_id = 2;
 }
 
+message File {
+  bytes filedata = 1;
+  string filename = 2;
+}
+
 message PeopleInlistToCreate {
   int64 list_id = 1;
   int64 friend_id = 2;
