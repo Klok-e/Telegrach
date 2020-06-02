@@ -20,6 +20,7 @@ class SuperAccount(Base):
 class UserAccount(Base):
     __tablename__ = "user_account"
     login = Column(UUID, primary_key=True, default=generate_uuid4)
+    nickname = Column(String(20), nullable=True)
     salt = Column(String(32), nullable=False)
     pword = Column(String(128), nullable=False)
     super_id = Column(BigInteger, ForeignKey("super_account.super_id"))
