@@ -28,6 +28,16 @@ message ServerMessage {
     repeated ThreadData threads = 1;
   }
 
+  message UsersOnlinePack {
+    message UserOnline {
+      string code = 1;
+
+      // TODO: nickname is unused
+      string nickname = 2;
+    }
+    repeated UserOnline users = 1;
+  }
+
   oneof inner {
     UserCredentials new_account_data = 1;
 
@@ -35,7 +45,10 @@ message ServerMessage {
     ServerResponse server_response = 2;
     ThreadMessagePack new_messages_appeared = 3;
 
-    // server sends only new (those the client hasn't seen that is) threads to the client
+    // server sends only new (those the client hasn't seen that is) threads to
+    // the client
     ThreadPack all_the_threads = 4;
+
+    UsersOnlinePack users_online = 5;
   }
 }

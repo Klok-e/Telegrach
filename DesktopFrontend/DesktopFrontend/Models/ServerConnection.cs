@@ -300,9 +300,42 @@ namespace DesktopFrontend.Models
             }
         }
 
-        public Task<IEnumerable<UserData>> RequestUsersOnline(ulong threadId)
+        public async Task<IEnumerable<UserData>> RequestUsersOnline(ulong threadId)
         {
-            throw new NotImplementedException();
+            await _querySema.WaitAsync();
+            try
+            {
+                var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
+
+                var msg = new ClientMessage
+                {
+                    UsersOnlineRequest = new ClientMessage.Types.UsersOnlineRequest
+                    {
+                        // TODO: ThreadId is unused
+                        ThreadId = 0
+                    }
+                };
+
+                await stream.WriteProtoMessageAsync(msg);
+
+                var response = await stream.ReadProtoMessageAsync(ServerMessage.Parser);
+                if (response.InnerCase != ServerMessage.InnerOneofCase.UsersOnline)
+                {
+                    Log.Error("Network", this,
+                        $"Response to the threads request was unexpected: {response}");
+                    throw new Exception();
+                }
+
+                return response.UsersOnline.Users.Select(u => new UserData
+                {
+                    Code = u.Code,
+                    Nickname = u.Nickname
+                });
+            }
+            finally
+            {
+                _querySema.Release();
+            }
         }
 
         private async Task<IEnumerable<ThreadItem>> RequestNewThreads()

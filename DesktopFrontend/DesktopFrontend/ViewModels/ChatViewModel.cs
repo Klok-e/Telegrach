@@ -166,18 +166,7 @@ namespace DesktopFrontend.ViewModels
             {
                 Log.Info(Log.Areas.Application, this,
                     $"Showing online users in thread with name {CurrentThread!.Thread.Name}");
-                var online = new List<UserData>
-                    {
-                        new UserData
-                        {
-                            Code = "asdasd", Nickname = "Bob"
-                        },
-                        new UserData
-                        {
-                            Code = "tertert", Nickname = "George"
-                        },
-                    }
-                    ; //await connection.RequestUsersOnline(CurrentThread!.Thread.Id);
+                var online = await connection.RequestUsersOnline(CurrentThread!.Thread.Id);
                 var listUsers = new ListOnlineUsersViewModel(CurrentThread.Thread.Head, online);
                 stack.Push(listUsers);
                 listUsers.Back.Subscribe(_ => { stack.Pop(); });
