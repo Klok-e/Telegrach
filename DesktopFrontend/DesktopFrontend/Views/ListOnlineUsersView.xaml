@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DesktopFrontend.ViewModels"
+             xmlns:v="clr-namespace:DesktopFrontend.Views"
+             xmlns:vc="clr-namespace:DesktopFrontend.Views.Controls"
+             xmlns:m="clr-namespace:DesktopFrontend.Models"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="DesktopFrontend.Views.ListOnlineUsersView">
+    <UserControl.DataTemplates>
+        <DataTemplate DataType="m:UserData">
+            <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto" Background="#f7f7f7">
+                <TextBlock Margin="5,5,5,5" Grid.Row="0" Grid.Column="0" Text="{Binding Code}" />
+                <TextBlock Margin="5,5,5,5" Grid.Row="0" Grid.Column="1" Text="{Binding Nickname}" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.DataTemplates>
+    <Grid Width="400" ColumnDefinitions="Auto" RowDefinitions="Auto,Auto">
+        <ScrollViewer Grid.Column="0" Grid.Row="0">
+            <StackPanel>
+                <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto">
+                    <TextBlock Margin="5,5,5,5" Grid.Column="0" Grid.Row="0"
+                               Text="Users online in:" TextWrapping="Wrap" />
+                    <TextBlock Margin="5,5,5,5" Grid.Column="1" Grid.Row="0"
+                               Text="{Binding ThreadHead}" TextWrapping="Wrap" />
+                </Grid>
+                <ListBox Items="{Binding UsersOnline}" BorderThickness="0" />
+            </StackPanel>
+        </ScrollViewer>
+        <Button Grid.Column="0" Grid.Row="1" Content="Back" Command="{Binding Back}" />
+    </Grid>
+</UserControl>

@@ -39,7 +39,7 @@
 
         <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="Auto,*">
             <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" IsVisible="{Binding CurrThreadNotNull}"
-                    Classes="no_highlight">
+                    Classes="no_highlight" Command="{Binding ShowOnline}">
                 <Grid RowDefinitions="Auto" ColumnDefinitions="Auto,Auto,*" Margin="10,0,10,10"
                       HorizontalAlignment="Left">
                     <TextBlock Margin="5,10,0,0" Grid.Row="0" Grid.Column="0" Text="#"

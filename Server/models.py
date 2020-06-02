@@ -21,6 +21,7 @@ class UserAccount(Base):
     salt = Column(String(32), nullable=False)
     pword = Column(String(128), nullable=False)
     super_id = Column(BigInteger, ForeignKey("super_account.super_id"))
+    #last_request_time = Column(DateTime, nullable=False)
 
 
 class UnionRequests(Base):

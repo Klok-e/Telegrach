@@ -296,6 +296,11 @@ namespace DesktopFrontend.Models
             }
         }
 
+        public Task<IEnumerable<UserData>> RequestUsersOnline(ulong threadId)
+        {
+            throw new NotImplementedException();
+        }
+
         private async Task<IEnumerable<ThreadItem>> RequestNewThreads()
         {
             var stream = new LengthPrefixedStreamWrapper(_client.GetStream());

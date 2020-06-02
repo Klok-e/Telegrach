@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media.Imaging;
@@ -39,6 +41,8 @@ namespace DesktopFrontend.Models
         Task CreateThread(string head, string body);
 
         Task SendMessage(string body, ulong threadId);
+
+        Task<IEnumerable<UserData>> RequestUsersOnline(ulong threadId);
 
         //Task<ChatMessages> RequestMessagesForThread(ThreadItem thread);
     }

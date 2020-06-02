@@ -139,6 +139,11 @@ namespace DesktopFrontend.Models
             //});
         }
 
+        public Task<IEnumerable<UserData>> RequestUsersOnline(ulong threadId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<ChatMessages> RequestMessagesForThread(ThreadItem thread)
         {
             if (!_loggedIn)

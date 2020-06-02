@@ -36,6 +36,7 @@
         <Style Selector="Button.no_highlight:pointerover /template/ ContentPresenter">
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="BorderBrush" Value="{DynamicResource ThemeControlHighBrush}" />
+            <Setter Property="Cursor" Value="Hand" />
         </Style>
 
         <Style Selector="TextBlock.reg1">
