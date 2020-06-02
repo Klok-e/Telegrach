@@ -15,6 +15,29 @@
         <Style Selector="Button.reg2">
             <Setter Property="FontSize" Value="18" />
         </Style>
+
+        <!-- 
+        taken from here https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Themes.Default/Button.xaml
+        idk why `/template/ ContentPresenter` works, but it does
+        it's probably an expected behaviour:
+        https://github.com/AvaloniaUI/Avalonia/issues/1347
+        
+        the problem is that when setting background of a pressed button, it doesn't change 
+        and it has something to do with  ContentPresenter
+         -->
+        <Style Selector="Button.no_highlight /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackgroundColor}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBackgroundColor}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="Button.no_highlight:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ThemeControlMidBrush}" />
+        </Style>
+        <Style Selector="Button.no_highlight:pointerover /template/ ContentPresenter">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeControlHighBrush}" />
+        </Style>
+
         <Style Selector="TextBlock.reg1">
             <Setter Property="FontSize" Value="22" />
         </Style>
