@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -24,17 +25,14 @@ namespace DesktopFrontend.ViewModels
             ThreadSearchInit(stack, connection);
         }
 
-        ~ChatViewModel()
-        {
-            //_cancelServerQuerying.Cancel();
-        }
-
         #region Chat
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public ReactiveCommand<Unit, Unit> SendMessage { get; private set; }
 
         private string _currentMessage = "";
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public string CurrentMessage
         {
             get => _currentMessage;
@@ -44,6 +42,7 @@ namespace DesktopFrontend.ViewModels
         private ChatMessages _messagesModel;
         private ThreadMessages? _currentThread;
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public ThreadMessages? CurrentThread
         {
             get => _currentThread;
@@ -60,12 +59,14 @@ namespace DesktopFrontend.ViewModels
 
         public bool CurrThreadNotNull => CurrentThread != null;
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public ChatMessages MessagesModel
         {
             get => _messagesModel;
             set => this.RaiseAndSetIfChanged(ref _messagesModel, value);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public ObservableCollection<ChatMessage> Messages { get; private set; }
 
         private void ChatInit(IServerConnection connection)
@@ -79,7 +80,7 @@ namespace DesktopFrontend.ViewModels
                 (msg, th) => !string.IsNullOrEmpty(msg) && th != null
             );
             SendMessage = ReactiveCommand.CreateFromTask(
-                async () => { await connection.SendMessage(CurrentMessage, CurrentThread.Thread.Id); },
+                async () => { await connection.SendMessage(CurrentMessage, CurrentThread!.Thread.Id); },
                 canSend);
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
             SendMessage.ThrownExceptions.Subscribe(
@@ -92,17 +93,26 @@ namespace DesktopFrontend.ViewModels
 
         private string _threadSearch = string.Empty;
 
+        // ReSharper disable once UnusedMember.Global
         public string ThreadSearch
         {
             get => _threadSearch;
             set => this.RaiseAndSetIfChanged(ref _threadSearch, value);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public ReactiveCommand<Unit, Unit> CreateNewThread { get; private set; }
 
         private ThreadSet _threadSet;
+
+        // ReSharper disable once MemberCanBePrivate.Global
         public ObservableCollection<ThreadMessages> Threads => _threadSet.Threads;
+
+        // ReSharper disable once MemberCanBePrivate.Global
         public ReactiveCommand<ThreadMessages, Unit> SelectThread { get; private set; }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public ReactiveCommand<Unit, Unit> ShowOnline { get; private set; }
 
         private void ThreadSearchInit(INavigationStack stack, IServerConnection connection)
         {
@@ -150,6 +160,18 @@ namespace DesktopFrontend.ViewModels
                 CurrentThread = thread;
             });
             SelectThread.ThrownExceptions.Subscribe(
+                e => Log.Error(Log.Areas.Network, this, e.ToString()));
+
+            ShowOnline = ReactiveCommand.CreateFromTask(async () =>
+            {
+                Log.Info(Log.Areas.Application, this,
+                    $"Showing online users in thread with name {CurrentThread!.Thread.Name}");
+                var online = await connection.RequestUsersOnline(CurrentThread!.Thread.Id);
+                var listUsers = new ListOnlineUsersViewModel(CurrentThread.Thread.Head, online);
+                stack.Push(listUsers);
+                listUsers.Back.Subscribe(_ => { stack.Pop(); });
+            });
+            ShowOnline.ThrownExceptions.Subscribe(
                 e => Log.Error(Log.Areas.Network, this, e.ToString()));
         }
 

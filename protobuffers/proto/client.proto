@@ -7,6 +7,11 @@ import "proto/common.proto";
 
 // messages the client sends to the server
 message ClientMessage {
+  message UsersOnlineRequest {
+    // TODO: thread_id is unused (everyone can view all threads)
+    uint64 thread_id = 1;
+  }
+
   message ThreadDataRequest {}
 
   message GetAllJoinedThreadsRequest {}
@@ -42,5 +47,7 @@ message ClientMessage {
 
     // TODO: rename this to get_new_threads_request
     GetAllJoinedThreadsRequest get_all_joined_threads_request = 8;
+
+    UsersOnlineRequest users_online_request = 9;
   }
 }
