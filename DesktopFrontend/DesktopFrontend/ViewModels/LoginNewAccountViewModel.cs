@@ -55,7 +55,7 @@ namespace DesktopFrontend.ViewModels
                         $"Logged in successfully as {login}");
                     stack.Push(new ChatViewModel(stack, connection));
 
-                    new CredentialsStorage().Store(login, pass);
+                    new DataStorage().StoreCredentials(login, pass);
                     return true;
                 }
 

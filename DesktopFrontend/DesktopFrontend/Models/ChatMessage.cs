@@ -9,32 +9,19 @@ namespace DesktopFrontend.Models
     public class ChatMessage
     {
         public DateTime Time { get; set; }
-        public string Body { get; set; }
+        public string Body { get; set; } = "";
+
+        public MediaFile? File { get; set; }
     }
 
     public class ChatMessageInThread
     {
         public ulong ThreadId { get; set; }
-        public ChatMessage Message { get; set; }
+        public ChatMessage Message { get; set; } = new ChatMessage();
     }
 
     public class ChatMessages
     {
-        //public float Interval { get; set; } = 0.5f;
-        //private IDisposable timer;
-
-        public ChatMessages()
-        {
-            Messages = new ObservableCollection<ChatMessage>();
-            //var counter = 0;
-            //timer = DispatcherTimer.Run(() =>
-            //    {
-            //        Messages.Add(new ChatMessage {Time = DateTime.Now, Body = $"interval {counter++}"});
-            //        return true;
-            //    },
-            //    TimeSpan.FromSeconds(Interval));
-        }
-
-        public ObservableCollection<ChatMessage> Messages { get; set; }
+        public ObservableCollection<ChatMessage> Messages { get; } = new ObservableCollection<ChatMessage>();
     }
 }

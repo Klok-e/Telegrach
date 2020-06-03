@@ -13,34 +13,39 @@
     <UserControl.DataTemplates>
         <DataTemplate DataType="m:ChatMessage">
             <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto" Background="#f7f7f7">
-                <TextBlock Margin="5,10,5,0" Grid.Row="0" Grid.Column="0" Text="{Binding Time}" />
-                <TextBlock Margin="5,5,5,5" Grid.Row="1" Grid.Column="0" Text="{Binding Body}" />
+                <TextBlock Margin="5,10,5,0" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Time}" />
+                <Button CommandParameter="{Binding .}" Grid.Row="1" Grid.Column="0">
+                    <Button.Command>
+                        <Binding Path="#ChatControl.DataContext.ActivateMediaMessage" />
+                    </Button.Command>
+                    <Image Source="{StaticResource DefaultImageIcon}" MaxWidth="128" MaxHeight="128" />
+                </Button>
+                <TextBlock Margin="5,5,5,5" Grid.Row="1" Grid.Column="1" Text="{Binding Body}" />
             </Grid>
         </DataTemplate>
         <DataTemplate DataType="m:ThreadMessages">
-            <Button Content="{Binding Thread.Name}">
+            <Button Content="{Binding Thread.Name}" CommandParameter="{Binding Path=.}">
                 <Button.Command>
                     <Binding Path="#ChatControl.DataContext.SelectThread" />
                 </Button.Command>
-                <Button.CommandParameter>
-                    <Binding Path="." />
-                </Button.CommandParameter>
             </Button>
         </DataTemplate>
     </UserControl.DataTemplates>
 
-    <DockPanel>
-        <Grid DockPanel.Dock="Left" RowDefinitions="Auto,*" ColumnDefinitions="*" Width="300">
-            <Button Command="{Binding CreateNewThread}"
-                    Content="Create"
-                    Margin="2" Grid.Row="0" Grid.Column="0" />
-            <ListBox Items="{Binding Threads}" Grid.ColumnSpan="2" Grid.Row="1" Grid.Column="0" IsVisible="True" />
-        </Grid>
+    <Grid ColumnDefinitions="*" RowDefinitions="*">
+        <DockPanel Grid.Column="0" Grid.Row="0">
+            <Grid DockPanel.Dock="Left" RowDefinitions="Auto,*" ColumnDefinitions="*" Width="300">
+                <Button Command="{Binding CreateNewThread}"
+                        Content="Create"
+                        Margin="2" Grid.Row="0" Grid.Column="0" />
+                <ListBox Items="{Binding Threads}" Grid.ColumnSpan="2" Grid.Row="1" Grid.Column="0" IsVisible="True" />
+            </Grid>
 
-        <Grid RowDefinitions="*,Auto" ColumnDefinitions="Auto,*">
-            <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
-                <StackPanel>
-                    <Grid ColumnDefinitions="Auto,Auto,*" RowDefinitions="Auto,Auto" HorizontalAlignment="Stretch">
+            <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="Auto,*">
+                <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" IsVisible="{Binding CurrThreadNotNull}"
+                        Classes="no_highlight pretty_border" Command="{Binding ShowOnline}">
+                    <Grid RowDefinitions="Auto" ColumnDefinitions="Auto,Auto,*" Margin="10,0,10,10"
+                          HorizontalAlignment="Left">
                         <TextBlock Margin="5,10,0,0" Grid.Row="0" Grid.Column="0" Text="#"
                                    IsVisible="{Binding CurrThreadNotNull}" />
                         <TextBlock Margin="0,10,5,0" Grid.Row="0" Grid.Column="1"
@@ -48,17 +53,29 @@
                         <TextBlock Margin="5,10,5,0" Grid.Row="0" Grid.Column="2"
                                    Text="{Binding CurrentThread.Thread.Head}"
                                    TextWrapping="Wrap" />
-
-                        <TextBlock Margin="20,5,5,5" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
-                                   Text="{Binding CurrentThread.Thread.Body}" TextWrapping="Wrap" />
                     </Grid>
-                    <ListBox Name="MessageList" Items="{Binding Messages}" BorderThickness="0" />
-                </StackPanel>
-            </ScrollViewer>
-            <Button Command="{Binding SendMessage}"
-                    Content="Send"
-                    Margin="2" Grid.Row="1" Grid.Column="0" />
-            <TextBox Text="{Binding CurrentMessage}" AcceptsReturn="True" Margin="2" Grid.Row="1" Grid.Column="1" />
+                </Button>
+                <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                    <StackPanel>
+                        <TextBlock Margin="20,5,5,5"
+                                   Text="{Binding CurrentThread.Thread.Body}" TextWrapping="Wrap" />
+                        <ListBox Name="MessageList" Items="{Binding Messages}" BorderThickness="0" />
+                    </StackPanel>
+                </ScrollViewer>
+                <Button Command="{Binding SendMessage}"
+                        Content="Send"
+                        Margin="2" Grid.Row="2" Grid.Column="0" />
+                <TextBox Text="{Binding CurrentMessage}" AcceptsReturn="True" Margin="2" Grid.Row="2" Grid.Column="1" />
+            </Grid>
+        </DockPanel>
+        <Grid ColumnDefinitions="*" RowDefinitions="*"
+              Grid.Column="0" Grid.Row="0" IsVisible="{Binding IsMediaActive}">
+            <Button Grid.Column="0" Grid.Row="0" BorderThickness="0"
+                    Command="{Binding DeactivateMediaMessage}" Classes="no_highlight">
+                <Image Source="/Assets/black.png" Stretch="Fill" Opacity="0.4" />
+            </Button>
+            <Image Grid.Column="0" Grid.Row="0" MaxHeight="500" MaxWidth="500"
+                   Source="{Binding ActiveImage}" />
         </Grid>
-    </DockPanel>
+    </Grid>
 </UserControl>

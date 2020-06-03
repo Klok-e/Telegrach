@@ -94,11 +94,7 @@ class DataBase:
         if result is None:
             return None
         else:
-            return UserAccount(
-                login=result['login'],
-                salt=result['salt'],
-                pword=result['pword'],
-                super_id=result['super_id'])
+            return UserAccount(**result)
 
     async def get_super(self, super_id: int) -> Optional[SuperAccount]:
         query = (
@@ -107,7 +103,7 @@ class DataBase:
             "where s.super_id = :super_id"
         )
         result = await self.fetch_one(query=query, super_id=super_id)
-        return SuperAccount(super_id=result['super_id'])
+        return SuperAccount(**result)
 
     async def threads_with_id_above(self, thread_id: int) -> Iterable[Tred]:
         query = (
@@ -118,12 +114,7 @@ class DataBase:
         )
         threads = await self.fetch_all(query, id=thread_id)
         return map(
-            lambda d: Tred(
-                tred_id=d["tred_id"],
-                creator_id=d["creator_id"],
-                header=d["header"],
-                body=d["body"],
-                timestamp=d["timestamp"]),
+            lambda d: Tred(**d),
             threads)
 
     async def messages_with_id_above(self, message_id: int) -> List[Record]:
@@ -137,6 +128,25 @@ class DataBase:
             "order by m.message_id;")
         result = await self.fetch_all(query, message_id=message_id)
         return result
+
+    async def users_online_in_thread(self, thread_id: int) -> Iterable[UserAccount]:
+        # TODO: thread_id is unused because all users connected to the server
+        # can view all threads hence they are all online
+        query = (
+            "select u.login, u.salt, u.pword, u.super_id, u.last_request_time "
+            "from user_account u "
+            "where u.last_request_time > now() - (1 * interval '1 minute')"
+        )
+        online = await self.fetch_all(query=query)
+        return map(lambda u: UserAccount(**u), online)
+
+    async def set_user_last_action_time_to_now(self, user_login: str) -> None:
+        query = (
+            "update user_account u "
+            "set last_request_time = now() "
+            "where u.login = :login "
+        )
+        await self.execute(query=query, login=user_login)
 
     async def all_people_in_personal_list(self, list_id: int) -> List[Record]:
         query = ("select * from personal_lists pl "

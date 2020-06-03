@@ -40,6 +40,9 @@ async def server_handler(handlers: HandlersList, db: DataBase,
             print(f"connection {sockname} ended communications")
             break
 
+        if session_data.logged_in:
+            await db.set_user_last_action_time_to_now(session_data.login)
+
         # calculate response
         response = await handlers.handle_request(request, session_data)
 
@@ -58,7 +61,9 @@ def main():
         get_new_messages,
         get_new_threads,
         thread_creation,
-        create_message)
+        create_message,
+        users_online)
+    
     db = DataBase(connect_string())
     with db as db:
         loop = asyncio.get_event_loop()

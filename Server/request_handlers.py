@@ -125,5 +125,20 @@ async def create_message(message: ClientMessage.ThreadSendMessageRequest,
 
     response = ServerMessage()
     response.server_response.is_ok = True
+    return response
 
+
+@request_handler(ClientMessage.users_online_request)
+async def users_online(message: ClientMessage.UsersOnlineRequest,
+                       session: SessionData) -> ServerMessage:
+    # TODO: thread_id is unused
+    online = await session.db.users_online_in_thread(-1)
+
+    response = ServerMessage()
+    response.users_online.users.extend([])
+    for onl in online:
+        onl_resp = response.users_online.users.add()
+        onl_resp.code = str(onl.login)
+        # TODO: nickname unused
+        onl_resp.nickname = ""
     return response

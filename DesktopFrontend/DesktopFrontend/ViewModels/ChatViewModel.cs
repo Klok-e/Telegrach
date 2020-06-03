@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -8,6 +9,9 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using DesktopFrontend.Models;
 using DynamicData;
@@ -24,17 +28,14 @@ namespace DesktopFrontend.ViewModels
             ThreadSearchInit(stack, connection);
         }
 
-        ~ChatViewModel()
-        {
-            //_cancelServerQuerying.Cancel();
-        }
-
         #region Chat
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public ReactiveCommand<Unit, Unit> SendMessage { get; private set; }
 
         private string _currentMessage = "";
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public string CurrentMessage
         {
             get => _currentMessage;
@@ -44,6 +45,7 @@ namespace DesktopFrontend.ViewModels
         private ChatMessages _messagesModel;
         private ThreadMessages? _currentThread;
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public ThreadMessages? CurrentThread
         {
             get => _currentThread;
@@ -60,13 +62,38 @@ namespace DesktopFrontend.ViewModels
 
         public bool CurrThreadNotNull => CurrentThread != null;
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public ChatMessages MessagesModel
         {
             get => _messagesModel;
             set => this.RaiseAndSetIfChanged(ref _messagesModel, value);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public ObservableCollection<ChatMessage> Messages { get; private set; }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public ReactiveCommand<ChatMessage, Unit> ActivateMediaMessage { get; private set; }
+
+        public ReactiveCommand<Unit, Unit> DeactivateMediaMessage { get; private set; }
+
+        private bool _isMediaActive;
+
+        // ReSharper disable once MemberCanBePrivate.Global UnusedMember.Global
+        public bool IsMediaActive
+        {
+            get => _isMediaActive;
+            private set => this.RaiseAndSetIfChanged(ref _isMediaActive, value);
+        }
+
+        private Bitmap _activeImage;
+
+        // ReSharper disable once MemberCanBePrivate.Global UnusedMember.Global
+        public Bitmap ActiveImage
+        {
+            get => _activeImage;
+            private set => this.RaiseAndSetIfChanged(ref _activeImage, value);
+        }
 
         private void ChatInit(IServerConnection connection)
         {
@@ -79,11 +106,40 @@ namespace DesktopFrontend.ViewModels
                 (msg, th) => !string.IsNullOrEmpty(msg) && th != null
             );
             SendMessage = ReactiveCommand.CreateFromTask(
-                async () => { await connection.SendMessage(CurrentMessage, CurrentThread.Thread.Id); },
+                async () => { await connection.SendMessage(CurrentMessage, CurrentThread!.Thread.Id); },
                 canSend);
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
-            SendMessage.ThrownExceptions.Subscribe(
-                e => Log.Error(Log.Areas.Network, this, e.ToString()));
+            SendMessage.LogErrors(Log.Areas.Network, this);
+
+            ActivateMediaMessage = ReactiveCommand.Create<ChatMessage>(message =>
+            {
+                Log.Info(Log.Areas.Application, this, $"Activate image for message {message.Time}");
+                if (message.File == null)
+                {
+                    Log.Warn(Log.Areas.Application, this,
+                        $"Activate image for message {message.Time} failed: file not present in the message");
+                    var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                    var bitmap = new Bitmap(assets.Open(new Uri("avares://DesktopFrontend/Assets/generic_image.png")));
+                    ActiveImage = bitmap;
+                    IsMediaActive = true;
+                    return;
+                }
+
+                switch (message.File.Type)
+                {
+                    case FileType.Image:
+                        ActiveImage = message.File.Bitmap();
+                        IsMediaActive = true;
+                        break;
+                    default:
+                        //Process.Start(@"c:\myPDF.pdf");
+                        break;
+                }
+            });
+            ActivateMediaMessage.LogErrors(Log.Areas.Network, this);
+
+            DeactivateMediaMessage = ReactiveCommand.Create(() => { IsMediaActive = false; });
+            DeactivateMediaMessage.LogErrors(Log.Areas.Network, this);
         }
 
         #endregion
@@ -92,17 +148,26 @@ namespace DesktopFrontend.ViewModels
 
         private string _threadSearch = string.Empty;
 
+        // ReSharper disable once UnusedMember.Global
         public string ThreadSearch
         {
             get => _threadSearch;
             set => this.RaiseAndSetIfChanged(ref _threadSearch, value);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public ReactiveCommand<Unit, Unit> CreateNewThread { get; private set; }
 
         private ThreadSet _threadSet;
+
+        // ReSharper disable once MemberCanBePrivate.Global
         public ObservableCollection<ThreadMessages> Threads => _threadSet.Threads;
+
+        // ReSharper disable once MemberCanBePrivate.Global
         public ReactiveCommand<ThreadMessages, Unit> SelectThread { get; private set; }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public ReactiveCommand<Unit, Unit> ShowOnline { get; private set; }
 
         private void ThreadSearchInit(INavigationStack stack, IServerConnection connection)
         {
@@ -140,8 +205,7 @@ namespace DesktopFrontend.ViewModels
                     .Merge(createThread.Cancel)
                     .Subscribe(_ => { stack.Pop(); });
             });
-            CreateNewThread.ThrownExceptions.Subscribe(
-                e => Log.Error(Log.Areas.Network, this, e.ToString()));
+            CreateNewThread.LogErrors(Log.Areas.Network, this);
 
             SelectThread = ReactiveCommand.Create<ThreadMessages>(thread =>
             {
@@ -149,8 +213,18 @@ namespace DesktopFrontend.ViewModels
                 SetMessages(thread.Messages);
                 CurrentThread = thread;
             });
-            SelectThread.ThrownExceptions.Subscribe(
-                e => Log.Error(Log.Areas.Network, this, e.ToString()));
+            SelectThread.LogErrors(Log.Areas.Network, this);
+
+            ShowOnline = ReactiveCommand.CreateFromTask(async () =>
+            {
+                Log.Info(Log.Areas.Application, this,
+                    $"Showing online users in thread with name {CurrentThread!.Thread.Name}");
+                var online = await connection.RequestUsersOnline(CurrentThread!.Thread.Id);
+                var listUsers = new ListOnlineUsersViewModel(CurrentThread.Thread.Head, online);
+                stack.Push(listUsers);
+                listUsers.Back.Subscribe(_ => { stack.Pop(); });
+            });
+            ShowOnline.LogErrors(Log.Areas.Network, this);
         }
 
         #endregion
