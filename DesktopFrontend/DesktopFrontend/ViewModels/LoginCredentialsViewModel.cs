@@ -41,7 +41,7 @@ namespace DesktopFrontend.ViewModels
                 if (await connection.LogInWithCredentials(Login, Password))
                 {
                     stack.Push(new ChatViewModel(stack, connection));
-                    new CredentialsStorage().Store(Login, Password);
+                    new DataStorage().StoreCredentials(Login, Password);
                     Log.Info(Log.Areas.Network, this,
                         $"Logged in successfully as {Login}");
                     return true;

@@ -30,7 +30,7 @@ namespace DesktopFrontend.ViewModels
 
         public MainWindowViewModel(IServerConnection connection)
         {
-            var storage = new CredentialsStorage();
+            var storage = new DataStorage();
             connection.Connect()
                 .ToObservable()
                 .SelectMany(async connected =>
@@ -64,9 +64,9 @@ namespace DesktopFrontend.ViewModels
                 .Subscribe();
         }
 
-        private async Task Login(IServerConnection connection, CredentialsStorage storage)
+        private async Task Login(IServerConnection connection, DataStorage storage)
         {
-            var cred = storage.Retrieve();
+            var cred = storage.RetrieveCredentials();
             if (cred != null &&
                 await connection.LogInWithCredentials(cred.Value.login, cred.Value.password))
             {
@@ -76,7 +76,7 @@ namespace DesktopFrontend.ViewModels
             }
             else
             {
-                storage.ResetConfig();
+                storage.ResetCredentials();
                 Push(new LoginViewModel(this, connection));
             }
         }
