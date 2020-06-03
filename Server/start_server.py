@@ -65,7 +65,7 @@ def main():
         thread_creation,
         create_message,
         users_online)
-    
+
     db = DataBase(connect_string())
     with db as db:
         loop = asyncio.get_event_loop()
