@@ -154,8 +154,7 @@ namespace DesktopFrontend.ViewModels
                     .Merge(createThread.Cancel)
                     .Subscribe(_ => { stack.Pop(); });
             });
-            CreateNewThread.ThrownExceptions.Subscribe(
-                e => Log.Error(Log.Areas.Network, this, e.ToString()));
+            CreateNewThread.LogErrors(Log.Areas.Network, this);
 
             SelectThread = ReactiveCommand.Create<ThreadMessages>(thread =>
             {
@@ -163,8 +162,7 @@ namespace DesktopFrontend.ViewModels
                 SetMessages(thread.Messages);
                 CurrentThread = thread;
             });
-            SelectThread.ThrownExceptions.Subscribe(
-                e => Log.Error(Log.Areas.Network, this, e.ToString()));
+            SelectThread.LogErrors(Log.Areas.Network, this);
 
             ShowOnline = ReactiveCommand.CreateFromTask(async () =>
             {
@@ -175,8 +173,7 @@ namespace DesktopFrontend.ViewModels
                 stack.Push(listUsers);
                 listUsers.Back.Subscribe(_ => { stack.Pop(); });
             });
-            ShowOnline.ThrownExceptions.Subscribe(
-                e => Log.Error(Log.Areas.Network, this, e.ToString()));
+            ShowOnline.LogErrors(Log.Areas.Network, this);
         }
 
         #endregion
