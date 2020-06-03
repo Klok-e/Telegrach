@@ -50,8 +50,5 @@ async def main() -> None:
     await test_get_messages_with_files()
 
 
-
-
-
 if __name__ == '__main__':
     asyncio.run(main())

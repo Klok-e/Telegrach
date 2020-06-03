@@ -4,8 +4,7 @@ from typing import Optional, Any, TypeVar
 from proto.client_pb2 import ClientMessage
 from proto.server_pb2 import ServerMessage
 
-# generics in python WOHOO!
-# T_MSG is either ClientMessage or ServerMessage
+
 T_MSG = TypeVar('T_MSG', ClientMessage, ServerMessage)
 
 

@@ -9,9 +9,8 @@ import asyncio
 import asyncpg
 import databases
 from databases import Database
+from databases.backends.postgres import Record
 from sqlalchemy.sql import select, text
-# from asyncpg.pgproto.pgproto import UUID
-# from sqlalchemy.dialects.postgresql import UUID
 from typing import List, Generator, Dict, Optional, Iterable
 from types import SimpleNamespace
 from config import *
@@ -26,7 +25,7 @@ class DataBase:
         """Setting params for the connection"""
         self.database = Database(connect_string)
 
-    def __enter__(self) -> "DataBase":
+    def __enter__(self) -> DataBase:
         asyncio.get_event_loop().run_until_complete(self.connect())
         return self
 
@@ -84,14 +83,6 @@ class DataBase:
         result = await self.fetch_one(query)
         return result['nextval']
 
-    # async def execute_many(self, query: str, values: List[Dict]):
-    #    '''
-    #        https://www.encode.io/databases/database_queries/
-    #        Actually returns something i cant explain
-    #    '''
-    #    result = await self.database.execute_many(query=query, values=values)
-    #    return result
-
     async def get_user(self, login: str) -> Optional[UserAccount]:
         """ Get user with specified UUID. Just send str representation of UUID """
         query = (
@@ -147,7 +138,7 @@ class DataBase:
         result = await self.fetch_all(query, message_id=message_id)
         return result
 
-    async def all_people_in_personal_list(self, list_id: int):
+    async def all_people_in_personal_list(self, list_id: int) -> List[Record]:
         query = ("select * from personal_lists pl "
                  "inner join people_inlist pi "
                  "on pl.list_id = pi.list_id "
@@ -226,14 +217,14 @@ class DataBase:
         result = await self.execute(query=query, creator_id=creator_id, header=header, body=body)
         return result
 
-    async def create_new_file(self, extension: str, filename: str, filedata: bytes):
+    async def create_new_file(self, extension: str, filename: str, filedata: bytes) -> int:
         next_id = await self.next_in("files_file_id_seq")
         query = ("insert into files(file_id, extension, filename, data) "
                  "values (:next_id ,:extension, :filename, :filedata);")
         result = await self.execute(next_id=next_id, query=query, extension=extension, filename=filename, filedata=filedata)
         return next_id
 
-    async def get_file(self, file_id: int):
+    async def get_file(self, file_id: int) -> Record:
         query = ("select * from files where file_id = :file_id")
         result = await self.fetch_one(query, file_id=file_id)
         return result
@@ -284,7 +275,8 @@ async def get_file_test(db: Database):
 
 async def get_messages_with_files (db: Database):
     id = 19
-    result = list(await db.messages_with_id_above(id))
+    result = await db.messages_with_id_above(id)
+    print(type(result[1]))
     for i in result:
         print(f"id {i['message_id']}")
         print(i["filename"])
@@ -306,10 +298,6 @@ async def main() -> None:
     await db.connect()
 
     await get_messages_with_files(db)
-    
-    # await create_file_test(db)
-    # await get_file_test(db)
-
 
 
 if __name__ == '__main__':
