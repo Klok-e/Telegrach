@@ -59,18 +59,31 @@ async def create_user(message: ClientMessage.UserCreationRequest, session: Sessi
 # request)
 @request_handler(ClientMessage.thread_data_request)
 async def get_new_messages(message: ClientMessage.ThreadDataRequest, session: SessionData):
-    new_messages = list(await session.db.messages_with_id_above(session.last_message_id))
+    new_messages = await session.db.messages_with_id_above(session.last_message_id)
     if len(new_messages) > 0:
-        session.last_message_id = new_messages[-1].message_id
+        session.last_message_id = new_messages[-1]["message_id"]
+
+# (
+#             "select m.message_id, m.author_login, m.tred_id, "
+#             "m.timestamp, m.body, m.is_deleted, f.data, f.filename, f.extension "
+#             "from message m "
+#             "left join files f "
+#             "on m.file_id = f.file_id "
+#             "where m.message_id > :message_id "
+#             "order by m.message_id;")
 
     response = ServerMessage()
     response.new_messages_appeared.messages.extend([])
     for msg in new_messages:
         appendable = response.new_messages_appeared.messages.add()
-        appendable.id = msg.message_id
-        appendable.thread_id = msg.tred_id
-        appendable.body = msg.body
-        appendable.time.FromDatetime(msg.timestamp)
+        appendable.id = msg["message_id"]
+        appendable.thread_id = msg["tred_id"]
+        appendable.body = msg["body"]
+        appendable.time.FromDatetime(msg["timestamp"])
+        if msg["data"] is not None:
+            filename = msg["filename"] + "." + msg["extension"]
+            appendable.file.filename = filename
+            appendable.file.filedata = msg["data"]
 
     return response
 
@@ -109,7 +122,7 @@ async def thread_creation(message: ClientMessage.ThreadCreateRequest, session: S
 async def create_message(message: ClientMessage.ThreadSendMessageRequest, session: SessionData):
     file: UserCredentials.File = message.file
     file_id = None
-    if not file.IsInitialized():
+    if file.filename != "":
         filename, _, extension = file.filename.rpartition('.')
         file_id = await session.db.create_new_file(extension, filename, file.filedata)
 

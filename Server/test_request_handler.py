@@ -34,9 +34,20 @@ async def test_message_send_nofile(string: str):
     await rh.create_message(message, session)
 
 
+async def test_get_messages_with_files():
+    message = ClientMessage.ThreadDataRequest()
+    db = DataBase(connect_string())
+    await db.connect()
+    session = SessionData(db, last_message_id=19)
+    result = await rh.get_new_messages(message, session)
+    for i in result.new_messages_appeared.messages:
+        print(i)
+
+
 async def main() -> None:
     await test_message_send_file("test_request_handler", b"8658567865", "test.exe")
     await test_message_send_nofile("nofile")
+    await test_get_messages_with_files()
 
 
 

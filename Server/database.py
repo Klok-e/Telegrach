@@ -137,12 +137,15 @@ class DataBase:
 
     async def messages_with_id_above(self, message_id: int) -> Iterable[Message]:
         query = (
-            "select m.message_id, m.author_login, m.tred_id, m.timestamp, m.body, m.is_deleted "
+            "select m.message_id, m.author_login, m.tred_id, "
+            "m.timestamp, m.body, m.is_deleted, f.data, f.filename, f.extension "
             "from message m "
+            "left join files f "
+            "on m.file_id = f.file_id "
             "where m.message_id > :message_id "
-            "order by m.message_id ")
+            "order by m.message_id;")
         result = await self.fetch_all(query, message_id=message_id)
-        return map(lambda d: Message(**d), result)
+        return result
 
     async def all_people_in_personal_list(self, list_id: int):
         query = ("select * from personal_lists pl "
@@ -272,13 +275,22 @@ async def create_file_test(db: Database):
     file_test_name = "wow"
     file_test_ext = "exe"
     result = await db.create_new_file(file_test_ext, file_test_name, file_test_data)
-    print(type(result))
 
 
 async def get_file_test(db: Database):
     id = 5
     result = await db.get_file(id)
-    print(result)
+
+
+async def get_messages_with_files (db: Database):
+    id = 19
+    result = list(await db.messages_with_id_above(id))
+    for i in result:
+        print(f"id {i['message_id']}")
+        print(i["filename"])
+        print(i["extension"])
+        print(i["data"])
+
 
 
 async def init_database(db: DataBase):
@@ -293,7 +305,7 @@ async def main() -> None:
 
     await db.connect()
 
-    # await init_database(db)
+    await get_messages_with_files(db)
     
     # await create_file_test(db)
     # await get_file_test(db)
