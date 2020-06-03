@@ -126,7 +126,7 @@ class DataBase:
                 timestamp=d["timestamp"]),
             threads)
 
-    async def messages_with_id_above(self, message_id: int) -> Iterable[Message]:
+    async def messages_with_id_above(self, message_id: int) -> List[Record]:
         query = (
             "select m.message_id, m.author_login, m.tred_id, "
             "m.timestamp, m.body, m.is_deleted, f.data, f.filename, f.extension "
