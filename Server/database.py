@@ -25,7 +25,7 @@ class DataBase:
         """Setting params for the connection"""
         self.database = Database(connect_string)
 
-    def __enter__(self) -> DataBase:
+    def __enter__(self) -> "DataBase":
         asyncio.get_event_loop().run_until_complete(self.connect())
         return self
 
