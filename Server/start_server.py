@@ -21,12 +21,12 @@ TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
 #                     format=LOG_FORMAT_SERVER)
 
 
-T = TypeVar("T")
-Handler = NewType("Handler", Callable[[T, SessionData], ServerMessage])
-HandlersList = NewType("HandlersList", List[Handler])
+# T = TypeVar("T")
+# Handler = NewType("Handler", Callable[[T, SessionData], ServerMessage])
+# HandlersList = NewType("HandlersList", List[Handler])
 
 
-async def server_handler(handlers: HandlersList, db: DataBase,
+async def server_handler(handlers: Handlers, db: DataBase,
                          reader: asyncio.StreamReader,
                          writer: asyncio.StreamWriter):
     sockname = writer.get_extra_info('peername')
