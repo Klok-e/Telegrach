@@ -4,7 +4,7 @@ from proto.client_pb2 import ClientMessage
 from proto.server_pb2 import ServerMessage
 from proto.common_pb2 import UserCredentials
 import typing
-from typing import Tuple, Callable, Awaitable, Any, Dict, Union, NewType, List
+from typing import Tuple, Callable, Awaitable, Any, Dict, Union, NewType, List, TypeVar
 from config import *
 from database import DataBase
 import utils
@@ -21,7 +21,9 @@ TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
 #                     format=LOG_FORMAT_SERVER)
 
 
-HandlersList = NewType("HandlersList", List[Callable[[Union[ClientMessage, UserCredentials], SessionData], ServerMessage]])
+T = TypeVar("T")
+Handler = NewType("Handler", Callable[[T, SessionData], ServerMessage])
+HandlersList = NewType("HandlersList", List[Handler])
 
 
 async def server_handler(handlers: HandlersList, db: DataBase,
