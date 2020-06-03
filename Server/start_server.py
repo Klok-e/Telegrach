@@ -1,11 +1,10 @@
 import asyncio
 # import logging
-import controllers as ctrl
 from proto.client_pb2 import ClientMessage
 from proto.server_pb2 import ServerMessage
 from proto.common_pb2 import UserCredentials
 import typing
-from typing import Tuple, Callable, Awaitable, Any, Dict
+from typing import Tuple, Callable, Awaitable, Any, Dict, Union, NewType, List, TypeVar
 from config import *
 from database import DataBase
 import utils
@@ -22,7 +21,14 @@ TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
 #                     format=LOG_FORMAT_SERVER)
 
 
-async def server_handler(handlers, db, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+# T = TypeVar("T")
+# Handler = NewType("Handler", Callable[[T, SessionData], ServerMessage])
+# HandlersList = NewType("HandlersList", List[Handler])
+
+
+async def server_handler(handlers: Handlers, db: DataBase,
+                         reader: asyncio.StreamReader,
+                         writer: asyncio.StreamWriter):
     sockname = writer.get_extra_info('peername')
     print(f"new connection! {sockname}")
 
@@ -58,7 +64,8 @@ def main():
         get_new_threads,
         thread_creation,
         create_message,
-        create_union_request, users_online)
+        users_online)
+    
     db = DataBase(connect_string())
     with db as db:
         loop = asyncio.get_event_loop()

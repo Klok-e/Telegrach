@@ -9,9 +9,8 @@ import asyncio
 import asyncpg
 import databases
 from databases import Database
+from databases.backends.postgres import Record
 from sqlalchemy.sql import select, text
-# from asyncpg.pgproto.pgproto import UUID
-# from sqlalchemy.dialects.postgresql import UUID
 from typing import List, Generator, Dict, Optional, Iterable
 from types import SimpleNamespace
 from config import *
@@ -84,14 +83,6 @@ class DataBase:
         result = await self.fetch_one(query)
         return result['nextval']
 
-    # async def execute_many(self, query: str, values: List[Dict]):
-    #    '''
-    #        https://www.encode.io/databases/database_queries/
-    #        Actually returns something i cant explain
-    #    '''
-    #    result = await self.database.execute_many(query=query, values=values)
-    #    return result
-
     async def get_user(self, login: str) -> Optional[UserAccount]:
         """ Get user with specified UUID. Just send str representation of UUID """
         query = (
@@ -126,14 +117,17 @@ class DataBase:
             lambda d: Tred(**d),
             threads)
 
-    async def messages_with_id_above(self, message_id: int) -> Iterable[Message]:
+    async def messages_with_id_above(self, message_id: int) -> List[Record]:
         query = (
-            "select m.message_id, m.author_login, m.tred_id, m.timestamp, m.body, m.is_deleted "
+            "select m.message_id, m.author_login, m.tred_id, "
+            "m.timestamp, m.body, m.is_deleted, f.data, f.filename, f.extension "
             "from message m "
+            "left join files f "
+            "on m.file_id = f.file_id "
             "where m.message_id > :message_id "
-            "order by m.message_id ")
+            "order by m.message_id;")
         result = await self.fetch_all(query, message_id=message_id)
-        return map(lambda d: Message(**d), result)
+        return result
 
     async def users_online_in_thread(self, thread_id: int) -> Iterable[UserAccount]:
         # TODO: thread_id is unused because all users connected to the server
@@ -154,7 +148,7 @@ class DataBase:
         )
         await self.execute(query=query, login=user_login)
 
-    async def all_people_in_personal_list(self, list_id: int):
+    async def all_people_in_personal_list(self, list_id: int) -> List[Record]:
         query = ("select * from personal_lists pl "
                  "inner join people_inlist pi "
                  "on pl.list_id = pi.list_id "
@@ -220,17 +214,29 @@ class DataBase:
                            pword=new_acc.pword, super_id=new_acc.super_id)
         return new_acc, password
 
-    async def create_new_message(self, author_login: str, tred_id: int, body: str):
+    async def create_new_message(self, author_login: str, tred_id: int, body: str, file_id: int):
         query = (
-            "insert into message(author_login, tred_id, body) "
-            "values(:author_login, :tred_id, :body);")
-        result = await self.execute(query=query, author_login=author_login, tred_id=tred_id, body=body)
+            "insert into message(author_login, tred_id, body, file_id) "
+            "values(:author_login, :tred_id, :body, :file_id);")
+        result = await self.execute(query=query, author_login=author_login, tred_id=tred_id, body=body, file_id=file_id)
         return result
 
     async def create_new_tred(self, creator_id: int, header: str, body: str):
         query = ("insert into tred(creator_id, header, body) "
                  "values (:creator_id, :header, :body);")
         result = await self.execute(query=query, creator_id=creator_id, header=header, body=body)
+        return result
+
+    async def create_new_file(self, extension: str, filename: str, filedata: bytes) -> int:
+        next_id = await self.next_in("files_file_id_seq")
+        query = ("insert into files(file_id, extension, filename, data) "
+                 "values (:next_id ,:extension, :filename, :filedata);")
+        result = await self.execute(next_id=next_id, query=query, extension=extension, filename=filename, filedata=filedata)
+        return next_id
+
+    async def get_file(self, file_id: int) -> Record:
+        query = ("select * from files where file_id = :file_id")
+        result = await self.fetch_one(query, file_id=file_id)
         return result
 
     async def create_new_tred_participation(self, values):
@@ -263,3 +269,46 @@ class DataBase:
         query = "select max(sa.super_id) from super_account sa;"
         result = await self.fetch_one(query)
         return result
+
+
+async def create_file_test(db: Database):
+    file_test_data = b"5487639875639"
+    file_test_name = "wow"
+    file_test_ext = "exe"
+    result = await db.create_new_file(file_test_ext, file_test_name, file_test_data)
+
+
+async def get_file_test(db: Database):
+    id = 5
+    result = await db.get_file(id)
+
+
+async def get_messages_with_files (db: Database):
+    id = 19
+    result = await db.messages_with_id_above(id)
+    print(type(result[1]))
+    for i in result:
+        print(f"id {i['message_id']}")
+        print(i["filename"])
+        print(i["extension"])
+        print(i["data"])
+
+
+
+async def init_database(db: DataBase):
+    """For testing new db just run"""
+    await db.create_new_user()
+    await db.create_new_tred(1, "initial", "initial")
+
+
+async def main() -> None:
+    from config import connect_string
+    db = DataBase(connect_string())
+
+    await db.connect()
+
+    await get_messages_with_files(db)
+
+
+if __name__ == '__main__':
+    asyncio.run(main())

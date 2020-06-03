@@ -25,6 +25,7 @@ message ClientMessage {
   message ThreadSendMessageRequest {
     uint64 thread_id = 1;
     string body = 2;
+    File file = 3;  
   }
 
   message ThreadCreateRequest {

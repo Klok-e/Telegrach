@@ -15,6 +15,7 @@ message ServerMessage {
       uint64 thread_id = 2;
       string body = 3;
       google.protobuf.Timestamp time = 4;
+      File file = 5;
     }
     repeated ThreadSendMessageRequest messages = 1;
   }

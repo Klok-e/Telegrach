@@ -13,3 +13,5 @@
 # protobuffers
 /Server/proto/
 /DesktopFrontend/DesktopFrontend/Proto
+
+**/venv

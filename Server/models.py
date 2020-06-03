@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, MetaData, Table, ForeignKey, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, MetaData, \
+                       Table, ForeignKey, DateTime, Boolean, \
+                       Binary 
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.types import BigInteger
+from sqlalchemy.types import BigInteger, LargeBinary
 from sqlalchemy.sql import func, expression
 from helpers import generate_uuid4
 import config
@@ -18,6 +20,7 @@ class SuperAccount(Base):
 class UserAccount(Base):
     __tablename__ = "user_account"
     login = Column(UUID, primary_key=True, default=generate_uuid4)
+    nickname = Column(String(20), nullable=True)
     salt = Column(String(32), nullable=False)
     pword = Column(String(128), nullable=False)
     super_id = Column(BigInteger, ForeignKey("super_account.super_id"))
@@ -68,10 +71,19 @@ class Message(Base):
     tred_id = Column(BigInteger, ForeignKey("tred.tred_id"))
     timestamp = Column(DateTime, nullable=False, server_default=func.now())
     body = Column(String(256))
+    file_id = Column(BigInteger, ForeignKey("files.file_id"), nullable=True)
     is_deleted = Column(
         Boolean,
         nullable=False,
         server_default=expression.false())
+
+
+class File(Base):
+    __tablename__ = "files"
+    file_id = Column(BigInteger, primary_key=True)
+    extension = Column(String(10))
+    filename = Column(String(100), nullable=False)
+    data = Column(LargeBinary, nullable=False)
 
 
 class PersonalLists(Base):
