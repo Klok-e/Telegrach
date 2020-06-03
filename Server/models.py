@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, MetaData, \
-                       Table, ForeignKey, DateTime, Boolean, \
-                       Binary 
+    Table, ForeignKey, DateTime, Boolean, \
+    Binary
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.types import BigInteger, LargeBinary
 from sqlalchemy.sql import func, expression

@@ -283,7 +283,7 @@ async def get_file_test(db: Database):
     result = await db.get_file(id)
 
 
-async def get_messages_with_files (db: Database):
+async def get_messages_with_files(db: Database):
     id = 19
     result = await db.messages_with_id_above(id)
     print(type(result[1]))
@@ -292,7 +292,6 @@ async def get_messages_with_files (db: Database):
         print(i["filename"])
         print(i["extension"])
         print(i["data"])
-
 
 
 async def init_database(db: DataBase):
