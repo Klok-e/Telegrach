@@ -9,6 +9,7 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using DesktopFrontend.Models;
 using DynamicData;
@@ -68,8 +69,27 @@ namespace DesktopFrontend.ViewModels
 
         // ReSharper disable once MemberCanBePrivate.Global
         public ObservableCollection<ChatMessage> Messages { get; private set; }
-        
-        public ReactiveCommand<ChatMessage,Unit> ActivateMediaMessage { get; private set; }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public ReactiveCommand<ChatMessage, Unit> ActivateMediaMessage { get; private set; }
+
+        private bool _isMediaActive;
+
+        // ReSharper disable once MemberCanBePrivate.Global UnusedMember.Global
+        public bool IsMediaActive
+        {
+            get => _isMediaActive;
+            private set => this.RaiseAndSetIfChanged(ref _isMediaActive, value);
+        }
+
+        private Bitmap _activeImage;
+
+        // ReSharper disable once MemberCanBePrivate.Global UnusedMember.Global
+        public Bitmap ActiveImage
+        {
+            get => _activeImage;
+            private set => this.RaiseAndSetIfChanged(ref _activeImage, value);
+        }
 
         private void ChatInit(IServerConnection connection)
         {
@@ -87,7 +107,19 @@ namespace DesktopFrontend.ViewModels
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
             SendMessage.LogErrors(Log.Areas.Network, this);
 
-            ActivateMediaMessage.Subscribe(message => { });
+            ActivateMediaMessage = ReactiveCommand.Create<ChatMessage>(message =>
+            {
+                switch (message.File!.Type)
+                {
+                    case FileType.Image:
+                        ActiveImage = message.File.Bitmap();
+                        IsMediaActive = true;
+                        break;
+                    default:
+                        //Process.Start(@"c:\myPDF.pdf");
+                        break;
+                }
+            });
             ActivateMediaMessage.LogErrors(Log.Areas.Network, this);
         }
 

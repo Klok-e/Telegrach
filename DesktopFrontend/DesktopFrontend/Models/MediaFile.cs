@@ -1,6 +1,7 @@
 using System.Data;
 using System.Drawing;
 using System.IO;
+using Bitmap = Avalonia.Media.Imaging.Bitmap;
 
 namespace DesktopFrontend.Models
 {
@@ -15,17 +16,17 @@ namespace DesktopFrontend.Models
     public class MediaFile
     {
         public FileType Type { get; }
-        public byte[] Data { get; }
+        public string FilePath { get; }
 
-        public MediaFile()
+        public MediaFile(FileType type, string path)
         {
+            Type = type;
+            FilePath = path;
         }
 
-        public Image Decode()
+        public Bitmap Bitmap()
         {
-            var stream = new MemoryStream(Data);
-            Image.FromStream(stream);
-            throw new RowNotInTableException();
+            return new Bitmap(FilePath);
         }
     }
 }
