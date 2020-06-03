@@ -9,7 +9,9 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using DesktopFrontend.Models;
 using DynamicData;
@@ -73,6 +75,8 @@ namespace DesktopFrontend.ViewModels
         // ReSharper disable once MemberCanBePrivate.Global
         public ReactiveCommand<ChatMessage, Unit> ActivateMediaMessage { get; private set; }
 
+        public ReactiveCommand<Unit, Unit> DeactivateMediaMessage { get; private set; }
+
         private bool _isMediaActive;
 
         // ReSharper disable once MemberCanBePrivate.Global UnusedMember.Global
@@ -109,7 +113,19 @@ namespace DesktopFrontend.ViewModels
 
             ActivateMediaMessage = ReactiveCommand.Create<ChatMessage>(message =>
             {
-                switch (message.File!.Type)
+                Log.Info(Log.Areas.Application, this, $"Activate image for message {message.Time}");
+                if (message.File == null)
+                {
+                    Log.Warn(Log.Areas.Application, this,
+                        $"Activate image for message {message.Time} failed: file not present in the message");
+                    var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                    var bitmap = new Bitmap(assets.Open(new Uri("avares://DesktopFrontend/Assets/generic_image.png")));
+                    ActiveImage = bitmap;    
+                    IsMediaActive = true;
+                    return;
+                }
+
+                switch (message.File.Type)
                 {
                     case FileType.Image:
                         ActiveImage = message.File.Bitmap();
@@ -121,6 +137,9 @@ namespace DesktopFrontend.ViewModels
                 }
             });
             ActivateMediaMessage.LogErrors(Log.Areas.Network, this);
+
+            DeactivateMediaMessage = ReactiveCommand.Create(() => { IsMediaActive = false; });
+            DeactivateMediaMessage.LogErrors(Log.Areas.Network, this);
         }
 
         #endregion

@@ -1,6 +1,8 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:DesktopFrontend"
+             xmlns:sys="clr-namespace:System;assembly=netstandard"
+             xmlns:img="clr-namespace:Avalonia.Media.Imaging;assembly=Avalonia.Visuals"
              x:Class="DesktopFrontend.App">
     <Application.DataTemplates>
         <local:ViewLocator />
@@ -9,6 +11,11 @@
     <Application.Styles>
         <StyleInclude Source="avares://Avalonia.Themes.Default/DefaultTheme.xaml" />
         <StyleInclude Source="avares://Avalonia.Themes.Default/Accents/BaseLight.xaml" />
+
+        <Style Selector="Button:pointerover">
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
         <Style Selector="Button.reg1">
             <Setter Property="FontSize" Value="22" />
         </Style>
@@ -27,16 +34,17 @@
          -->
         <Style Selector="Button.no_highlight /template/ ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource ThemeBackgroundColor}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBackgroundColor}" />
-            <Setter Property="BorderThickness" Value="1" />
         </Style>
         <Style Selector="Button.no_highlight:pressed /template/ ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource ThemeControlMidBrush}" />
         </Style>
-        <Style Selector="Button.no_highlight:pointerover /template/ ContentPresenter">
+        <Style Selector="Button.pretty_border /template/ ContentPresenter">
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBackgroundColor}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="Button.pretty_border:pointerover /template/ ContentPresenter">
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="BorderBrush" Value="{DynamicResource ThemeControlHighBrush}" />
-            <Setter Property="Cursor" Value="Hand" />
         </Style>
 
         <Style Selector="TextBlock.reg1">
@@ -55,4 +63,10 @@
             <Setter Property="Foreground" Value="#abcdff" />
         </Style>
     </Application.Styles>
+
+    <Application.Resources>
+        <img:IBitmap x:Key="DefaultImageIcon">/Assets/generic_image.png</img:IBitmap>
+        <img:IBitmap x:Key="DefaultAudioIcon">/Assets/generic_audio.png</img:IBitmap>
+        <img:IBitmap x:Key="DefaultVideoIcon">/Assets/generic_video.png</img:IBitmap>
+    </Application.Resources>
 </Application>
