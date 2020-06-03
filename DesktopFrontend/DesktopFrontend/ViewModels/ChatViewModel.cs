@@ -68,6 +68,8 @@ namespace DesktopFrontend.ViewModels
 
         // ReSharper disable once MemberCanBePrivate.Global
         public ObservableCollection<ChatMessage> Messages { get; private set; }
+        
+        public ReactiveCommand<ChatMessage,Unit> ActivateMediaMessage { get; private set; }
 
         private void ChatInit(IServerConnection connection)
         {
@@ -83,8 +85,10 @@ namespace DesktopFrontend.ViewModels
                 async () => { await connection.SendMessage(CurrentMessage, CurrentThread!.Thread.Id); },
                 canSend);
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
-            SendMessage.ThrownExceptions.Subscribe(
-                e => Log.Error(Log.Areas.Network, this, e.ToString()));
+            SendMessage.LogErrors(Log.Areas.Network, this);
+
+            ActivateMediaMessage.Subscribe(message => { });
+            ActivateMediaMessage.LogErrors(Log.Areas.Network, this);
         }
 
         #endregion
