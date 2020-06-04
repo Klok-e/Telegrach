@@ -61,7 +61,8 @@
                     <StackPanel>
                         <TextBlock Margin="20,5,5,5"
                                    Text="{Binding CurrentThread.Thread.Body}" TextWrapping="Wrap" />
-                        <ListBox Name="MessageList" Items="{Binding Messages}" BorderThickness="0" />
+                        <ItemsControl Name="MessageList" Items="{Binding Messages}" BorderThickness="0"/>
+                        
                     </StackPanel>
                 </ScrollViewer>
                 <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
