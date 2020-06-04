@@ -28,9 +28,8 @@ namespace DesktopFrontend.ViewModels
             private set => this.RaiseAndSetIfChanged(ref _currentContent, value);
         }
 
-        public MainWindowViewModel(IServerConnection connection)
+        public MainWindowViewModel(IServerConnection connection, DataStorage storage)
         {
-            var storage = new DataStorage();
             connection.Connect()
                 .ToObservable()
                 .SelectMany(async connected =>

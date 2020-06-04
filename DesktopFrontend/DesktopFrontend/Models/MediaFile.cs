@@ -24,9 +24,35 @@ namespace DesktopFrontend.Models
             FilePath = path;
         }
 
+        public MediaFile(string path) :
+            this(ExtToEnum(Path.GetExtension(path)), path)
+        {
+        }
+
         public Bitmap Bitmap()
         {
             return new Bitmap(FilePath);
+        }
+
+        public FileStream Bytes()
+        {
+            return File.OpenRead(FilePath);
+        }
+
+        public static FileType ExtToEnum(string ext)
+        {
+            switch (ext)
+            {
+                case ".png":
+                case ".jpg":
+                    return FileType.Image;
+                case ".mp4":
+                    return FileType.Video;
+                case ".mp3":
+                    return FileType.Sound;
+                default:
+                    return FileType.Generic;
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Net;
@@ -18,6 +19,7 @@ using Avalonia.Threading;
 using DynamicData;
 using Google.Protobuf;
 using Proto;
+using File = Proto.File;
 
 namespace DesktopFrontend.Models
 {
@@ -27,6 +29,7 @@ namespace DesktopFrontend.Models
 
         private readonly string _connectString;
         private readonly int _port;
+        private readonly DataStorage _storage;
         private readonly TcpClient _client;
         private bool _isLoggedIn = false;
 
@@ -49,10 +52,11 @@ namespace DesktopFrontend.Models
         private CancellationTokenSource _cancelServerQuerying;
 
 
-        public ServerConnection(string connectString, int port)
+        public ServerConnection(string connectString, int port, DataStorage storage)
         {
             _connectString = connectString;
             _port = port;
+            _storage = storage;
             _client = new TcpClient();
 
             _cancelServerQuerying = new CancellationTokenSource();
@@ -89,7 +93,7 @@ namespace DesktopFrontend.Models
                 var connectTask = _client.ConnectAsync(_connectString, _port);
                 if (await Task.WhenAny(connectTask,
                         Task.Delay(TimeSpan.FromSeconds(0.5))) == connectTask)
-                // connected successfully
+                    // connected successfully
                 {
                     // propagate exceptions
                     await connectTask;
@@ -202,7 +206,7 @@ namespace DesktopFrontend.Models
                 var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
 
                 var msg = new ClientMessage
-                { UserCreateRequest = new ClientMessage.Types.UserCreationRequest { Link = false } };
+                    {UserCreateRequest = new ClientMessage.Types.UserCreationRequest {Link = false}};
 
                 await stream.WriteProtoMessageAsync(msg);
 
@@ -262,19 +266,26 @@ namespace DesktopFrontend.Models
             }
         }
 
-        public async Task SendMessage(string body, ulong threadId)
+        public async Task SendMessage(string body, ulong threadId, MediaFile? file)
         {
             await _querySema.WaitAsync();
             try
             {
                 var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
-
+                
                 var msg = new ClientMessage
                 {
                     SendMsgToThreadRequest = new ClientMessage.Types.ThreadSendMessageRequest
                     {
                         Body = body,
-                        ThreadId = threadId
+                        ThreadId = threadId,
+                        File = file == null
+                            ? null
+                            : new File
+                            {
+                                Filename = Path.GetFileName(file.FilePath),
+                                Filedata = await ByteString.FromStreamAsync(file.Bytes())
+                            }
                     }
                 };
                 await stream.WriteProtoMessageAsync(msg);
@@ -384,15 +395,28 @@ namespace DesktopFrontend.Models
                 throw new Exception();
             }
 
-            return response.NewMessagesAppeared.Messages.Select(m => new ChatMessageInThread
+            return response.NewMessagesAppeared.Messages.Select(m =>
             {
-                Message = new ChatMessage
+                MediaFile? mediaFile = null;
+                if (m.File != null)
                 {
-                    Body = m.Body,
-                    Time = m.Time.ToDateTime(),
-                    // TODO: set file
-                },
-                ThreadId = m.ThreadId,
+                    var savePath = _storage.SaveFile(m.File.Filename, m.File.Filedata.ToByteArray());
+                    if (savePath != null)
+                    {
+                        mediaFile = new MediaFile(savePath);
+                    }
+                }
+
+                return new ChatMessageInThread
+                {
+                    Message = new ChatMessage
+                    {
+                        Body = m.Body,
+                        Time = m.Time.ToDateTime(),
+                        File = mediaFile,
+                    },
+                    ThreadId = m.ThreadId,
+                };
             });
         }
     }

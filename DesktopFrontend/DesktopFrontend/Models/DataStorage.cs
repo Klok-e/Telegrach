@@ -18,6 +18,11 @@ namespace DesktopFrontend.Models
         public DataStorage()
         {
             Log.Info(Log.Areas.Storage, this, $"Credentials path is {ConfigFilePath}");
+            
+            if (!Directory.Exists(DataFolderPath))
+                Directory.CreateDirectory(DataFolderPath);
+            if (!Directory.Exists(CacheFolderPath))
+                Directory.CreateDirectory(CacheFolderPath);
         }
 
         public void StoreCredentials(string login, string password)
@@ -28,7 +33,6 @@ namespace DesktopFrontend.Models
             try
             {
                 // store in a totally secure way
-                Directory.CreateDirectory(DataFolderPath);
                 File.WriteAllText(ConfigFilePath, login + " " + password);
                 Log.Info(Log.Areas.Storage, this, $"Config file written successfully");
             }
@@ -77,17 +81,13 @@ namespace DesktopFrontend.Models
             }
         }
 
-        public string? SaveFile(string name, MemoryStream stream)
+        public string? SaveFile(string name, byte[] bytes)
         {
             try
             {
                 var filePath = Path.Join(CacheFolderPath, name);
-
-                // create dir if it doesn't exist
-                Directory.CreateDirectory(filePath);
-
-                using var writer = File.OpenWrite(filePath);
-                stream.WriteTo(writer);
+                
+                File.WriteAllBytes(filePath, bytes);
                 return filePath;
             }
             catch (Exception e)
