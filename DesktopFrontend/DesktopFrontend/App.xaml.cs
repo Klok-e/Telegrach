@@ -19,24 +19,16 @@ namespace DesktopFrontend
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                var connection = GetConnection();
+                var storage = new DataStorage();
+                var connection = new ServerConnection("127.0.0.1", 9999, storage);
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(connection),
+                    DataContext = new MainWindowViewModel(connection, storage),
                 };
                 desktop.Exit += (o, a) => { connection.Dispose(); };
             }
 
             base.OnFrameworkInitializationCompleted();
-        }
-
-        private IServerConnection GetConnection()
-        {
-            // get environment variable
-            IServerConnection connection;
-            connection = new ServerConnection("127.0.0.1", 9999);
-
-            return connection;
         }
     }
 }

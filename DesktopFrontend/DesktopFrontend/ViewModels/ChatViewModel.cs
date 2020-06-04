@@ -208,7 +208,7 @@ namespace DesktopFrontend.ViewModels
                         return;
 
                     Log.Info(Log.Areas.Application, this, $"file ext: {ext}");
-                    CurrentAttached = new MediaFile(ext, toAttach);
+                    CurrentAttached = new MediaFile(toAttach);
                 }, canAttach);
             AttachFile.LogErrors(Log.Areas.Application, this);
 

@@ -77,7 +77,7 @@ namespace DesktopFrontend.Models
             }
         }
 
-        public string? SaveFile(string name, MemoryStream stream)
+        public string? SaveFile(string name, byte[] stream)
         {
             try
             {
@@ -86,8 +86,7 @@ namespace DesktopFrontend.Models
                 // create dir if it doesn't exist
                 Directory.CreateDirectory(filePath);
 
-                using var writer = File.OpenWrite(filePath);
-                stream.WriteTo(writer);
+                File.WriteAllBytes(filePath, stream);
                 return filePath;
             }
             catch (Exception e)

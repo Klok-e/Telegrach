@@ -29,6 +29,7 @@ namespace DesktopFrontend.Models
 
         private readonly string _connectString;
         private readonly int _port;
+        private readonly DataStorage _storage;
         private readonly TcpClient _client;
         private bool _isLoggedIn = false;
 
@@ -51,10 +52,11 @@ namespace DesktopFrontend.Models
         private CancellationTokenSource _cancelServerQuerying;
 
 
-        public ServerConnection(string connectString, int port)
+        public ServerConnection(string connectString, int port, DataStorage storage)
         {
             _connectString = connectString;
             _port = port;
+            _storage = storage;
             _client = new TcpClient();
 
             _cancelServerQuerying = new CancellationTokenSource();
@@ -394,15 +396,28 @@ namespace DesktopFrontend.Models
                 throw new Exception();
             }
 
-            return response.NewMessagesAppeared.Messages.Select(m => new ChatMessageInThread
+            return response.NewMessagesAppeared.Messages.Select(m =>
             {
-                Message = new ChatMessage
+                MediaFile? mediaFile = null;
+                if (m.File != null)
                 {
-                    Body = m.Body,
-                    Time = m.Time.ToDateTime(),
-                    // TODO: set file
-                },
-                ThreadId = m.ThreadId,
+                    var savePath = _storage.SaveFile(m.File.Filename, m.File.Filedata.ToByteArray());
+                    if (savePath != null)
+                    {
+                        mediaFile = new MediaFile(savePath);
+                    }
+                }
+
+                return new ChatMessageInThread
+                {
+                    Message = new ChatMessage
+                    {
+                        Body = m.Body,
+                        Time = m.Time.ToDateTime(),
+                        File = mediaFile,
+                    },
+                    ThreadId = m.ThreadId,
+                };
             });
         }
     }

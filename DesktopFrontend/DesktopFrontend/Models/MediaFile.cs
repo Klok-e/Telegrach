@@ -24,8 +24,8 @@ namespace DesktopFrontend.Models
             FilePath = path;
         }
 
-        public MediaFile(string extension, string path) :
-            this(ExtToEnum(extension), path)
+        public MediaFile(string path) :
+            this(ExtToEnum(Path.GetExtension(path)), path)
         {
         }
 
