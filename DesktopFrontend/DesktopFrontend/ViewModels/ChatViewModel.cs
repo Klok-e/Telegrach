@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -10,6 +11,7 @@ using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -24,8 +26,16 @@ namespace DesktopFrontend.ViewModels
     {
         public ChatViewModel(INavigationStack stack, IServerConnection connection)
         {
-            ChatInit(connection);
-            ThreadSearchInit(stack, connection);
+            try
+            {
+                ChatInit(connection);
+                ThreadSearchInit(stack, connection);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         #region Chat
@@ -41,6 +51,49 @@ namespace DesktopFrontend.ViewModels
             get => _currentMessage;
             set => this.RaiseAndSetIfChanged(ref _currentMessage, value);
         }
+
+        #region Attaching files
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public ReactiveCommand<Unit, Unit> AttachFile { get; private set; }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public ReactiveCommand<Unit, Unit> DetachFile { get; private set; }
+
+        private MediaFile? _currentAttached;
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public MediaFile? CurrentAttached
+        {
+            get => _currentAttached;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _currentAttached, value);
+                this.RaisePropertyChanged(nameof(IsAnythingAttached));
+            }
+        }
+
+        public bool IsAnythingAttached => CurrentAttached != null;
+
+        private Bitmap? _currentAttachedIcon;
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public Bitmap? CurrentAttachedIcon
+        {
+            get => _currentAttachedIcon;
+            set => this.RaiseAndSetIfChanged(ref _currentAttachedIcon, value);
+        }
+
+        private string? _currentAttachedName;
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public string? CurrentAttachedName
+        {
+            get => _currentAttachedName;
+            set => this.RaiseAndSetIfChanged(ref _currentAttachedName, value);
+        }
+
+        #endregion
 
         private ChatMessages _messagesModel;
         private ThreadMessages? _currentThread;
@@ -103,13 +156,58 @@ namespace DesktopFrontend.ViewModels
             var canSend = this.WhenAnyValue(
                 x => x.CurrentMessage,
                 x => x.CurrentThread,
-                (msg, th) => !string.IsNullOrEmpty(msg) && th != null
+                x => x.CurrentAttached,
+                (msg, th, attached) => (!string.IsNullOrEmpty(msg) || attached != null) && th != null
             );
             SendMessage = ReactiveCommand.CreateFromTask(
                 async () => { await connection.SendMessage(CurrentMessage, CurrentThread!.Thread.Id); },
                 canSend);
             SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
             SendMessage.LogErrors(Log.Areas.Network, this);
+
+            var canAttach = this.WhenAnyValue(x => x.CurrentThread)
+                // because WhenAnyValue(x => x.CurrentThread != null) crashes
+                .Select(th => th != null);
+            AttachFile = ReactiveCommand.CreateFromTask(
+                async () =>
+                {
+                    Log.Info(Log.Areas.Application, this, $"File attach begin");
+                    var dialog = new OpenFileDialog();
+                    var window = new Window();
+                    var files = await dialog.ShowAsync(window);
+                    if (files == null || files.Length == 0)
+                        return;
+
+                    var toAttach = files.First();
+                    Log.Info(Log.Areas.Application, this, $"file: {toAttach}");
+                    var ext = Path.GetExtension(toAttach);
+                    if (ext == null)
+                        return;
+
+                    Log.Info(Log.Areas.Application, this, $"file ext: {ext}");
+                    CurrentAttached = new MediaFile(ext, toAttach);
+
+                    CurrentAttachedName = Path.GetFileName(toAttach);
+                    // TODO: this must use Resources instead of hardcoding filenames  
+                    var filename = CurrentAttached.Type switch
+                    {
+                        FileType.Image => "generic_image.png",
+                        FileType.Sound => "generic_sound.png",
+                        FileType.Video => "generic_video.png",
+                        FileType.Generic => "generic_file.png"
+                    };
+                    var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                    var bitmap = new Bitmap(assets.Open(new Uri($"avares://DesktopFrontend/Assets/{filename}")));
+                    CurrentAttachedIcon = bitmap;
+                }, canAttach);
+            AttachFile.LogErrors(Log.Areas.Application, this);
+
+            DetachFile = ReactiveCommand.Create(() =>
+            {
+                Log.Info(Log.Areas.Application, this, $"Detaching image {CurrentAttached?.FilePath}");
+                CurrentAttached = null;
+            });
+            DetachFile.LogErrors(Log.Areas.Application, this);
 
             ActivateMediaMessage = ReactiveCommand.Create<ChatMessage>(message =>
             {
@@ -118,10 +216,10 @@ namespace DesktopFrontend.ViewModels
                 {
                     Log.Warn(Log.Areas.Application, this,
                         $"Activate image for message {message.Time} failed: file not present in the message");
-                    var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-                    var bitmap = new Bitmap(assets.Open(new Uri("avares://DesktopFrontend/Assets/generic_image.png")));
-                    ActiveImage = bitmap;
-                    IsMediaActive = true;
+                    //var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                    //var bitmap = new Bitmap(assets.Open(new Uri("avares://DesktopFrontend/Assets/generic_image.png")));
+                    //ActiveImage = bitmap;
+                    //IsMediaActive = true;
                     return;
                 }
 
@@ -136,10 +234,10 @@ namespace DesktopFrontend.ViewModels
                         break;
                 }
             });
-            ActivateMediaMessage.LogErrors(Log.Areas.Network, this);
+            ActivateMediaMessage.LogErrors(Log.Areas.Application, this);
 
             DeactivateMediaMessage = ReactiveCommand.Create(() => { IsMediaActive = false; });
-            DeactivateMediaMessage.LogErrors(Log.Areas.Network, this);
+            DeactivateMediaMessage.LogErrors(Log.Areas.Application, this);
         }
 
         #endregion
