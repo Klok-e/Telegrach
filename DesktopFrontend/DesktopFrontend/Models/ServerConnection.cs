@@ -272,8 +272,7 @@ namespace DesktopFrontend.Models
             try
             {
                 var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
-
-
+                
                 var msg = new ClientMessage
                 {
                     SendMsgToThreadRequest = new ClientMessage.Types.ThreadSendMessageRequest

@@ -65,6 +65,7 @@
     </Application.Styles>
 
     <Application.Resources>
+        <!-- images -->
         <img:IBitmap x:Key="DefaultImageIcon">/Assets/generic_image.png</img:IBitmap>
         <img:IBitmap x:Key="DefaultAudioIcon">/Assets/generic_audio.png</img:IBitmap>
         <img:IBitmap x:Key="DefaultVideoIcon">/Assets/generic_video.png</img:IBitmap>

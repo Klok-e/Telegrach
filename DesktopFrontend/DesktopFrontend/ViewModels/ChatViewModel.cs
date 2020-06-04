@@ -226,10 +226,6 @@ namespace DesktopFrontend.ViewModels
                 {
                     Log.Warn(Log.Areas.Application, this,
                         $"Activate image for message {message.Time} failed: file not present in the message");
-                    //var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-                    //var bitmap = new Bitmap(assets.Open(new Uri("avares://DesktopFrontend/Assets/generic_image.png")));
-                    //ActiveImage = bitmap;
-                    //IsMediaActive = true;
                     return;
                 }
 
