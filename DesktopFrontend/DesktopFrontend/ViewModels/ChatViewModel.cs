@@ -236,7 +236,25 @@ namespace DesktopFrontend.ViewModels
                         IsMediaActive = true;
                         break;
                     default:
-                        //Process.Start(@"c:\myPDF.pdf");
+                        try
+                        {
+                            new Process
+                            {
+                                StartInfo = new ProcessStartInfo(message.File.FilePath)
+                                {
+                                    // idk why it works. Resources:
+                                    // https://github.com/dotnet/runtime/issues/17938
+                                    // https://stackoverflow.com/questions/10174156/open-file-with-associated-application
+                                    UseShellExecute = true
+                                }
+                            }.Start();
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Warn(Log.Areas.Application, this,
+                                $"{message.File.FilePath} couldn't be opened by a default app: {e}");
+                        }
+
                         break;
                 }
             });
