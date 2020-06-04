@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Net;
@@ -18,6 +19,7 @@ using Avalonia.Threading;
 using DynamicData;
 using Google.Protobuf;
 using Proto;
+using File = Proto.File;
 
 namespace DesktopFrontend.Models
 {
@@ -89,7 +91,7 @@ namespace DesktopFrontend.Models
                 var connectTask = _client.ConnectAsync(_connectString, _port);
                 if (await Task.WhenAny(connectTask,
                         Task.Delay(TimeSpan.FromSeconds(0.5))) == connectTask)
-                // connected successfully
+                    // connected successfully
                 {
                     // propagate exceptions
                     await connectTask;
@@ -202,7 +204,7 @@ namespace DesktopFrontend.Models
                 var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
 
                 var msg = new ClientMessage
-                { UserCreateRequest = new ClientMessage.Types.UserCreationRequest { Link = false } };
+                    {UserCreateRequest = new ClientMessage.Types.UserCreationRequest {Link = false}};
 
                 await stream.WriteProtoMessageAsync(msg);
 
@@ -262,19 +264,27 @@ namespace DesktopFrontend.Models
             }
         }
 
-        public async Task SendMessage(string body, ulong threadId)
+        public async Task SendMessage(string body, ulong threadId, MediaFile? file)
         {
             await _querySema.WaitAsync();
             try
             {
                 var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
 
+
                 var msg = new ClientMessage
                 {
                     SendMsgToThreadRequest = new ClientMessage.Types.ThreadSendMessageRequest
                     {
                         Body = body,
-                        ThreadId = threadId
+                        ThreadId = threadId,
+                        File = file == null
+                            ? null
+                            : new File
+                            {
+                                Filename = Path.GetFileName(file.FilePath),
+                                Filedata = await ByteString.FromStreamAsync(file.Bytes())
+                            }
                     }
                 };
                 await stream.WriteProtoMessageAsync(msg);

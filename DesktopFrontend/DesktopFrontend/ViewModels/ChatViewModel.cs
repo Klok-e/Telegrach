@@ -70,6 +70,22 @@ namespace DesktopFrontend.ViewModels
             {
                 this.RaiseAndSetIfChanged(ref _currentAttached, value);
                 this.RaisePropertyChanged(nameof(IsAnythingAttached));
+
+                if (_currentAttached == null)
+                    return;
+                CurrentAttachedName = Path.GetFileName(_currentAttached.FilePath);
+                // TODO: this must use Resources instead of hardcoding filenames  
+                var filename = _currentAttached.Type switch
+                {
+                    FileType.Image => "generic_image.png",
+                    FileType.Sound => "generic_sound.png",
+                    FileType.Video => "generic_video.png",
+                    FileType.Generic => "generic_file.png",
+                    _ => throw new Exception("Shouldn't happen")
+                };
+                var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                var bitmap = new Bitmap(assets.Open(new Uri($"avares://DesktopFrontend/Assets/{filename}")));
+                CurrentAttachedIcon = bitmap;
             }
         }
 
@@ -160,9 +176,16 @@ namespace DesktopFrontend.ViewModels
                 (msg, th, attached) => (!string.IsNullOrEmpty(msg) || attached != null) && th != null
             );
             SendMessage = ReactiveCommand.CreateFromTask(
-                async () => { await connection.SendMessage(CurrentMessage, CurrentThread!.Thread.Id); },
+                async () =>
+                {
+                    await connection.SendMessage(CurrentMessage, CurrentThread!.Thread.Id, CurrentAttached);
+                },
                 canSend);
-            SendMessage.Subscribe(_ => CurrentMessage = string.Empty);
+            SendMessage.Subscribe(_ =>
+            {
+                CurrentMessage = string.Empty;
+                CurrentAttached = null;
+            });
             SendMessage.LogErrors(Log.Areas.Network, this);
 
             var canAttach = this.WhenAnyValue(x => x.CurrentThread)
@@ -186,19 +209,6 @@ namespace DesktopFrontend.ViewModels
 
                     Log.Info(Log.Areas.Application, this, $"file ext: {ext}");
                     CurrentAttached = new MediaFile(ext, toAttach);
-
-                    CurrentAttachedName = Path.GetFileName(toAttach);
-                    // TODO: this must use Resources instead of hardcoding filenames  
-                    var filename = CurrentAttached.Type switch
-                    {
-                        FileType.Image => "generic_image.png",
-                        FileType.Sound => "generic_sound.png",
-                        FileType.Video => "generic_video.png",
-                        FileType.Generic => "generic_file.png"
-                    };
-                    var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-                    var bitmap = new Bitmap(assets.Open(new Uri($"avares://DesktopFrontend/Assets/{filename}")));
-                    CurrentAttachedIcon = bitmap;
                 }, canAttach);
             AttachFile.LogErrors(Log.Areas.Application, this);
 

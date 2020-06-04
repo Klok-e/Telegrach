@@ -40,7 +40,7 @@ namespace DesktopFrontend.Models
         /// <returns></returns>
         Task CreateThread(string head, string body);
 
-        Task SendMessage(string body, ulong threadId);
+        Task SendMessage(string body, ulong threadId, MediaFile? file);
 
         Task<IEnumerable<UserData>> RequestUsersOnline(ulong threadId);
 
