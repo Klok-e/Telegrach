@@ -18,7 +18,7 @@ namespace DesktopFrontend.Models
         public DataStorage()
         {
             Log.Info(Log.Areas.Storage, this, $"Credentials path is {ConfigFilePath}");
-            
+
             if (!Directory.Exists(DataFolderPath))
                 Directory.CreateDirectory(DataFolderPath);
             if (!Directory.Exists(CacheFolderPath))
@@ -86,7 +86,7 @@ namespace DesktopFrontend.Models
             try
             {
                 var filePath = Path.Join(CacheFolderPath, name);
-                
+
                 File.WriteAllBytes(filePath, bytes);
                 return filePath;
             }

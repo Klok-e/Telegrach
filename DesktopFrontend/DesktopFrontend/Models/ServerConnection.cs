@@ -93,7 +93,7 @@ namespace DesktopFrontend.Models
                 var connectTask = _client.ConnectAsync(_connectString, _port);
                 if (await Task.WhenAny(connectTask,
                         Task.Delay(TimeSpan.FromSeconds(0.5))) == connectTask)
-                    // connected successfully
+                // connected successfully
                 {
                     // propagate exceptions
                     await connectTask;
@@ -206,7 +206,7 @@ namespace DesktopFrontend.Models
                 var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
 
                 var msg = new ClientMessage
-                    {UserCreateRequest = new ClientMessage.Types.UserCreationRequest {Link = false}};
+                { UserCreateRequest = new ClientMessage.Types.UserCreationRequest { Link = false } };
 
                 await stream.WriteProtoMessageAsync(msg);
 
@@ -272,7 +272,7 @@ namespace DesktopFrontend.Models
             try
             {
                 var stream = new LengthPrefixedStreamWrapper(_client.GetStream());
-                
+
                 var msg = new ClientMessage
                 {
                     SendMsgToThreadRequest = new ClientMessage.Types.ThreadSendMessageRequest
