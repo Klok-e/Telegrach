@@ -10,11 +10,11 @@ from database import DataBase
 import utils
 from request_handling_utils import SessionData, request_handler, Handlers
 from request_handlers import *
+import signal
 
 # TODO LOG ALL EXCEPTIONS WITH sys.exc_info
 
 TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
-
 
 # logging.basicConfig(filename=LOG_FILE_SERVER,
 #                     level=LOG_LEVEL_SERVER,
@@ -25,6 +25,29 @@ TEST_KEY = b'XP4VTC3mrE-84R4xFVVDBXZFnQo4jf1i'
 # Handler = NewType("Handler", Callable[[T, SessionData], ServerMessage])
 # HandlersList = NewType("HandlersList", List[Handler])
 
+SHUTDOWN = False
+
+
+async def shutdown(signal, loop):
+    """Cleanup tasks tied to the service's shutdown."""
+    global SHUTDOWN
+    # logging.info(f"Received exit signal {signal.name}...")
+    # logging.info("Closing database connections")
+    # logging.info("Nacking outstanding messages")
+    print(f"Received exit signal {signal.name}...")
+    SHUTDOWN = True
+    await asyncio.sleep(1)
+
+    tasks = [t for t in asyncio.all_tasks() if t is not
+             asyncio.current_task()]
+
+    [task.cancel() for task in tasks]
+
+    # logging.info(f"Cancelling {len(tasks)} outstanding tasks")
+    await asyncio.gather(*tasks, return_exceptions=True)
+    # logging.info(f"Flushing metrics")
+    loop.stop()
+
 
 async def server_handler(handlers: Handlers, db: DataBase,
                          reader: asyncio.StreamReader,
@@ -33,7 +56,7 @@ async def server_handler(handlers: Handlers, db: DataBase,
     print(f"new connection! {sockname}")
 
     session_data = SessionData(db)
-    while True:
+    while not SHUTDOWN:
         # read request
         request = await utils.read_proto_message(reader, ClientMessage)
 
@@ -68,20 +91,24 @@ def main():
     db = DataBase(connect_string())
     with db as db:
         loop = asyncio.get_event_loop()
+
+        signals = (signal.SIGTERM, signal.SIGINT)
+        for s in signals:
+            loop.add_signal_handler(
+                s, lambda s=s: asyncio.create_task(shutdown(s, loop)))
+
         server = asyncio.start_server(
             lambda r, w: server_handler(handlers,
                                         db, r, w), *ADDRESS)
         server = loop.run_until_complete(server)
 
-        # serve until CTRL + C
-        print(f'Serving on {server.sockets[0].getsockname()}')
         try:
+            # serve until CTRL + C
+            print(f'Serving on {server.sockets[0].getsockname()}')
             loop.run_forever()
-        except KeyboardInterrupt:
-            pass
-
-        print(f'Stopped serving on {server.sockets[0].getsockname()}')
-        server.close()
+        finally:
+            print(f'Stopped serving on {server.sockets[0].getsockname()}')
+            server.close()
 
     loop.run_until_complete(server.wait_closed())
     loop.close()
