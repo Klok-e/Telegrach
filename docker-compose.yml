@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=telegrachdb
+      - POSTGRES_USER=telegrach
+      - POSTGRES_PASSWORD=1111
+
+  # compile protobuffers
+  protobuf:
+    image: memominsk/protobuf-alpine
+    volumes:
+      - .:/usr/src/app
+    working_dir: /usr/src/app
+    entrypoint: /bin/sh ./protobuffers/compile.sh
+  server:
+    environment: 
+      - TELEGRACH_DB_HOST=db
+      - TELEGRACH_DB_PW=1111
+      - TELEGRACH_DB_USER=telegrach
+      - TELEGRACH_DB_PORT=5432
+      - TELEGRACH_SCHEMA_NAME=public
+      - TELEGRACH_DB_NAME=telegrachdb
+      - PYTHONUNBUFFERED=1
+    restart: always
+    build: .
+    working_dir: /usr/src/app
+    entrypoint: /bin/sh ./Server/server_entrypoint.sh /ran_before
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - 9999:9999
+    # define the port number the container should expose
+    expose:
+      - 9999
+    depends_on:
+      - db
+      - protobuf
