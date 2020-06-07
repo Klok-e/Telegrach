@@ -1,0 +1,39 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:DesktopFrontend.ViewModels"
+             xmlns:m="clr-namespace:DesktopFrontend.Models"
+             xmlns:v="clr-namespace:DesktopFrontend.Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="DesktopFrontend.Views.ChooseServerView"
+             Name="ChooseServer">
+
+  <UserControl.DataTemplates>
+    <DataTemplate DataType="m:ServerItem">
+      <Button Width="200" IsEnabled="True" Content="{Binding String}">
+        <Button.Command>
+          <Binding Path="#ChooseServer.DataContext.SelectServer" />
+        </Button.Command>
+      </Button>
+    </DataTemplate>
+  </UserControl.DataTemplates>
+
+  <StackPanel>
+      <TextBlock Text="Please, select server"  HorizontalAlignment="Center" Padding="40"/>
+    <!--<ItemsControl  Items="{Binding Items}" />-->
+      <ItemsControl Items="{Binding Items}" />
+    <!--<Grid HorizontalAlignment="Center" Margin="0 20 0 20" ColumnDefinitions="auto,auto" RowDefinitions="auto">
+      <TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding SelectedText}" />
+      
+      <ItemsControl Grid.Column="1" Grid.Row="0" Items="{Binding SelectedItem}" />
+    </Grid>-->
+    
+      <Grid Margin="0 200 0 0" HorizontalAlignment="Center" ShowGridLines="False" ColumnDefinitions="100,100" RowDefinitions="Auto,Auto" >
+        <Button Grid.Column="1" Grid.Row="2" Command="{Binding AddServer}" Content="AddServer" />
+        <Button Grid.Column="0" Grid.Row="2" Command="{Binding Connect}" Content="Connect" />
+      </Grid>
+  </StackPanel>
+  
+  
+</UserControl>

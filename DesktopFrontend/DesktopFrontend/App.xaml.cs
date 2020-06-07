@@ -20,10 +20,10 @@ namespace DesktopFrontend
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 var storage = new DataStorage();
-                var connection = new ServerConnection("127.0.0.1", 9999, storage);
+                IServerConnection connection = new ServerConnection("127.0.0.1", 9999, storage);
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(connection, storage),
+                    DataContext = new MainWindowViewModel(ref connection, storage),
                 };
                 desktop.Exit += (o, a) => { connection.Dispose(); };
             }

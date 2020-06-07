@@ -1,0 +1,32 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:DesktopFrontend.ViewModels"
+             xmlns:m="clr-namespace:DesktopFrontend.Models"
+             xmlns:v="clr-namespace:DesktopFrontend.Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="DesktopFrontend.Views.AddServerView">
+
+  <StackPanel>
+    <Button VerticalAlignment="Top" HorizontalAlignment="Left" Command="{Binding Back}">← Back</Button>
+    <TextBlock VerticalAlignment="Top" HorizontalAlignment="Center" Margin=" 0 20 0 0" Text="{Binding Error}" />
+    <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Width="400" Height="300"
+          ColumnDefinitions="100,100"
+          RowDefinitions="auto,auto,auto"
+          Margin="100 30 0 0">
+      
+      <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Nick}" Padding="10"></TextBox>
+      <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Ip}" MaxLength="15" Padding="10"></TextBox>
+      <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port}" MaxLength="5" Padding="10"></TextBox>
+
+      <TextBlock Grid.Row="0" Grid.Column="0" Text="Server Nickname:" />
+      <TextBlock Grid.Row="1" Grid.Column="0"  Text="Server Ip Address:" />
+      <TextBlock Grid.Row="2" Grid.Column="0"  Text="Server Port:" />
+      
+    </Grid>
+    <Button Command="{Binding Add}" Width="60" Height="30" Margin="20">Add</Button>
+  </StackPanel>
+
+  
+</UserControl>

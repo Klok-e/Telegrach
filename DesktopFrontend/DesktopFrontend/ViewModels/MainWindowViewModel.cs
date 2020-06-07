@@ -28,57 +28,12 @@ namespace DesktopFrontend.ViewModels
             private set => this.RaiseAndSetIfChanged(ref _currentContent, value);
         }
 
-        public MainWindowViewModel(IServerConnection connection, DataStorage storage)
+        public MainWindowViewModel(ref IServerConnection connection, DataStorage storage)
         {
-            connection.Connect()
-                .ToObservable()
-                .SelectMany(async connected =>
-                {
-                    if (connected)
-                    {
-                        await Login(connection, storage);
-                    }
-                    else
-                    {
-                        Log.Warn(Log.Areas.Network, this,
-                            "Could not connect to the server");
-                        var retry = new RetryConnectViewModel();
-                        Push(retry);
-                        retry.RetryAttempt.SelectMany(async _ => await connection.Connect())
-                            .Where(didConnect => didConnect)
-                            .Take(1)
-                            // async subscribe bad, idk why
-                            // https://stackoverflow.com/questions/24843000/reactive-extensions-subscribe-calling-await
-                            .SelectMany(async _ =>
-                            {
-                                Pop();
-                                await Login(connection, storage);
-                                return default(Unit);
-                            })
-                            .Subscribe();
-                    }
-
-                    return default(Unit);
-                })
-                .Subscribe();
+            this.Push(new ChooseServerViewModel(this, ref connection, storage));
         }
 
-        private async Task Login(IServerConnection connection, DataStorage storage)
-        {
-            var cred = storage.RetrieveCredentials();
-            if (cred != null &&
-                await connection.LogInWithCredentials(cred.Value.login, cred.Value.password))
-            {
-                Push(new ChatViewModel(this, connection));
-                Log.Info(Log.Areas.Network, this,
-                    $"Logged in successfully as {cred.Value.login}");
-            }
-            else
-            {
-                storage.ResetCredentials();
-                Push(new LoginViewModel(this, connection));
-            }
-        }
+       
 
         #region INavigationStack
 
