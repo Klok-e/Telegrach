@@ -7,6 +7,8 @@ cd "${0%/*}"
 PYTHON_DIR=../Server/
 CSHARP_DIR=../DesktopFrontend/DesktopFrontend/Proto
 
+echo "compiling protobuffers"
+
 # remove old protofiles
 rm -rf $PYTHON_DIR/proto $CSHARP_DIR
 
@@ -19,3 +21,5 @@ protoc --csharp_out=$CSHARP_DIR proto/*.proto
 # 'proto' folder is the name of the package
 # it's created automatically by protobuf
 protoc --python_out=$PYTHON_DIR proto/*.proto
+
+echo "protobuffers compilation finished"

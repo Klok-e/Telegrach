@@ -11,12 +11,30 @@ Run this:
 `pacman -Syu ttf-croscore ttf-dejavu ttf-ubuntu-font-family ttf-inconsolata ttf-liberation`
 
 ## Server deployment
-### Prerequisites
-1. Install postgres database
-2. Execute the `compile.sh` bash script in the `protobuffers` directory
-3. Set all the ENV variables from [this list](#server-env-variables)
-4. Run the `create_schema.py` script in the `Server` directory to create a schema in your DB
-5. Start the server via the `start_server.py` script in the `Server` directory and you're good to go
+You can either use `docker-compose` or do it manually.
+### Using docker-compose
+1. Make sure you have `docker` and `docker-compose` installed
+2. Run these commands:
+```bash
+git clone https://github.com/LokiVKlokeNaAndoke/Telegrach.git
+cd Telegrach
+docker-compose up -d
+```
+3. You now have a container with Telegrach server installed.
+### Deploying manually
+1. Install the postgres database
+2. Clone the repository:
+```bash
+git clone https://github.com/LokiVKlokeNaAndoke/Telegrach.git
+cd Telegrach
+```
+3. Execute the `compile.sh` bash script in the `protobuffers` directory:
+```bash
+bash protobuffers/compile.sh
+```
+4. Set all the ENV variables from [this list](#env-variables)
+5. Run the `create_schema.py` script in the `Server` directory to create a schema in your DB
+6. Start the server via the `start_server.py` script in the `Server` directory and you're good to go
 
 ### ENV variables
 Variable | Explanation
@@ -33,10 +51,21 @@ The values of these variables are combined into a connection string which is use
 `postgresql://{TELEGRACH_DB_USER}[:TELEGRACH_DB_PW]@{TELEGRACH_DB_HOST}:{TELEGRACH_DB_PORT}/{TELEGRACH_DB_NAME}`
 
 ## Building client manually
-1. Execute the `compile.sh` bash script in the `protobuffers` directory
-2. Build the application like a dotnet core project (dotnet CLI is required): 
+1. Clone the repository:
+```bash
+git clone https://github.com/LokiVKlokeNaAndoke/Telegrach.git
+cd Telegrach
+```
+2. Execute the `compile.sh` bash script in the `protobuffers` directory:
+```bash
+bash protobuffers/compile.sh
+```
+3. Build the application like a dotnet core project (dotnet CLI is required): 
 ```bash
 cd DesktopFrontend
 dotnet build --configuration Release
 ```
-3. Run the app
+4. Run the app:
+```bash
+dotnet DesktopFrontend/bin/Release/netcoreapp3.1/DesktopFrontend.dll
+```
