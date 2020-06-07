@@ -16,6 +16,6 @@ namespace DesktopFrontend.Views
             AvaloniaXamlLoader.Load(this);
         }
 
-       
+
     }
 }

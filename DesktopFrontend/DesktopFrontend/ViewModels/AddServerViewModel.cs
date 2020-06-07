@@ -13,7 +13,7 @@ namespace DesktopFrontend.ViewModels
         private INavigationStack _stack;
         private readonly Regex _nickName = new Regex(@"[^""{}[]]+||[^ ]+");
         private readonly Regex _ipAdress = new Regex(@"\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}");
-        
+
         private string _nickVal = "";
         private string _ipVal = "";
         private string _portVal = "";
@@ -50,9 +50,9 @@ namespace DesktopFrontend.ViewModels
         }
 
 
-        
 
-        private bool CheckNick() 
+
+        private bool CheckNick()
         {
             return _nickName.IsMatch(_nickVal);
         }
@@ -64,7 +64,7 @@ namespace DesktopFrontend.ViewModels
             foreach (var item in ipParts)
             {
                 int temp;
-                if(int.TryParse(item, out temp))
+                if (int.TryParse(item, out temp))
                 {
                     result &= (-1 < temp && temp < 256);
                 }
@@ -79,7 +79,7 @@ namespace DesktopFrontend.ViewModels
         private bool CheckPort()
         {
             int port;
-            if(int.TryParse(_portVal, out port))
+            if (int.TryParse(_portVal, out port))
             {
                 return 0 < port && port < 65535;
             }
@@ -90,7 +90,7 @@ namespace DesktopFrontend.ViewModels
         }
         public void Add()
         {
-            if(CheckIp() && CheckNick() && CheckPort())
+            if (CheckIp() && CheckNick() && CheckPort())
             {
                 var newSever = new ServerItem { Ip = _ipVal, Nick = _nickVal, Port = int.Parse(_portVal) };
                 var list = _storage.ReadIpConfig();

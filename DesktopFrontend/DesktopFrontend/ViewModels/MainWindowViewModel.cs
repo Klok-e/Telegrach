@@ -33,7 +33,7 @@ namespace DesktopFrontend.ViewModels
             this.Push(new ChooseServerViewModel(this, connection, storage));
         }
 
-       
+
 
         #region INavigationStack
 

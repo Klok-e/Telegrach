@@ -18,8 +18,8 @@ namespace DesktopFrontend.ViewModels
         private DataStorage _storage;
         private IServerConnection _connection;
         private List<ServerItem> _items;
-        private ServerItem _selectedServer =  new ServerItem();
-        
+        private ServerItem _selectedServer = new ServerItem();
+
 
         public ReactiveCommand<ServerItem, Unit> SelectServer { get; private set; }
         public ChooseServerViewModel(INavigationStack stack, IServerConnection connection, DataStorage storage)
@@ -28,10 +28,10 @@ namespace DesktopFrontend.ViewModels
             _storage = storage;
             _connection = connection;
             SelectServer = ReactiveCommand.Create<ServerItem>(ServerItem =>
-            {                
+            {
                 Log.Info(Log.Areas.Application, this, $"Selected server : {ServerItem}");
-                SelectedItem = ServerItem ;
-                
+                SelectedItem = ServerItem;
+
             });
 
         }
@@ -43,7 +43,7 @@ namespace DesktopFrontend.ViewModels
                 _items = _storage.ReadIpConfig();
                 return _items;
             }
-        }     
+        }
 
         public string SelectedText => "The selected server:";
 
@@ -52,9 +52,9 @@ namespace DesktopFrontend.ViewModels
             get => _selectedServer;
             set => this.RaiseAndSetIfChanged(ref _selectedServer, value);
         }
-        
 
-        public void Connect() 
+
+        public void Connect()
         {
 
             var connection = new ServerConnection(_selectedServer.Ip, _selectedServer.Port, _storage);
