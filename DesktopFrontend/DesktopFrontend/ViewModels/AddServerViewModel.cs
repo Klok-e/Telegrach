@@ -4,6 +4,7 @@ using System.Text;
 using DesktopFrontend.Models;
 using System.Text.RegularExpressions;
 using ReactiveUI;
+using DesktopFrontend.Models;
 
 namespace DesktopFrontend.ViewModels
 {
@@ -18,6 +19,14 @@ namespace DesktopFrontend.ViewModels
         private string _portVal = "";
 
         private string _errMessage = "";
+
+        private DataStorage _storage;
+
+        public AddServerViewModel(INavigationStack stack, DataStorage storage)
+        {
+            _stack = stack;
+            _storage = storage;
+        }
 
         public string Nick
         {
@@ -41,10 +50,7 @@ namespace DesktopFrontend.ViewModels
         }
 
 
-        public AddServerViewModel(INavigationStack stack)
-        {
-            _stack = stack;
-        }
+        
 
         private bool CheckNick() 
         {
@@ -87,9 +93,9 @@ namespace DesktopFrontend.ViewModels
             if(CheckIp() && CheckNick() && CheckPort())
             {
                 var newSever = new ServerItem { Ip = _ipVal, Nick = _nickVal, Port = int.Parse(_portVal) };
-                var list = IpConfig.ReadConfig();
+                var list = _storage.ReadIpConfig();
                 list.Add(newSever);
-                IpConfig.WriteConfig(list);
+                _storage.WriteIpConfig(list);
                 DeleteText();
                 Error = "Succesful";
             }

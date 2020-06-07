@@ -28,9 +28,9 @@ namespace DesktopFrontend.ViewModels
             private set => this.RaiseAndSetIfChanged(ref _currentContent, value);
         }
 
-        public MainWindowViewModel(ref IServerConnection connection, DataStorage storage)
+        public MainWindowViewModel(IServerConnection connection, DataStorage storage)
         {
-            this.Push(new ChooseServerViewModel(this, ref connection, storage));
+            this.Push(new ChooseServerViewModel(this, connection, storage));
         }
 
        

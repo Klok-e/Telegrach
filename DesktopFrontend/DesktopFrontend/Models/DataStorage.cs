@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using Avalonia;
+using System.Text.Json;
+using System.Collections.Generic;
 
 namespace DesktopFrontend.Models
 {
@@ -13,6 +15,8 @@ namespace DesktopFrontend.Models
 
         public static readonly string ConfigFilePath = Path.Join(DataFolderPath, "config");
 
+        private static readonly string IpConfigPath = Path.Join(DataFolderPath, "ipConfig.json");
+
         private (string login, string password)? _credsCache;
 
         public DataStorage()
@@ -23,6 +27,12 @@ namespace DesktopFrontend.Models
                 Directory.CreateDirectory(DataFolderPath);
             if (!Directory.Exists(CacheFolderPath))
                 Directory.CreateDirectory(CacheFolderPath);
+            if (!File.Exists(IpConfigPath))
+            {
+                var json = JsonSerializer.Serialize<List<ServerItem>>(new List<ServerItem> { new ServerItem() });
+                File.WriteAllTextAsync(IpConfigPath, json).Wait();
+
+            }
         }
 
         public void StoreCredentials(string login, string password)
@@ -96,6 +106,19 @@ namespace DesktopFrontend.Models
             }
 
             return null;
+        }
+
+        public List<ServerItem> ReadIpConfig()
+        {
+            var json = File.ReadAllText(IpConfigPath);
+            var serverList = JsonSerializer.Deserialize<List<ServerItem>>(json);
+            return serverList;
+        }
+
+        public void WriteIpConfig(List<ServerItem> servers)
+        {
+            var json = JsonSerializer.Serialize(servers);
+            File.WriteAllTextAsync(IpConfigPath, json).Wait();
         }
     }
 }

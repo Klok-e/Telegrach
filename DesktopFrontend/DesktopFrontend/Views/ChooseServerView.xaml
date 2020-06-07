@@ -11,23 +11,21 @@
 
   <UserControl.DataTemplates>
     <DataTemplate DataType="m:ServerItem">
-      <Button Width="200" IsEnabled="True" Content="{Binding String}">
-        <Button.Command>
-          <Binding Path="#ChooseServer.DataContext.SelectServer" />
-        </Button.Command>
-      </Button>
+      <Button Width="200" IsEnabled="True" Content="{Binding String}" 
+              Command="{Binding #ChooseServer.DataContext.SelectServer}" 
+              CommandParameter="{Binding}"/>    
     </DataTemplate>
   </UserControl.DataTemplates>
 
   <StackPanel>
       <TextBlock Text="Please, select server"  HorizontalAlignment="Center" Padding="40"/>
-    <!--<ItemsControl  Items="{Binding Items}" />-->
+    
       <ItemsControl Items="{Binding Items}" />
-    <!--<Grid HorizontalAlignment="Center" Margin="0 20 0 20" ColumnDefinitions="auto,auto" RowDefinitions="auto">
+    <Grid HorizontalAlignment="Center" Margin="0 20 0 20" ColumnDefinitions="auto" RowDefinitions="auto,auto">
       <TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding SelectedText}" />
-      
-      <ItemsControl Grid.Column="1" Grid.Row="0" Items="{Binding SelectedItem}" />
-    </Grid>-->
+
+      <TextBlock Grid.Column="0" Grid.Row="1" Text="{Binding SelectedItem.Nick}" />
+    </Grid>
     
       <Grid Margin="0 200 0 0" HorizontalAlignment="Center" ShowGridLines="False" ColumnDefinitions="100,100" RowDefinitions="Auto,Auto" >
         <Button Grid.Column="1" Grid.Row="2" Command="{Binding AddServer}" Content="AddServer" />
