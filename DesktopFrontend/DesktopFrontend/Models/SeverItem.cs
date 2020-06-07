@@ -6,7 +6,8 @@ using System.IO;
 
 namespace DesktopFrontend.Models
 {
-    public class ServerItem {
+    public class ServerItem
+    {
         public string Nick { get; set; } = "Default Server";
         public string Ip { get; set; } = "127.0.0.1";
         public int Port { get; set; } = 9999;
@@ -17,7 +18,7 @@ namespace DesktopFrontend.Models
         }
 
         public string String => ToString();
-                
+
     }
-    
+
 }
