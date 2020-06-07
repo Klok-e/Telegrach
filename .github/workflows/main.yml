@@ -1,13 +1,13 @@
 name: CI
 
 # https://github.community/t/how-to-trigger-an-action-on-push-or-pull-request-but-not-both/16662/2
-on: 
+on:
   push:
     branches:
-    - master
+      - master
   pull_request:
     branches:
-    - master
+      - master
 
 jobs:
   build:
@@ -41,7 +41,20 @@ jobs:
     runs-on: ubuntu-latest
     # Check if the PR is not raised by this workflow and is not from a fork
     steps:
-      - name: Checkout
+      - name: Print debug event
+        run: |
+          echo "github.event_name == ${{ github.event_name }}"
+          echo "github.event.action == ${{ github.event.action }}"
+
+      - if: github.event_name == 'pull_request'
+        name: Checkout
+        uses: actions/checkout@v2
+        # Checkout pull request HEAD commit instead of merge commit
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - if: github.event_name == 'push'
+        name: Checkout
         uses: actions/checkout@v2
 
       - name: Setup dotnet
@@ -90,7 +103,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       # if this branch has a PR to master and code was changed by formatters
-      - if: (steps.findPR.outputs.pr != '' || github.event_name == 'pull_request' && github.event.action == 'opened') &&
+      - if:
+          (steps.findPR.outputs.pr != '' || github.event_name == 'pull_request' && github.event.action == 'opened') &&
           (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
         name: Create pull request with proper formatting
         uses: peter-evans/create-pull-request@v2
@@ -104,7 +118,10 @@ jobs:
           branch-suffix: timestamp
 
       # if this branch has a PR to master and code was changed by formatters
-      - if: (steps.findPR.outputs.pr != '' || github.event_name == 'pull_request' && github.event.action == 'opened') &&
+      # but is not a push to master
+      - if:
+          (steps.findPR.outputs.pr != '' || github.event_name == 'pull_request' && github.event.action == 'opened') &&
+          github.event_name != 'push' &&
           (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
         name: Comment on the PR with the formatting pull request number
         uses: unsplash/comment-on-pr@master
@@ -113,8 +130,7 @@ jobs:
         with:
           msg: "Formatting pull request created #${{ steps.pull_request.outputs.pr_number }}"
 
-      # if this branch has a PR to master and code was changed by formatters
-      - if: (steps.findPR.outputs.pr != '' || github.event_name == 'pull_request' && github.event.action == 'opened') &&
-          (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
+      # if code was changed by formatters
+      - if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
         name: Fail if there are changes so that a job fails
         run: exit 1
