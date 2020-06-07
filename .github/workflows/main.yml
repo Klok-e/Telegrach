@@ -97,10 +97,14 @@ jobs:
           echo "csharp changed-files ${{ steps.csharp.outputs.changed-files }}"
 
       - name: Find Current Pull Request
-        uses: jwalton/gh-find-current-pr@v1.0.2
         id: findPR
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo ${{ github.event_name == 'pull_request' }}
+          PR=''
+          if [ ${{ github.event_name == 'pull_request' }} == 'true' ]; then
+            PR=${{ github.event.number }}
+          fi
+          echo ::set-output name=pr::$PR
 
       - name: Print debug pull request
         run: |
