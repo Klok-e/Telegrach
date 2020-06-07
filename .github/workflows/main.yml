@@ -1,13 +1,13 @@
 name: CI
 
 # https://github.community/t/how-to-trigger-an-action-on-push-or-pull-request-but-not-both/16662/2
-on: 
+on:
   push:
     branches:
-    - master
+      - master
   pull_request:
     branches:
-    - master
+      - master
 
 jobs:
   build:
@@ -40,9 +40,18 @@ jobs:
   format-commit:
     runs-on: ubuntu-latest
     # Check if the PR is not raised by this workflow and is not from a fork
+    if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
+      - name: Print debug event
+        run: |
+          echo "github.event_name == ${{ github.event_name }}"
+          echo "github.event.action == ${{ github.event.action }}"
+
       - name: Checkout
         uses: actions/checkout@v2
+        # Checkout pull request HEAD commit instead of merge commit
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Setup dotnet
         uses: actions/setup-dotnet@v1
@@ -84,13 +93,22 @@ jobs:
           echo "csharp changed-files ${{ steps.csharp.outputs.changed-files }}"
 
       - name: Find Current Pull Request
-        uses: jwalton/gh-find-current-pr@v1.0.2
         id: findPR
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo ${{ github.event_name == 'pull_request' }}
+          PR=''
+          if [ ${{ github.event_name == 'pull_request' }} == 'true' ]; then
+            PR=${{ github.event.number }}
+          fi
+          echo ::set-output name=pr::$PR
+
+      - name: Print debug pull request
+        run: |
+          echo "steps.findPR.outputs.pr == ${{ steps.findPR.outputs.pr }}"
 
       # if this branch has a PR to master and code was changed by formatters
-      - if: (steps.findPR.outputs.pr != '' || github.event_name == 'pull_request' && github.event.action == 'opened') &&
+      - if:
+          (steps.findPR.outputs.pr != '' || github.event_name == 'pull_request' && github.event.action == 'opened') &&
           (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
         name: Create pull request with proper formatting
         uses: peter-evans/create-pull-request@v2
@@ -101,10 +119,12 @@ jobs:
           title: Fixes by Auto Formatting Bot
           body: This is an auto-generated PR with fixes by Auto Formatting Bot.
           branch: format-patches
-          branch-suffix: timestamp
 
       # if this branch has a PR to master and code was changed by formatters
-      - if: (steps.findPR.outputs.pr != '' || github.event_name == 'pull_request' && github.event.action == 'opened') &&
+      # but is not a push to master
+      - if:
+          (steps.findPR.outputs.pr != '' || github.event_name == 'pull_request' && github.event.action == 'opened') &&
+          github.event_name != 'push' &&
           (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
         name: Comment on the PR with the formatting pull request number
         uses: unsplash/comment-on-pr@master
@@ -113,8 +133,7 @@ jobs:
         with:
           msg: "Formatting pull request created #${{ steps.pull_request.outputs.pr_number }}"
 
-      # if this branch has a PR to master and code was changed by formatters
-      - if: (steps.findPR.outputs.pr != '' || github.event_name == 'pull_request' && github.event.action == 'opened') &&
-          (steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0)
+      # if code was changed by formatters
+      - if: steps.autopep8.outputs.exit-code == 2 || steps.csharp.outputs.changed-files != 0
         name: Fail if there are changes so that a job fails
         run: exit 1
