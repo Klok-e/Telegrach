@@ -102,6 +102,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Print debug pull request
+        run: |
+          echo "steps.findPR.outputs.pr == ${{ steps.findPR.outputs.pr }}"
+
       # if this branch has a PR to master and code was changed by formatters
       - if:
           (steps.findPR.outputs.pr != '' || github.event_name == 'pull_request' && github.event.action == 'opened') &&
