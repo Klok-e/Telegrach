@@ -52,7 +52,7 @@ jobs:
         # Checkout pull request HEAD commit instead of merge commit
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      
+
       - if: github.event_name == 'push'
         name: Checkout
         uses: actions/checkout@v2
